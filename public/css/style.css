@@ -1,0 +1,40 @@
+
+body{
+
+   // background-color:black;
+}
+
+b {
+  font: 20px;
+  color: darkgrey;
+  text-shadow: 0 -40px 100px;
+}
+
+.logo b span {
+  animation: blink linear infinite 4s;
+}
+
+@keyframes blink {
+  70% {
+    color: red;
+
+  }
+  75% { color: blue; }
+  80% { text-shadow: 0 -40px 100px; }
+  81% { 
+    color: inherit;
+  }
+  83% {
+    color: yellow;
+  }
+  85% {
+    color: inherit;
+  }
+  90% {
+    color: green;
+  }
+  94% {
+    color: inherit;
+
+  }
+}

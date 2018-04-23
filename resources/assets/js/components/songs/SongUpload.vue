@@ -1,0 +1,160 @@
+<template>
+    <div class="songupload">
+        <!-- upload song link -->
+        <div class="form-group">
+            <input ref="audioinput" type="file" @change="getFileInfo">
+        </div>
+        <a class="btn btn-md btn-default" id="custom-file-upload" data-toggle="modal" data-target="#exampleModal" @click="browseSong">
+            upload song
+        </a>
+        <!-- end of upload song link -->
+
+        <!-- Modal for song information before upload -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">upload song</h5>
+                        <button type="button" class="close" ref="closemodal" data-dismiss="modal" aria-label="Close" @click="resetForm">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form ref="uploadform">
+                            <div class="form-group">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="col-md-5">
+                                            <button type="button" @click="browseImage" class="btn btn-md btn-default">Choose image:</button>
+                                            <div id="image_previews">
+                                                <img ref='image' class="" v-bind:src="song.imgpreview" width="200px" height="200px" >
+                                                <input class="form-control-file" ref="imageinput" type="file" name="feature_image" @change="showImage($event)">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <div class="form-group">
+                                                <label for="title">Song Title:</label>
+                                                <input type="text" v-model="song.filename" class="form-control" required maxlength="255">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="size">Size (in KiloBytes):</label>
+                                                {{ song.filesize }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>  
+                            </div>
+                            <div class="form-group">
+                                <label for="message-text" class="col-form-label">Description:</label>
+                                <textarea class="form-control" id="message-text" v-model="song.description"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @click="resetForm" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="uploadSong(song)">upload</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end of modal for song info -->
+    </div>
+</template>
+
+<script>
+export default {
+
+    mounted() {
+        console.log('Component mounted.')
+    },
+
+    methods: {
+        getFileInfo(event) {
+            console.log('file selected');
+            this.song.file = event.target.files[0];
+           // console.log(typeof(this.song.file));
+            this.song.filename = this.song.file.name;
+            this.song.filesize = this.song.file.size/1000; 
+            /*            console.log(this.song.filename);*/
+            //$("#exampleModal").modal('show');         
+        },
+
+        browseSong() {
+            this.$refs.audioinput.click();
+        },
+
+        browseImage() {
+            this.$refs.imageinput.click();
+        },
+
+        showImage(event) {
+            this.song.img = event.target.files[0];//may be i should avoid var and use below inside song.imgelement and song.filelement likewise. use refs in vue js style
+            //console.log(this.song.img);
+            this.song.imgpreview = URL.createObjectURL(event.target.files[0]);
+        },
+
+        resetForm(event) {
+            //console.log('trigger');
+            this.song.file = '',
+            this.song.filename = '',
+            this.song.filesize = '',
+            this.song.img = '',
+            this.song.imgpreview = '',
+            this.song.description = ''
+        },
+
+        uploadSong(song) {
+
+            let formData = new FormData();
+            formData.append('file', this.song.file);
+            formData.append('filename', this.song.filename);
+            formData.append('filesize', this.song.filesize);
+            formData.append('img', this.song.img);
+            formData.append('description', this.song.description);
+//try json encode in song without using formdata.append
+            axios.post('/songs',formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(function (response) {
+                //show progress bar
+                //add other fields of sing like permission
+                console.log(response);
+                this.$refs.closemodal.click();
+                this.resetForm();
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
+
+    },
+
+    data() {
+        return {
+            song: {
+                file: '',
+                filename: '',
+                filesize: '',
+                img: '',
+                imgpreview: '',
+                description:''
+            }
+        }
+    }
+
+}
+
+</script>
+
+<style>
+
+input[type="file"] {
+    display: none;
+}
+
+#image_previews {
+    border-radius: 5px;background-color: whitesmoke; width: 200px; height: 200px;
+}
+
+</style>
+
