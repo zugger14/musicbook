@@ -22,7 +22,7 @@ class Artist
 
         } else {
 
-            return redirect('home/fan');
+            return redirect('fan/home');
             
         }
 

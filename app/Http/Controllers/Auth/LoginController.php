@@ -38,9 +38,9 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('userLogout','logout');
         if(Auth::check() && Auth::user()->is_artist) {
-            $this->redirectTo = 'home/artist';
+            $this->redirectTo = 'artist/home';
         } else {
-            $this->redirectTo = 'home/fan';            
+            $this->redirectTo = 'fan/home';            
         }
 
     }

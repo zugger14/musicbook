@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\User;
+use App\Profile;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -27,7 +28,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = 'artist/home';
 
     /**
      * Create a new controller instance.
@@ -70,7 +71,7 @@ class RegisterController extends Controller
             $avatar = 'public/defaults/avatars/female.jpeg';
         }
 
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'gender' => $data['gender'],
@@ -79,5 +80,11 @@ class RegisterController extends Controller
             'slug' => str_slug($data['name']),
             'avatar' => $avatar
         ]);
+      
+        Profile::create([
+            'user_id' => $user->id
+        ]);
+
+        return $user;
     }
 }

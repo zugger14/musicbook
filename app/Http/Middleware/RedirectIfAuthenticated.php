@@ -28,7 +28,8 @@ class RedirectIfAuthenticated
                 if (Auth::guard($guard)->check()) {
                     //die('yes');
                     //dd($guard);
-                    $location = Auth::guard($guard)->user()->is_artist ? 'home/artist' : 'home/fan';
+                    $location = Auth::guard($guard)->user()->is_artist ? 'artist/home' : 'fan/home';
+                    
                     return redirect($location);
                 }
                 break;

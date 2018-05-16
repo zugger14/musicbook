@@ -16,7 +16,7 @@ class AddSongsTable extends Migration
         Schema::create('songs', function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
-            $table->integer('artist_id')->unsigned()->nullable();
+            $table->integer('user_id')->unsigned()->nullable();
 
             $table->integer('album_id')->unsigned()->nullable();
 

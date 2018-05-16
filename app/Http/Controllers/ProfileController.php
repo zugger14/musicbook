@@ -1,0 +1,61 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\User;
+use Auth;
+use Session;
+use App\Profile;
+
+class ProfileController extends Controller
+{
+
+    public function index($slug) 
+    {
+    	$user = User::where('slug', $slug)->first();
+
+    	if($user->is_artist){
+    		return view('artists.profile')->withUser($user);
+    	} else {
+
+    		return view('fans.profile')->withUser($user);
+    	}
+
+    }
+
+    public function edit($slug)
+    {
+    	$user = Auth::user()->is_artist;
+    	if($user) {
+    		return view('artists.edit_profile')->withProfile(Auth::user()->profile)->withUser(Auth::user());
+    	}
+    		return view('fans.edit_profile')->withProfile(Auth::user()->profile)->withUser(Auth::user());
+
+    }
+
+    public function update(Request $r)
+    {
+    	$this->validate($r,[
+    		'location' => 'required',
+    		'about'	   => 'required|max:255'
+    	]);
+
+    	Auth::user()->profile()->update([
+    		'location' => $r->location,
+    		'about'    => $r->about
+    	]);
+
+    	if($r->hasFile('avatar')) {
+
+    		Auth::user()->update([
+    			'avatar' => $r->avatar->store('public/avatars')
+    		]);
+    	}
+
+    	Session::flash('success', 'saved your profile successfully');
+    	//$selecter = Auth::user()->is_artist ? 'artist' : 'fan';
+    	return redirect()->route('profile.show', Auth::user()->slug);
+    }
+
+}
