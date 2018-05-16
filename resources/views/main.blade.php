@@ -3,7 +3,7 @@
 		<body>    
 			@include('layouts._nav')
 		    @include('layouts._messages')
-		    <div class="container-fluid" style="margin-top:70px;">
+		    <div class="container-fluid" style="margin-top:0px;">
 		      @yield('content')
 		    </div>
 		    @include('layouts._footer')

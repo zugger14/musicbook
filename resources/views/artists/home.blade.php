@@ -6,16 +6,14 @@
     <div class="row">
         <div class="col-md-12" >
             <div class="panel panel-default">
-                <div class="panel-heading"> fan Dashboard</div>
+                <div class="panel-heading"> Artist Dashboard</div>
 
                 <div class="panel-body">
-                    <song-upload></song-upload>
+                    
 
                 </div>
             </div>
-
-            <song-view></song-view>
-
+            <song-feeds></song-feeds>
         </div>
     </div>
 @endsection

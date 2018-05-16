@@ -24,29 +24,28 @@ class PageController extends Controller
 	public function index()
 	{		
 		
-		return view('welcome');
-
-	}
-
-	public function upload()
-	{
-		return view('songs.create');
+		return view('guests.welcome');
 
 	}
 
 	public function artistHome()
-	{		
-		return view('artisthome');
+    {       
+        return view('artists.home');
 
+    }
+
+     public function collection()
+    {       
+        return view('artists.home');
+
+    }
+
+    public function fanHome()
+	{		
+		return view('fans.home');
 	}
 
-	public function fanHome()
-	{		
-		return view('fanhome');
-
-	}
-
-
+    
 
 	public function about()
 	{
@@ -57,6 +56,11 @@ class PageController extends Controller
 	public function contact()
 	{
 		return view('pages.contact');
+	}
+
+	public function showAllNotifications()
+	{
+		return view('notifications.index')->withNotifications(Auth::guard('web')->user()->readnotifications);
 	}
 
 	public function emailContact(Request $request)

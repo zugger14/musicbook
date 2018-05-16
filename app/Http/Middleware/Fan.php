@@ -17,12 +17,12 @@ class Fan
      */
     public function handle($request, Closure $next)
     {
-        if(Auth::guard('web')->check() && !Auth::guard()->user()->is_artist) {
+        if(Auth::guard('web')->check() && !Auth::guard('web')->user()->is_artist) {
 
             return $next($request);
-        } 
-            return redirect('home/artist');
-
+        } else {
+            return redirect('artist/home');
+        }
 
         //return redirect()->route('landing');
     }

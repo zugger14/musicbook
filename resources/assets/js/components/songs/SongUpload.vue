@@ -4,9 +4,11 @@
         <div class="form-group">
             <input ref="audioinput" type="file" @change="getFileInfo">
         </div>
+        <li>
         <a class="btn btn-md btn-default" id="custom-file-upload" data-toggle="modal" data-target="#exampleModal" @click="browseSong">
             upload song
         </a>
+    </li>
         <!-- end of upload song link -->
 
         <!-- Modal for song information before upload -->
@@ -37,8 +39,15 @@
                                                 <input type="text" v-model="song.filename" class="form-control" required maxlength="255">
                                             </div>
                                             <div class="form-group">
-                                                <label for="size">Size (in KiloBytes):</label>
+                                                <p class="text-primary small" for="size">Size (in KiloBytes):</p><!-- change text color for upload max limit -->
                                                 {{ song.filesize }}
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="upload_type">Song Upload Type</label>
+                                                <select name="upload_type" v-model="song.upload_type" class="form-control">
+                                                    <option value="public">public( free )</option>
+                                                    <option value="private">private( for sale )</option>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -62,10 +71,11 @@
 </template>
 
 <script>
+        
 export default {
 
     mounted() {
-        console.log('Component mounted.')
+        console.log('song upload Component mounted.')
     },
 
     methods: {
@@ -104,24 +114,27 @@ export default {
         },
 
         uploadSong(song) {
-
+            var self = this;
             let formData = new FormData();
             formData.append('file', this.song.file);
             formData.append('filename', this.song.filename);
             formData.append('filesize', this.song.filesize);
             formData.append('img', this.song.img);
             formData.append('description', this.song.description);
-//try json encode in song without using formdata.append
-            axios.post('/songs',formData, {
+            formData.append('upload_type', this.song.upload_type);
+
+//try json encode in song without using formdata.append prevviously used this.song instead self.song so maybe
+            axios.post('/artist/songs',formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             }).then(function (response) {
                 //show progress bar
-                //add other fields of sing like permission
+                //add other fields of song like permission to listen for free or paid content..
                 console.log(response);
-                this.$refs.closemodal.click();
-                this.resetForm();
+                self.resetForm();       //this.resetform is not recognized inside here so..
+                self.$refs.closemodal.click();
+                
             }).catch(function (error) {
                 console.log(error);
             });
@@ -137,6 +150,7 @@ export default {
                 filesize: '',
                 img: '',
                 imgpreview: '',
+                upload_type:'',
                 description:''
             }
         }
@@ -154,6 +168,10 @@ input[type="file"] {
 
 #image_previews {
     border-radius: 5px;background-color: whitesmoke; width: 200px; height: 200px;
+}
+
+.btn{
+    border-radius: 0px;
 }
 
 </style>

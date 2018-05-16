@@ -3,11 +3,14 @@
 namespace App;
 
 use Illuminate\Notifications\Notifiable;
+use App\Traits\Friendable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Storage;
 
 class User extends Authenticatable
 {
     use Notifiable;
+    use Friendable;
 
     /**
      * The attributes that are mass assignable.
@@ -26,4 +29,27 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function profile()
+    {
+        return $this->hasOne('App\Profile');
+    }
+
+  /*  public function orders()
+    {
+        return $this->hasMany('App\Order');
+    }
+*/
+    public function songs()
+    {
+        return $this->hasMany('App\Song');
+    }
+
+
+    public function getAvatarAttribute($avatar)
+    {
+        return asset(Storage::url($avatar));
+    }
+
+
 }
