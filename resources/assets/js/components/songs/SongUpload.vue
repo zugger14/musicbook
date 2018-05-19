@@ -39,8 +39,8 @@
                                                 <input type="text" v-model="song.filename" class="form-control" required maxlength="255">
                                             </div>
                                             <div class="form-group">
-                                                <p class="text-primary small" for="size">Size (in KiloBytes):</p><!-- change text color for upload max limit -->
-                                                {{ song.filesize }}
+                                                <p class="text-success small" for="size">Size (in MB): {{ song.filesize }}</p><!-- change text color for upload max limit -->
+
                                             </div>
                                             <div class="form-group">
                                                 <label for="upload_type">Song Upload Type</label>
@@ -49,6 +49,12 @@
                                                     <option value="private">private( for sale )</option>
                                                 </select>
                                             </div>
+                                            <div class="form-group" v-if="private">
+                                                <label for="upload_type">Song price</label>
+                                                <input type="text" v-model="song.amount" class="form-control" required maxlength="255">
+
+                                            </div>
+
                                         </div>
                                     </div>
                                 </div>  
@@ -78,13 +84,22 @@ export default {
         console.log('song upload Component mounted.')
     },
 
+    computed: {
+        private() {
+            if(this.song.upload_type == 'private') {
+                return true;
+            }
+            return false;
+        }
+    },
+
     methods: {
         getFileInfo(event) {
             console.log('file selected');
             this.song.file = event.target.files[0];
            // console.log(typeof(this.song.file));
             this.song.filename = this.song.file.name;
-            this.song.filesize = this.song.file.size/1000; 
+            this.song.filesize = this.song.file.size/1000000; 
             /*            console.log(this.song.filename);*/
             //$("#exampleModal").modal('show');         
         },
@@ -151,7 +166,8 @@ export default {
                 img: '',
                 imgpreview: '',
                 upload_type:'',
-                description:''
+                description:'',
+                amount:''
             }
         }
     }
@@ -160,7 +176,7 @@ export default {
 
 </script>
 
-<style>
+<style scoped>
 
 input[type="file"] {
     display: none;

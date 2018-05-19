@@ -24,6 +24,13 @@ class ProfileController extends Controller
 
     }
 
+    public function getProfile($slug) 
+    {
+        $user = User::where('slug', $slug)->first();
+        return $user;
+
+    }
+
     public function edit($slug)
     {
     	$user = Auth::user()->is_artist;
@@ -38,8 +45,13 @@ class ProfileController extends Controller
     {
     	$this->validate($r,[
     		'location' => 'required',
-    		'about'	   => 'required|max:255'
+    		'about'	   => 'required|max:255',
+            'name'     => 'required|max:255',
     	]);
+
+        Auth::user()->update([
+            'name' => $r->name
+        ]);
 
     	Auth::user()->profile()->update([
     		'location' => $r->location,
@@ -53,9 +65,24 @@ class ProfileController extends Controller
     		]);
     	}
 
+
+
+        return response()->json('succesfully saved the profile info ', 200);
+
     	Session::flash('success', 'saved your profile successfully');
     	//$selecter = Auth::user()->is_artist ? 'artist' : 'fan';
     	return redirect()->route('profile.show', Auth::user()->slug);
+    }
+
+    public function updateProfilePic(Request $r)
+    {
+        if($r->hasFile('avatar')) {
+
+            Auth::user()->update([
+                'avatar' => $r->avatar->store('public/avatars')
+            ]);
+        }
+        return 'changed your profile picture';
     }
 
 }

@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Post;
+use App\User;
 use Mail;
 use Session;
-use App\user;
 use Auth;
 use App\Message;
 use DB;
@@ -34,7 +33,7 @@ class PageController extends Controller
 
     }
 
-     public function collection()
+    public function artistCollection()
     {       
         return view('artists.home');
 
@@ -45,18 +44,24 @@ class PageController extends Controller
 		return view('fans.home');
 	}
 
+    public function fanCollection()
+    {       
+        return view('fans.home');
+
+    }
     
+    public function searchUsers($query)
+    {
+    	if($query == '') return false;
+    	$user = User::where('name', 'LIKE', '%' . $query . '%')->get();
+    	return $user;
 
-	public function about()
-	{
-		return view('pages.about');
+    }
 
-	}
-
-	public function contact()
-	{
-		return view('pages.contact');
-	}
+    public function tracks()
+    {
+    	return view('artists.tracks');
+    }
 
 	public function showAllNotifications()
 	{

@@ -134,8 +134,8 @@
 
 		public function removePendingRequest($user_id)
 		{
-			$friendship = Friendship::where('requester', $user_id)->where('user_requested', $this->id)->first();
-			$friendship->delete();//dont delete change status oly aile lai garde 
+			$friendship = Friendship::where('requester', $user_id)->where('user_requested', $this->id)->where('status', 0)->first();
+			$friendship->delete();//dont delete change status only aile lai garde 
 			return 1;
 		}
 
@@ -173,9 +173,15 @@
 				
 			}
 			return $users;
-
-
 		}
+
+		public function removePendingRequestSent($user_id)
+		{
+			$friendship = Friendship::where('requester', $this->id)->where('user_requested', $user_id)->where('status', 0)->first();
+			$friendship->delete();//dont delete change status only aile lai garde 
+			return 1;
+		}
+
 
 		public function pendingRequestSentIds()
 		{
@@ -200,12 +206,7 @@
 
 			}
 			return false;
-
 		}
-
-
-
-
 
 	}
 

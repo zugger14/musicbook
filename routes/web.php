@@ -58,9 +58,12 @@ Route::group(['prefix' => 'admin'], function () {
 Route::group(['middleware' => ['auth:web']], function () {
 
 	//profile routes
-	Route::get('/profile/{slug}', 'ProfileController@index')->name('profile.show');
+	Route::get('/profile/{slug}', 'ProfileController@index')->name('profile.show');//laravel reurn view call
+	Route::get('/getprofile/{slug}', 'ProfileController@getProfile');//vuejs call
 	Route::get('/profile/{slug}/edit', 'ProfileController@edit')->name('profile.edit');
 	Route::put('/profile/update', 'ProfileController@update')->name('profile.update');
+
+	Route::post('/changeprofilepic', 'ProfileController@updateProfilePic');
 
 	//friendship routes
 	Route::get('/check_relationship_status/{user_id}','FriendshipsController@checkStatus' );
@@ -75,9 +78,9 @@ Route::group(['middleware' => ['auth:web']], function () {
 
 	Route::get('/removependingrequest/{user_id}', 'FriendshipsController@removePendingRequest' );
 
+	Route::get('/getfriends/{user_id}', 'FriendshipsController@getFriends' );
 
 
-	
 	/*Route::get('/accept', function() {
 		return App\User::find(5)->acceptFriend(1);
 
@@ -121,13 +124,23 @@ Route::group(['middleware' => ['auth:web']], function () {
 	//song routes for authenticated users
 	Route::group(['prefix' => 'artist'], function () {
 
-		Route::get('songs/buy','SongController@addToOrderList');
+		Route::post('songs/buy','SongController@addToOrderList');
 		Route::get('songs/{song_id}','SongController@getPrivateSong');
 		Route::get('demos/{artist_id}','SongController@getPrivateSongDemo');
+		Route::get('songs/download/{payment_id}','SongController@viewDownSong')->name('songs.download');
+
 		Route::resource('songs','SongController');
 	});
 
+	Route::get('getusersongs/{user_id}','SongController@getUserSongs');
 	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friedns
+
+	//page routes
+	Route::get('tracks', 'PageController@tracks')->name('artist.tracks');
+
+	//search routes
+	Route::get('searchusers/{query_string}','PageController@searchUsers');
+
 
 
 });
@@ -137,9 +150,10 @@ Route::group(['middleware' => ['auth:web']], function () {
 Route::group(['middleware' => ['auth:web', 'artist']], function () {
 
 	Route::group(['prefix' => 'artist'], function () {
-
+		//page routes for artists
 		Route::get('home', 'PageController@artistHome')->name('artist.home');
-		Route::get('collections', 'PageController@collection')->name('artist.collections');
+		Route::get('collections', 'PageController@artistCollection')->name('artist.collections');
+
 
 	});
 });
@@ -149,7 +163,10 @@ Route::group(['middleware' => ['auth:web', 'artist']], function () {
 Route::group(['middleware' => ['auth:web', 'fan']], function () {
 
 	Route::group(['prefix' => 'fan'], function () {
+		//page routes
 		Route::get('home', 'PageController@fanHome')->name('fan.home');
+		Route::get('collections', 'PageController@fanCollection')->name('fan.collections');
+
 
 	});
 
@@ -159,22 +176,14 @@ Route::group(['middleware' => ['auth:web', 'fan']], function () {
 	*/
 	Route::group(['prefix' => 'payments'], function () {
 		Route::get('/','PaypalController@index');
-		Route::get('/show/{payment_id}','PaypalController@show');
+		//Route::get('/show/{payment_id}','PaypalController@show');
 		Route::get('with-credit-card','PaypalController@paywithCreditCard')->name('payment.creditcard');
 		Route::get('with-paypal','PaypalController@paywithPaypal')->name('payment.paypal');
 
+		Route::get('success', 'PaypalController@store');//check if payment is success or fail i have only used pyment id to verify but sometimes the payment may fail and redirect in success.
 		Route::get('fails', function () {
-		    // The user cancelled the payment
-		    // Show appropriate view/message
-		    return 'fail';
+		    return 'sorry something went wrong.please go back and try again later if the problem remains';
 		});
-		Route::get('success', function () {
-		    // The user cancelled the payment
-		    // Show appropriate view/message
-		    return 'success';
-
-		});
-
 
 	});
 

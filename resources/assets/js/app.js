@@ -17,13 +17,25 @@ window.toastr = require('toastr');
  */
 
 //Vue.component('example-component', require('./components/ExampleComponent.vue'));
+
 Vue.component('song-upload', require('./components/songs/SongUpload.vue'));
 Vue.component('demosong-view', require('./components/songs/DemoSongView.vue'))
 Vue.component('song-feeds', require('./components/songs/SongFeeds.vue'))
 Vue.component('song-download', require('./components/songs/SongDownload.vue'));
+Vue.component('publicsong-view', require('./components/songs/PublicSongView.vue'));
 
-Vue.component('friend', require('./components/friends/Friend.vue'));
+
+Vue.component('friend-button', require('./components/friends/FriendButton.vue'));
 Vue.component('friend-requests', require('./components/friends/FriendRequests.vue'));
+Vue.component('friends', require('./components/friends/Friends.vue'));
+
+Vue.component('change-profile-pic', require('./components/profile/ChangeProfilePicture.vue'));
+Vue.component('edit-profile', require('./components/profile/EditProfile.vue'));
+
+Vue.component('search-users', require('./components/search/SearchUsers.vue'));
+
+
+
 
 Vue.component('notification', require('./components/notifications/Notification.vue'));
 
@@ -35,5 +47,6 @@ import {store} from './store'
 
 const app = new Vue({
     el: '#app',
-    store,
+    store
+
 });

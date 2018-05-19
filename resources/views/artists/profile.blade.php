@@ -16,19 +16,17 @@
                 <div class="panel-body">   
                     <div class="row">
                         <div class="col-md-5">
-                            <img src="{{ $user->avatar }}" width="140px" height="140px" style="border-radius: 50%;"> 
+                            <change-profile-pic :avatar={{ json_encode($user->avatar) }} ></change-profile-pic>
+                           {{--  need to json encode the avatar which contaons special characters like http://asd/.. other wise cannot send the props value to vuejs component  --}}
                         </div>     
                         <div class="col-md-6">
-                            <p><friend :profile_user_id="{{ $user->id }}"></friend></p>
-                            <p>Friends: {{ count($user->friends())  }}</p>
-
+                            <p><friend-button :profile_user_id="{{ $user->id }}"></friend-button></p>
+                            <p><friends :user_id={{ $user->id }}></friends></p>
                         </div>
                     </div>                     
-                    <p><a href="" class="btn btn-default btn-md">change profile picture </a></p>
                     <p class="text-center">
                         @if(Auth::guard('web')->id() == $user->id)
-                        <a class="btn btn-default btn-md" href="{{ route('profile.edit', $user->slug) }}">Edit profile</a>
-
+                            <edit-profile :slug={{ json_encode($user->slug) }}></edit-profile>
                         @endif
                     </p>
                     <p>
@@ -97,7 +95,24 @@
                 </div>
 
                 <div class="panel-body">
-                    <demosong-view :artist_id="{{ $user->id }}"></demosong-view>
+                    <demosong-view :is_artist="{{ Auth::user()->is_artist }}" :artist_id="{{ $user->id }}"></demosong-view>
+                    <p class="">
+                        hello uppoaded songs goes here....
+                    </p>
+                </div> 
+            </div>
+        </div>
+
+        <div class="col-md-10">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <p class="">
+                        songs uploaded for free listen
+                    </p>
+                </div>
+
+                <div class="panel-body">
+                    <publicsong-view :user_id={{ $user->id }}></publicsong-view>
                     <p class="">
                         hello uppoaded songs goes here....
                     </p>

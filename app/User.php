@@ -17,6 +17,9 @@ class User extends Authenticatable
      *
      * @var array
      */
+
+    public $with=['profile'];
+
     protected $fillable = [
         'name', 'email', 'password','slug','gender','avatar','is_artist'
     ];
@@ -46,7 +49,7 @@ class User extends Authenticatable
     }
 
 
-    public function getAvatarAttribute($avatar)
+    public function getAvatarAttribute($avatar)//changes avatar attribute before acces from anythwere $user->avatar
     {
         return asset(Storage::url($avatar));
     }

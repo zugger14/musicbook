@@ -4,34 +4,55 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Paypalpayment;
+use App\Order;
+use Auth;
 
 class PaypalController extends Controller
 {
+
 	public function index()
-    {
-    //after collection all payment details make a call to this method to get all latest payment information ..change count to but same payment data appear.
+    {//every payments that have been created aprroved or failed
+    //after collection all payment details make a call to this method to get all latest payment information ..change count to but same payment data appear maybe due to sandbox.
         $payments = Paypalpayment::getAll(['count' => 1, 'start_index' => 0], Paypalpayment::apiContext());
         
         return response()->json([$payments->toArray()], 200);
 
     }
 
-    public function show($payment_id)
-    {
-     $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
+    public function store()
+    {//gets the payment information after paypal payment success and stores in order table and calls show() method to show detail
+        $payment_id = request()->get('paymentId');
 
-     return response()->json([$payment->toArray()], 200);
- }
+        $order = Order::where('paypal_paymentid', $payment_id)->first();//selects previousy submitted form for purchase of songs..
+
+        $order->paypal_payerid = request()->get('PayerID'); 
+        $order->payal_token = request()->get('token');//payal bhayecha db ma
+        $order->paid_order = 1;
+
+        $order->save();
+//        $payment = $this->show($payment_id);
+
+        return redirect()->route('songs.download', $payment_id);
+
+        /*$this->show($payment_id);*/
+    }
+
+    public function show($payment_id)//payment by particular payment id
+    {
+        
+        $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
+        return $payment->toArray();//if i dont toArray also blade template can parse it but cannot read when set as response()->json()
+    }
 
      /*
     * Process payment using credit card
     */
      public function paywithCreditCard()
-     {
+    {
         // ### Address
         // Base Address object used as shipping or billing
         // address in a payment. [Optional]
-        $shippingAddress = Paypalpayment::shippingAddress();
+        /*$shippingAddress = Paypalpayment::shippingAddress();
         $shippingAddress->setLine1("3909 Witmer Roadss")
         ->setLine2("Niagara Falls")
         ->setCity("Niagara Falls")
@@ -39,7 +60,7 @@ class PaypalController extends Controller
         ->setPostalCode("14305")
         ->setCountryCode("US")
         ->setPhone("716-298-1822")
-        ->setRecipientName("Jhonaaaaaaae");
+        ->setRecipientName("Jhonaaaaaaae");*/
 
         // ### CreditCard
         $card = Paypalpayment::creditCard();
@@ -73,7 +94,7 @@ class PaypalController extends Controller
         ->setDescription('Ground Coffee 40 oz')
         ->setCurrency('USD')
         ->setQuantity(1)
-        ->setTax(0.3)
+        //->setTax(0.3)
         ->setPrice(7.50);
 
         $item2 = Paypalpayment::item();
@@ -81,13 +102,13 @@ class PaypalController extends Controller
         ->setDescription('Granola Bars with Peanuts')
         ->setCurrency('USD')
         ->setQuantity(5)
-        ->setTax(0.2)
+        //->setTax(0.2)
         ->setPrice(2);
 
 
         $itemList = Paypalpayment::itemList();
-        $itemList->setItems([$item1,$item2])
-        ->setShippingAddress($shippingAddress);
+        $itemList->setItems([$item1,$item2]);
+        //->setShippingAddress($shippingAddress);
 
 
         $details = Paypalpayment::details();
@@ -136,12 +157,12 @@ class PaypalController extends Controller
         }
 
         //check state then go to next download
-       if($payment->state === "approved") {
-        return view('songs.download')->withPayment($payment);
+/*       if($payment->state === "approved") {
+        return view('songs.download')->withPayment($payment);*/
         //store current user in order table for giving them download acces for songs later on also..
         //then route to download method
-       }
-        //return response()->json([$payment->toArray()], 200);
+  //     }
+        return response()->json([$payment->toArray()], 200);
     }
 
     public function paywithPaypal()
@@ -149,7 +170,7 @@ class PaypalController extends Controller
         // ### Address
         // Base Address object used as shipping or billing
         // address in a payment. [Optional]
-        $shippingAddress= Paypalpayment::shippingAddress();
+     /*   $shippingAddress= Paypalpayment::shippingAddress();
         $shippingAddress->setLine1("3909 Witmer Road")
         ->setLine2("Niagara Falls")
         ->setCity("Niagara Falls")
@@ -158,7 +179,7 @@ class PaypalController extends Controller
         ->setCountryCode("US")
         ->setPhone("716-298-1822")
         ->setRecipientName("Jhone");
-
+*/
         // ### Payer
         // A resource representing a Payer that funds a payment
         // Use the List of `FundingInstrument` and the Payment Method
@@ -184,8 +205,8 @@ class PaypalController extends Controller
 
 
         $itemList = Paypalpayment::itemList();
-        $itemList->setItems([$item1,$item2])
-        ->setShippingAddress($shippingAddress);
+        $itemList->setItems([$item1,$item2]);
+       // ->setShippingAddress($shippingAddress);
 
 
         $details = Paypalpayment::details();
@@ -237,6 +258,12 @@ class PaypalController extends Controller
         } catch (\PayPalConnectionException $ex) {
             return response()->json(["error" => $ex->getMessage()], 400);
         }
+    
+        $payment_id = $payment->id;
+        $order = Order::orderBy('id', 'DESC')->where('user_id', Auth::id())->first();//orderby desc very imp as user may have cancelde paypal process after entry inside our system's  order table
+        $order->paypal_paymentid = $payment_id;
+        //add other ids as well like payer id but it is not calculated at this time i think check it once.
+        $order->save();
 
         return response()->json([$payment->toArray(), 'approval_url' => $payment->getApprovalLink()], 200);
     }

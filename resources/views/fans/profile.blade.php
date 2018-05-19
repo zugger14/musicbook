@@ -16,17 +16,17 @@
                 <div class="panel-body">   
                     <div class="row">
                         <div class="col-md-5">
-                            <img src="{{ $user->avatar }}" width="140px" height="140px" style="border-radius: 50%;"> 
+                            {{-- <img src="{{ $user->avatar }}" width="140px" height="140px" style="border-radius: 50%;">  --}}
+                            <change-profile-pic :avatar={{ json_encode($user->avatar) }} ></change-profile-pic>
                         </div>     
                         <div class="col-md-5">
-                            <p><friend :profile_user_id="{{ $user->id }}"></friend></p>
+                            <p><friend-button :profile_user_id="{{ $user->id }}"></friend-button></p>
 
-                            <p>Friends: {{ count(Auth::user()->friends()) }}</p>
-                            
+                            <p><friends :user_id={{ $user->id }}></friends></p>
+                                                        
                         </div>
                     </div>                     
                     @if(Auth::guard('web')->id() == $user->id)
-                        <p><a href="" class="btn btn-default btn-md">change profile picture </a></p>
                         <p class="text-center">
                             <a class="btn btn-default btn-md" href="{{ route('profile.edit', $user->slug) }}">Edit profile</a>
                         </p>
@@ -93,11 +93,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <p class="">
-                        Songs shared
+                        Songs uploaded
                     </p>
                 </div>
 
                 <div class="panel-body">
+                    <publicsong-view :user_id={{ $user->id }}></publicsong-view>
                     <p class="">
                         hello shared songs goes here....
 

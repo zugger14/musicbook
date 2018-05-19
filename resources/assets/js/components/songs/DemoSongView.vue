@@ -6,6 +6,9 @@
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}
+                         <div class="pull-right">
+                            <manage-song :song="song" v-on:edittrack="edittrack"></manage-song>
+                         </div>
                     </div>
 
                     <div class="panel-body">
@@ -28,7 +31,7 @@
                             {{ song.created_at }}
                         </span>
                         <like :songs="songs" :id="song.id"></like>
-                        <song-payment :song="song"></song-payment>
+                        <song-payment v-if="is_artists == false" :song="song"></song-payment>
                     </div>
                 </div>
             </div>
@@ -53,6 +56,7 @@
 import Aplayer from 'vue-aplayer';
 import Like from './Like.vue';
 import SongPayment from './SongPayment.vue';
+import ManageSong from './ManageSong.vue'
 
 
 //import Crunker from 'crunker/src/crunker.js';
@@ -106,16 +110,16 @@ Crunker.notSupported(() => {
 
 export default {
 
-    props: ['artist_id'],
+    props: ['artist_id','is_artist'],
 
-    components: { Aplayer,Like,SongPayment },
+    components: { Aplayer,Like,SongPayment,ManageSong },
     
     beforeMount() {
-        this.getAllSongs();
+        //this.getAllSongs();
     },
     
     mounted() {
-        
+        this.getAllSongs();
         console.log('song views Component mounted.');
     },
 
@@ -133,24 +137,16 @@ export default {
             });
         },
 
-        buyAction() {
-            axios.post('/artist/songs/buy').then(response => {
-                if(response.data !='') {
-                    console.log('rseponse data after inserting into order model: ' + response.data);
-                } else {
-                    console.log(' order insert response is empty..something wrong from return side');
-                }
-            }).catch(error => {
-                console.log(error);
-            });
+        edittrack() {
+            console.log('this');
         }
-
     },
 
     data() {
         return {
             songs:[
-                {
+                {   
+                    
                     title: '',
                     src: '',
                     song_description: '',
@@ -159,6 +155,7 @@ export default {
             ],
 
             songExists:false,
+            is_artists: this.is_artist,
 
             songLocation:'http://localhost:8000/storage/songs/'
         }

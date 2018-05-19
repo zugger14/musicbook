@@ -10,6 +10,8 @@ use File;
 use Response;
 use App\Order;
 use Auth;
+use Paypalpayment;
+
 
 class SongController extends Controller
 {
@@ -29,20 +31,28 @@ class SongController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getPrivateSong($song_id)
+    public function getPrivateSong($song_id)//used to fetch privates song fro download to users who bought the song...
     {
         //check if user id present in order before giving them song access.
-        $songs = Song::whereId($song_id)->where('upload_type', 'private')->get(); // to get array collection because vueplayer wants array in song view component
-        foreach ($songs as $song) {
-            //if($song->upload_type == 'private'){
-                $music_file = asset('storage/songs') . '/' .$song->song_filename;
-                $song->src = $music_file;   
-            //}
+        $user_id = Auth::guard('web')->id();
+        $orders = Order::where('user_id', $user_id)->where('song_id', $song_id)->get();
+        foreach ($orders as $order) {
+            if($order->paid_order == 1){
+                $songs = Song::whereId($song_id)->where('upload_type', 'private')->get(); // to get array collection because vueplayer wants array in song view component
+                foreach ($songs as $song) {
+
+                        $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                        $song->src = $music_file;   
+                }       
+                //  return response()->download($song->src, $song->title)  not working how to use download response no idea
+                
+                return $songs;
+            }
         }
-        return $songs; //automatically returns as response type
+        return 'please purchase before accesing this song';
     }
 
-    public function getPrivateSongDemo($artist_id )
+    public function getPrivateSongDemo($artist_id )//loads all demo songs for sale purpose by individual artist
     {
         $songs = Song::where('user_id', $artist_id)->where('upload_type', 'private')->orderBy('id', 'desc')->get();
         $getID3 = new \getID3();
@@ -57,7 +67,7 @@ class SongController extends Controller
 
             $time = ($t_min * 60) + $t_sec;  
 
-            $preview = $time / 10; // Preview time of 3-4 seconds  
+            $preview = $time / 10; // Preview time of 10 seconds  
 
             $handle = fopen($music_file, 'r');
 
@@ -111,7 +121,37 @@ class SongController extends Controller
 
     }
 
-    public function songFeeds() //returns all song feed for users from thier added friends
+    public function viewDownSong($payment_id)   //used to show download song page after paypal payment success
+    {   
+        try {
+            $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
+        } catch(PayPalConnectionException $e) {
+            return $e->getMessage();
+        }
+        $order = Order::where('paypal_paymentid', $payment_id)->where('user_id', Auth::id())->get();
+
+        //$song_id = '';
+        foreach ($order as $or) {
+            if($or->paid_order == 1) {
+                $song_id = $or->song_id;
+                return view('songs.download')->withPayment($payment->toArray())->withSong($song_id);
+            }        
+        }
+        return 'you dont have access to view download';
+    }
+
+    public function getUserSongs($user_id)//get all public songs of a particular user maybe fan or artist by id
+    {
+        $songs = Song::where('user_id', $user_id)->where('upload_type', 'public')->get();//if used all() instead get canot read value in vuejs by aplayer 
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+
+        return response()->json($songs, 200);   //json response can be used sending to vuejs only doesnot work if sent to blade files(protected json response error) but can send jsonecode without response thats the difference of response..
+    }
+
+    public function songFeeds() //returns all song feeds of users and their friends(basically public songs uploaded ) for users from thier added friends
     {
         $friends = Auth::guard('web')->user()->friends();
         $songfeeds = array();
@@ -124,11 +164,9 @@ class SongController extends Controller
                     array_push($songfeeds, $song);
                 }
             }
-           //return $songfeeds;
         }
 
         return response()->json($songfeeds); //aleady returns as response only but not json i guess
-
     }
 
     /**
@@ -186,7 +224,6 @@ class SongController extends Controller
             return response()->json("Successfully uploaded your song. ");
 
         }
-        
     }
 
     /**
@@ -195,6 +232,7 @@ class SongController extends Controller
      * @param  \App\Song  $song
      * @return \Illuminate\Http\Response
      */
+
     public function show(Song $song)
     {
         //
@@ -218,9 +256,39 @@ class SongController extends Controller
      * @param  \App\Song  $song
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Song $song)
+    public function update(Request $request)
     {
-        //
+        return $request->all();
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|max:255',
+            'description' => 'sometimes|max:255',
+            'img' => 'required',
+            'upload_type' =>'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors(),500);
+
+        } else {
+
+            $song = Song::find($id);
+            $song->title = $request->title;
+            $song->upload_type = $request->upload_type;
+
+            if ($request->hasFile('img')) {
+                $image_file = $request->file('img');
+                $filename = time() . '.' . $image_file->getClientOriginalExtension();
+                $location = storage_path('app/public/images/songcovers');  // add artists id name anything here for folder structure.
+                $image_file->move($location,$filename);
+                
+                $song->image = $filename;
+            } 
+            
+            $song->song_description = $request->description;
+            $song->save();
+
+            return response()->json("Successfully edited your song. ");
+       }
     }
 
     /**
@@ -229,27 +297,29 @@ class SongController extends Controller
      * @param  \App\Song  $song
      * @return \Illuminate\Http\Response
      */
+
     public function destroy(Song $song)
     {
         //
     }
 
-    public function upload()
-    {
-        return view('songs.create');
-
-    }
-
     public function addToOrderList(Request $request)
     {
         $order = new Order;
-
-        $order->total_amount = 100;
+        $order->song_id = $request->id;
+        $order->total_amount = $request->amount;
         $order->user_id = Auth::guard('web')->id();
+        $order->paid_order = 0;// set default in db 
         $order->save();
-        return view('songs.pay-confirm')->withOrder($order);
+
+        return response()->json($order , 200);
+        
+        //return redirect()->route('payment.creditcard');
+
 
     }
+
+
 
 
 }

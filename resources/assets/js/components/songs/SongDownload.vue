@@ -12,32 +12,17 @@
                         artist: 'Silent Siren',
                         src: song.src,
                         pic: 'storage/images/songcovers/' + song.image
-                    }"
-                    :float="true" :list="songs" 
-                    />  
-                    <div class="panel-body">
-                        {{ song.description }}
-                        descaription about songsss
+                        }"
+                        :float="true" :list="songs" 
+                        />  
+                        <div class="panel-body">
+                            {{ song.song_description }}
+                       
+                        </div>
                     </div>
-                </div>
 
                 <div class="panel-footer">
-                    {{ song.description }}
-                    download button
-                    
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading"> Most played by users </div>
-
-                <div class="panel-body" style="height:500px;">
-                    songs list                  
-                </div>
-
-                <div class="panel-footer">
-                    like comments
+                    <a class="btn btn-success btn-lg" :href="song.src" :download="song.title" > Download </a>
                 </div>
             </div>
         </div>
@@ -51,9 +36,11 @@ import Aplayer from 'vue-aplayer';
 export default {
 
     components: { Aplayer },
+
+    props: ['song_id'],
     
     beforeMount() {
-        this.getAllSongs();
+        this.getPrivateSong();
     },
     
     mounted() {
@@ -61,19 +48,19 @@ export default {
     },
 
     methods: {
-        getAllSongs() {
-            axios.get('/artist/songs/1').then(response => {
+        getPrivateSong() {
+            axios.get('/artist/songs/' + this.song_id).then(response => {
                 console.log((response.data))
                 if(response.data !='') { 
-                    
+                    this.songs = response.data;   
                 }
-                console.log('song collections exists: ' + this.songExists);                    
-                this.songs = response.data;
+               
             }).catch(error => {
                     console.log(error);
             });
-        },
+        }
     },
+
 
     data() {
         return {

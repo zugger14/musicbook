@@ -63,12 +63,26 @@ class FriendshipsController extends Controller
 
     }
 
-
-  /*  public function friends($user_id)
+    public function getFriends($user_id)
     {
         $user = User::find($user_id);
         $friends = $user->friends();
         return $friends;
     }
-*/
+
+    public function getSentRequests()
+    {
+        $sent_users = Auth::user()->PendingRequestSent();
+        return $sent_users;
+
+    }
+
+     public function removePendingRequestSent($user_id)
+    {
+        $resp = Auth::user()->removePendingRequestSent($user_id);
+        return $resp;
+
+    }
+
+
 }

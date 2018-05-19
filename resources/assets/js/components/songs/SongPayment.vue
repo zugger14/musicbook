@@ -1,14 +1,14 @@
 <template>
 	<div> <!-- /artist/songs/buy -->
-		<a href="" class="btn btn-md btn-default" id="custom-file-upload" data-toggle="modal" data-target="#paymentModal" @click="showSongPayModal">Buy for Nrs 100</a>
+		<a href="" class="btn btn-md btn-default" data-toggle="modal" data-target="#paymentModal">Buy for Nrs 100</a>
 
-		<!-- Modal for song payment information before proceeding to paypal payment-->
+		<!-- Modal for song payment information before before getting approval url to paypal payment-->
         <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="paymentModalLabel">Song Payment Information</h5>
-                        <button type="button" class="close" ref="closemodal" data-dismiss="modal" aria-label="Close" @click="resetForm">
+                        <button type="button" class="close" ref="closemodal" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -19,24 +19,21 @@
                                     <div class="col-md-12">
                                         <div class="col-md-5">
                                             <div id="image_previews">
-                                                <img ref='image' class="" v-bind:src="song.imgpreview" width="200px" height="200px" >
-                                                <input class="form-control-file" ref="imageinput" type="file" name="feature_image" @change="showImage($event)">
+                                                <img ref='image' class="" v-bind:src="songs.imgpreview" width="200px" height="200px" >
+                                                <input class="form-control-file" ref="imageinput" type="file" name="feature_image">
                                             </div>
                                         </div>
                                         <div class="col-md-7">
                                             <div class="form-group">
                                                 <label for="title">Song Title:</label>
-                                                <input type="text"  v-model="song.title" class="form-control" required maxlength="255">
+                                                <input type="text"  v-model="songs.title" class="form-control" required maxlength="255">
                                             </div>
                                             <div class="form-group">
 
                                             </div>
                                             <div class="form-group">
                                                 <label for="upload_type">Payment Amount</label>
-                                                <select name="upload_type" v-model="song.upload_type" class="form-control">
-                                                    <option value="public">public( free )</option>
-                                                    <option value="private">private( for sale )</option>
-                                                </select>
+                                                <input type="text"  v-model="songs.amount" class="form-control" required maxlength="255">
                                             </div>
                                         </div>
                                     </div>
@@ -49,28 +46,72 @@
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="resetForm" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" @click="uploadSong(song)">proceed to payment</button>
+                        <button type="button" class="btn btn-secondary"  data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" @click="confirmPay">proceed to payment</button>
                     </div>
                 </div>
             </div>
         </div><!-- end of modal -->
+        <paypal-payment v-if="showPaypal" :approval_url="paypal_approval_url"></paypal-payment>
 	</div>
 
 </template>
 
 <script>
+import PaypalPayment from './PaypalPayment.vue';
+
 export default {
 
     props: ['song'],
+
+    components :{PaypalPayment},
 
 	mounted() {
 		console.log('Component mounted.')
 	},
 
+    watch: {
+        paypal_approval_url() {
+           // this.resetForm();
+            this.$refs.closemodal.click();
+            this.showPaypal = true;
+        }
+    },
+
+
+    methods: {
+        resetForm(event) {
+            this.songs = ''    
+        },
+
+        confirmPay() {//only works once then need to refresh the page because the props value is loaded on refresh once and i have reset the form before so resets songs value hence gives error of not initiakized data(songs)
+
+            axios.post('/artist/songs/buy', this.songs).then(response => {
+                if(response.data != '') {
+                    axios.get('/payments/with-paypal').then(response => {
+                        console.log(JSON.stringify(response));
+                        if(response.data !='') { 
+                            this.paypal_approval_url = response.data.approval_url;
+                           // this.payment_id = response.data.id;
+                        } 
+
+                    }).catch(error => {
+                        console.log(error);
+                    });
+                }
+                
+            }).catch(error => {
+                    console.log(error);
+            });
+        }
+    },
+
     data() {
 	    return {
-	        song: this.song
+	        songs: this.song,
+            showPaypal:false,
+            paypal_approval_url:''
+
 	    }
    	}
 }

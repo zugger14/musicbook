@@ -52,7 +52,7 @@
                axios.get('/removependingrequest/' + user.id).then((response) => {
                    if(response.data == true) {
                // console.log(user.id);
-                       var index = this.users.indexOf(user);//previous itried with user.id but not getting that
+                       var index = this.users.indexOf(user);//previous itried with user.id but not getting that..it was because whole reponse was returnde from backend instead return only id from there
                    /*    var index = this.users.find(function (users){
                             return users.id==user.id
                        })

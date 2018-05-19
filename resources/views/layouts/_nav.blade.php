@@ -27,13 +27,26 @@
                 </ul>
             @endif
 
-
+            @if (Auth::check() && !Auth::user()->is_artist)
+                <ul class="nav navbar-nav">
+                    <li class="{{ Request::is('fan/home')?'active':'' }}" >
+                        <a href="{{ route('fan.home') }}">Home</a>
+                    </li>
+                    <li class="{{ Request::is('fan/collections')?'active':'' }}" >
+                        <a href="{{ route('fan.collections') }}">Collections</a>
+                    </li>
+                </ul>
+            @endif
+            <ul class="nav navbar-nav">
+                <li>
+                    <search-users></search-users>
+                </li>
+            </ul>
     
             <ul class="nav navbar-nav navbar-right">
-
+                
                 <audio id='noty_audio' src="{{ asset('audio/notify.mp3') }}"></audio>
-
-                    @if (Auth::guard('web')->check() && Auth::user()->is_artist)
+                    @if (Auth::guard('web')->check())
                     <li>
                         <song-upload style="margin-top: -8px;"></song-upload>    
                     </li>
@@ -41,7 +54,7 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ Auth::user()->name }} <span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="{{ route('profile.show', Auth::user()->slug) }}">profile(artist)</a></li>
-                            <li><a href="">tracks</a></li>
+                            <li><a href="{{ route('artist.tracks') }}">tracks</a></li>
                             <li><a href="">account settings</a></li>
                             <li role="separator" class="divider"></li>
                             <li>
