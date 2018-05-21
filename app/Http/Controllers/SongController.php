@@ -9,6 +9,8 @@ use Validator;
 use File;
 use Response;
 use App\Order;
+use App\User;
+use App\Like;
 use Auth;
 use Paypalpayment;
 
@@ -50,6 +52,19 @@ class SongController extends Controller
             }
         }
         return 'please purchase before accesing this song';
+    }
+
+
+    public function getPublicSong($song_id)
+    {
+        $songs = Song::where('id', $song_id)->get();
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }     
+
+        return $songs;
+
     }
 
     public function getPrivateSongDemo($artist_id )//loads all demo songs for sale purpose by individual artist
@@ -149,6 +164,32 @@ class SongController extends Controller
         }
 
         return response()->json($songs, 200);   //json response can be used sending to vuejs only doesnot work if sent to blade files(protected json response error) but can send jsonecode without response thats the difference of response..
+    }
+
+
+    public function showLikedSongPage($user_id)
+    {
+        return view('artists.likedsong')->with('user_id', $user_id);
+    } 
+
+    public function getLikedSongs($user_id)
+    {   
+       // $user = Like::find(2);
+        //wrong with  realtion defining in foreignkey and local key i think coz we cannot use like::get() to get like->songs here
+      //  $songs = Song::where('user_id', Auth::id())->get();
+        $user = User::find($user_id);
+        $likes = $user->like;
+        $songs = array();
+        foreach ($likes as $like) {//also only show public songs that are liked...private songs like features should be removed lets think ;ater..
+            $songs[] = $like->song;//needs [] even declared as array above FFFFF
+        }
+
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+
+        return $songs;
     }
 
     public function songFeeds() //returns all song feeds of users and their friends(basically public songs uploaded ) for users from thier added friends
@@ -256,13 +297,13 @@ class SongController extends Controller
      * @param  \App\Song  $song
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
+    public function update($id, Request $request)
     {
-        return $request->all();
+        //return $request->all();
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:255',
             'description' => 'sometimes|max:255',
-            'img' => 'required',
+            'img' => 'nullable',
             'upload_type' =>'required'
         ]);
 
@@ -298,9 +339,16 @@ class SongController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function destroy(Song $song)
+    public function destroy($id)
     {
-        //
+        $song = Song::find($id);
+        if($song->upload_type == 'private') {
+            //get all users from
+        }
+
+        $song->delete();
+
+        return response()->json('succesfully deleted song');
     }
 
     public function addToOrderList(Request $request)

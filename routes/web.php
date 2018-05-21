@@ -133,13 +133,39 @@ Route::group(['middleware' => ['auth:web']], function () {
 	});
 
 	Route::get('getusersongs/{user_id}','SongController@getUserSongs');
+	Route::get('getpublicsong/{song_id}','SongController@getPublicSong');
 	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friedns
+	Route::get('songs/liked/{user_id}','SongController@showLikedSongPage')->name('songs.liked');
+	Route::get('/getLikedSongs/{user_id}','SongController@getLikedSongs');
 
-	//page routes
-	Route::get('tracks', 'PageController@tracks')->name('artist.tracks');
+
+
+	//page routes (change to song routes)
+	Route::get('tracks', 'PageController@tracks')->name('artist.tracks');//change tracks to songs maybe so put on song controller later
+
 
 	//search routes
 	Route::get('searchusers/{query_string}','PageController@searchUsers');
+
+	//playlist routes
+	Route::post('/playlist/', 'PlaylistController@store')->name('playlist.store');
+	Route::post('/playlist/addsong', 'PlaylistController@addSongToPlaylist')->name('playlist.addsong');
+	Route::get('/playlist/removesong/{s_id}/{p_id}', 'PlaylistController@removeSong')->name('playlist.removesong');
+	Route::get('/playlist/getplaylist/{user_id}', 'PlaylistController@getPlaylist')->name('playlist.getplaylist');
+	Route::get('/playlist/{user_id}', 'PlaylistController@userIndex')->name('artists.playlist');
+	Route::get('/playlist/songs/{user_id}', 'PlaylistController@getPlaylistSongs')->name('playlist.songs');
+	Route::delete('/playlist/{playlist_id}', 'PlaylistController@destroy')->name('playlist.songs');
+	Route::put('/playlist/{playlist_id}', 'PlaylistController@update')->name('playlist.update');
+
+	//song notes routes
+	Route::get('/getnotes/{user_id}', 'NoteController@getNotes');
+	Route::get('/notes/{user_id}', 'NoteController@index')->name('artist.notes');
+	Route::post('/notes/', 'NoteController@store')->name('notes.store');
+	Route::put('/notes/{user_id}', 'NoteController@update')->name('notes.update');
+	Route::delete('/notes/{user_id}', 'NoteController@destroy')->name('notes.destroy');
+
+
+
 
 
 

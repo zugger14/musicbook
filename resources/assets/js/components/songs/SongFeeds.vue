@@ -15,9 +15,9 @@
                                 title: song.title,
                                 artist: 'Silent Siren',
                                 src: song.src,
-                                pic: 'storage/images/songcovers/' + song.image
+                                pic: song.image
                             }"
-                            :float="true" :list="songs" 
+                            :float="true" 
                         />  
                         <div class="panel-body">
                             {{ song.song_description }}

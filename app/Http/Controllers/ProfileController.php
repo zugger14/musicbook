@@ -65,8 +65,6 @@ class ProfileController extends Controller
     		]);
     	}
 
-
-
         return response()->json('succesfully saved the profile info ', 200);
 
     	Session::flash('success', 'saved your profile successfully');

@@ -30,7 +30,11 @@ class Song extends Model
         return asset(Storage::url('public/images/songcovers/'.$image));
     }
 
+    public function playlists()
+    {
+        return $this->belongsToMany('App\Playlist')->withTimestamps();
 
+    }
 
     /*public function order()
     {

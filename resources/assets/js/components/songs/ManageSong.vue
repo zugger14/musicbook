@@ -1,10 +1,10 @@
 <template>
     <div>
-        <a data-toggle="modal" data-target="#EditModal"><span title="edit" class="glyphicon glyphicon-pencil" ></span></a>
+        <a data-toggle="modal" :data-target="'#EditModal'+ modalid"><span title="edit" class="glyphicon glyphicon-pencil" ></span></a>
         <a class=""><span title="delete" class="glyphicon glyphicon-trash"></span></a>
 
         <!-- Modal for editing song tracks-->
-        <div class="modal fade" id="EditModal" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
+        <div class="modal fade" :id="'EditModal'+ modalid" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -21,7 +21,7 @@
                                         <div class="col-md-5">
                                             <button type="button" @click="browseImage" class="btn btn-md btn-default">Choose image:</button>
                                             <div id="image_previews">
-                                                <img ref='image' class="" v-bind:src="esong.imgpreview" width="200px" height="200px" >
+                                                <img ref='image' class="" v-bind:src="image" width="200px" height="200px" >
                                                 <input class="form-control-file" ref="imageinput" type="file" name="feature_image" @change="showImage($event)">
                                             </div>
                                         </div>
@@ -39,7 +39,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="message-text" class="col-form-label">Description:</label>
-                                                <textarea class="form-control" id="message-text" v-model="esong.description"></textarea>
+                                                <textarea class="form-control" id="message-text" v-model="esong.song_description"></textarea>
                                             </div>
                                             <div class="form-group" v-if="private">
                                                 <label for="upload_type">Song price</label>
@@ -66,11 +66,10 @@
 <script>
     export default {
         mounted() {
-            this.$emit('edittrack','as');
-            console.log(this.esong.title);
+            console.log('index' + this.index);
         },
 
-        props: ['song'],
+        props: ['song','modalid','index'],
 
         computed: {
             private() {
@@ -83,19 +82,21 @@
 
         methods: {
             edit() {
-
                 let formData = new FormData();
                 formData.append('title', this.esong.title);
                 formData.append('img', this.esong.img);
-                formData.append('description', this.esong.description);
+                formData.append('description', this.esong.song_description);
                 formData.append('upload_type', this.esong.upload_type);
+                formData.append('_method', 'PUT')
 
-                axios.put('/artist/songs/' + this.esong.id, formData,{
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            }).then(response =>{
-                    console.log(response.data)
+                axios.post('/artist/songs/' + this.esong.id, formData,{
+                    headers: {//no need to put headers here dont know why it works with multipart-fromdata??
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response =>{
+                    this.$refs.closemodal.click();
+                    toastr.success('successfully edited song.');
+                    this.$emit('update', {song:this.esong,index:this.index});
                 }).catch(error => {
                     console.log(error);
                 });
@@ -103,8 +104,9 @@
 
 
             delete() {
+                // ofr private soongs send request to admin for delete then admin decides when to delete..
 
-
+                //axios.get('delete')
             },
 
 
@@ -114,21 +116,17 @@
 
             showImage(event) {
                 this.esong.img = event.target.files[0];
-                this.esong.imgpreview = URL.createObjectURL(event.target.files[0]);
+                this.image = URL.createObjectURL(event.target.files[0]);
             }
 
         },
 
         data() {
+                //seperetate data send to databse and just for vuejs part
             return {
-                esong:{
-                    title: this.song.title,
-                    img: '',
-                    imgpreview: this.song.image,
-                    upload_type:this.song.upload_type,
-                    description:this.song.song_description,
-                    amount:''
-                } 
+                esong:this.song,
+                image:this.song.image//image not chnged when using esong as props image only stored..
+                                    
             }
         }
     }

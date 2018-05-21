@@ -48,6 +48,24 @@ class User extends Authenticatable
         return $this->hasMany('App\Song');
     }
 
+    public function like()
+    {
+        return $this->hasMany('App\Like');
+
+    }
+
+    public function notes()
+    {
+        return $this->hasMany('App\Note');
+    }
+
+
+
+    public function playlists()
+    {
+        return $this->hasMany('App\Playlist');
+    }
+
 
     public function getAvatarAttribute($avatar)//changes avatar attribute before acces from anythwere $user->avatar
     {

@@ -22,7 +22,11 @@ Vue.component('song-upload', require('./components/songs/SongUpload.vue'));
 Vue.component('demosong-view', require('./components/songs/DemoSongView.vue'))
 Vue.component('song-feeds', require('./components/songs/SongFeeds.vue'))
 Vue.component('song-download', require('./components/songs/SongDownload.vue'));
+Vue.component('userpublicsong-view', require('./components/songs/UsersPublicSongView.vue'));
 Vue.component('publicsong-view', require('./components/songs/PublicSongView.vue'));
+Vue.component('liked-song', require('./components/songs/LikedSong.vue'));
+
+
 
 
 Vue.component('friend-button', require('./components/friends/FriendButton.vue'));
@@ -32,10 +36,14 @@ Vue.component('friends', require('./components/friends/Friends.vue'));
 Vue.component('change-profile-pic', require('./components/profile/ChangeProfilePicture.vue'));
 Vue.component('edit-profile', require('./components/profile/EditProfile.vue'));
 
+Vue.component('add-playlist', require('./components/playlists/AddPlaylist.vue'));
+Vue.component('show-playlist', require('./components/playlists/ShowPlaylist.vue'));
+
+Vue.component('add-note', require('./components/notes/AddNote.vue'));
+
+
+
 Vue.component('search-users', require('./components/search/SearchUsers.vue'));
-
-
-
 
 Vue.component('notification', require('./components/notifications/Notification.vue'));
 

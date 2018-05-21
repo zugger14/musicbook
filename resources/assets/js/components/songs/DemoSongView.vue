@@ -2,13 +2,15 @@
     <div class="songview">
         <div class="row">
             <div class="col-md-8">
-                <div v-if="songExists" v-for="song in songs" class="panel panel-default">
-                    <div class="panel-heading">
+                <div v-if="songExists" v-for="(song,index) in songs" v-bind:key="song.index" class="panel panel-default">
+                    <div class="panel-heading" >
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}
-                         <div class="pull-right">
-                            <manage-song :song="song" v-on:edittrack="edittrack"></manage-song>
-                         </div>
+                             <div class="pull-right">
+                                <add-playlist :song_id="song.id" :user_id="artist_id" :id="id"></add-playlist>
+                                <manage-song v-on:update="update" :index="index" :song="song" :modalid="id"></manage-song>
+                                {{ id++ }}
+                             </div>
                     </div>
 
                     <div class="panel-body">
@@ -17,7 +19,7 @@
                         title: song.title,
                         artist: 'Silent Siren',
                         src: song.src,
-                        pic: 'storage/images/songcovers/' + song.image
+                        pic: song.image
                         }"
                         :float="true" :list="songs" 
                     />  
@@ -117,10 +119,12 @@ export default {
     beforeMount() {
         //this.getAllSongs();
     },
+
     
     mounted() {
+
         this.getAllSongs();
-        console.log('song views Component mounted.');
+      //  console.log('song views Component mounted.');
     },
 
     methods: {
@@ -130,6 +134,7 @@ export default {
                 if(response.data !='') { 
                     this.songExists=true;
                     this.songs = response.data;
+        console.log('demosong' + this.songs.length);
                 }
 
             }).catch(error => {
@@ -137,27 +142,32 @@ export default {
             });
         },
 
-        edittrack() {
-            console.log('this');
+        update(songdata) {
+            console.log(songdata.index);
+            let index = songdata.index + 1;
+            console.log('newindex' + index);
+           // console.log(songdata.song.title);
+           // this.songs[songdata.index] = songdata.song;//not reactive due to limit in js caveats
+
+           //the error for not updating in my case seems to be vye player beause only title and image is not changing..
+
+           this.songs.splice(index, 1, songdata);//in place patch only array item value are updated but dom element is same
+           console.log(this.songs[songdata.index].title);
+
         }
     },
 
     data() {
         return {
-            songs:[
+            songs:
                 {   
                     
-                    title: '',
-                    src: '',
-                    song_description: '',
-                    image: ''
                 }
-            ],
-
+                ,
             songExists:false,
             is_artists: this.is_artist,
-
-            songLocation:'http://localhost:8000/storage/songs/'
+            songLocation:'http://localhost:8000/storage/songs/',
+            id:1
         }
     }
 }

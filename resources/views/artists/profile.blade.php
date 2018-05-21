@@ -81,6 +81,10 @@
 
                 <div class="panel-body">
                   <p class="">
+                <a href="{{ route('artists.playlist', $user->id) }}" class="btn btn-default btn-md">Albums(playlists)</a>
+                <a href="{{ route('artist.tracks')  }}" class="btn btn-default btn-md">Songs</a>
+                <a href="{{ route('artist.notes', $user->id) }}" class="btn btn-default btn-md">Song Notes</a>
+                <a href="{{ route('songs.liked', $user->id) }}" class="btn btn-default btn-md">Liked Songs</a>
                   tracks albums lyrics playlists are listed here...</p>
                 </div> 
             </div>

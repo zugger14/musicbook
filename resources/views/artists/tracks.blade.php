@@ -10,7 +10,7 @@
 
                 <div class="panel-body">
                     
-                    <publicsong-view :user_id={{ Auth::id() }}></publicsong-view>
+                    <userpublicsong-view :user_id={{ Auth::id() }}></userpublicsong-view>
 
                 </div>
             </div>

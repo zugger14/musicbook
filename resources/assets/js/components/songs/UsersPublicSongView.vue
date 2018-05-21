@@ -1,14 +1,14 @@
 <template>
     <div class="songview">
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-8">
                 <div v-if="songExists" v-for="song in songs" class="panel panel-default">
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}
                         
                         <div class="pull-right">
-                            <span class="glyphicon glyphicon-trash" @click="removeSong(song.id, playlist_id)">remove from playlist</span>
+                            <manage-song :song="song" :id="id">{{ id++ }}</manage-song>
                         </div>
                     </div>
 
@@ -16,13 +16,12 @@
                         <aplayer theme='#FADFA3'
                             :music="{
                             title: song.title,
-                            artist: ' ',
+                            artist: 'Silent Siren',
                             src: song.src,
                             pic: song.image
                             }"
-                            :float="true"
+                            :float="true" :list="songs" 
                         />  
-                        <!--  :list="lists"  -->
                         <div class="panel-body">
                             {{ song.song_description }}
                         </div>
@@ -36,6 +35,19 @@
                     </div>
                 </div>
             </div>
+        <div class="col-md-4">
+            <div class="panel panel-default">
+                <div class="panel-heading"> Most played by users </div>
+
+                <div class="panel-body" style="height:500px;">
+                    songs list                  
+                </div>
+
+                <div class="panel-footer">
+                    
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </template>
@@ -43,26 +55,26 @@
 <script>
 import Aplayer from 'vue-aplayer';
 import Like from './Like.vue';
+import ManageSong from './ManageSong';
 
 export default {
+//change name to userpubliciview 
+    props: ['user_id'],
 
-    //change name to userpubliciview 
-    props: ['song_id', 'playlist_id','lists'],
-
-    components: { Aplayer,Like},
+    components: { Aplayer,Like,ManageSong },
     
     beforeMount() {
         //this.getAllSongs();
     },
     
     mounted() {
-        this.getPublicSong();
+        this.getUserSongs();
         console.log('song views Component mounted.');
     },
 
     methods: {
-        getPublicSong() {
-            axios.get('/getpublicsong/' + this.song_id ).then(response => {
+        getUserSongs() {
+            axios.get('/getusersongs/' + this.user_id ).then(response => {
                 if(response.data !='') { 
                     this.songExists=true;
                     this.songs = response.data;
@@ -71,23 +83,20 @@ export default {
             }).catch(error => {
                     console.log(error);
             });
-        },
-
-        removeSong(s_id,p_id) {
-            axios.get('/playlist/removesong/' + s_id + '/' + p_id).then(response => {
-                if(response.data !='') { 
-                    console.log(response);                }
-
-            }).catch(error => {
-                    console.log(error);
-            });
-
         }
     },
 
     data() {
         return {
-            songs:{ src:'' },
+            songs:[
+                {
+                    title: '',
+                    src: '',
+                    song_description: '',
+                    image: ''
+                }
+            ],
+
             songExists:false,
             songLocation:'http://localhost:8000/storage/songs/',
             id:1
