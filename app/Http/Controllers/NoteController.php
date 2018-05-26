@@ -6,6 +6,7 @@ use App\Note;
 use Illuminate\Http\Request;
 use Validator;
 use Auth;
+use Purifier;
 
 class NoteController extends Controller
 {
@@ -22,6 +23,9 @@ class NoteController extends Controller
     public function getNotes($user_id)
     {
         $notes = Note::where('user_id', $user_id)->get();
+        foreach ($notes as $note) {
+           // $note->content = strip_tags($note->content);
+        }
         return $notes;
     }
 
@@ -55,7 +59,7 @@ class NoteController extends Controller
         } else {    
             $note = new Note;
             $note->title = $request->title;
-            $note->content = $request->content;
+            $note->content = Purifier::clean($request->content);
             if($request->private == true ){
                 $note->private = 1;
             }
@@ -113,7 +117,7 @@ class NoteController extends Controller
 
             $note = Note::find($note_id);
             $note->title = $r->title;
-            $note->content = $r->content;
+            $note->content = Purifier::clean($r->content);
             $note->user_id = Auth::id();     
             if($r->private == true ){
                 $note->private = 1;

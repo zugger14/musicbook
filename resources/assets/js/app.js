@@ -17,7 +17,10 @@ window.toastr = require('toastr');
  */
 
 //Vue.component('example-component', require('./components/ExampleComponent.vue'));
-
+/*
+*/			//Vue Components
+/*
+*/
 Vue.component('song-upload', require('./components/songs/SongUpload.vue'));
 Vue.component('demosong-view', require('./components/songs/DemoSongView.vue'))
 Vue.component('song-feeds', require('./components/songs/SongFeeds.vue'))
@@ -26,8 +29,7 @@ Vue.component('userpublicsong-view', require('./components/songs/UsersPublicSong
 Vue.component('publicsong-view', require('./components/songs/PublicSongView.vue'));
 Vue.component('liked-song', require('./components/songs/LikedSong.vue'));
 
-
-
+Vue.component('pm-sidebar', require('./components/private-messages/PrivateMessageSidebar.vue'));
 
 Vue.component('friend-button', require('./components/friends/FriendButton.vue'));
 Vue.component('friend-requests', require('./components/friends/FriendRequests.vue'));
@@ -41,17 +43,18 @@ Vue.component('show-playlist', require('./components/playlists/ShowPlaylist.vue'
 
 Vue.component('add-note', require('./components/notes/AddNote.vue'));
 
-
-
 Vue.component('search-users', require('./components/search/SearchUsers.vue'));
 
 Vue.component('notification', require('./components/notifications/Notification.vue'));
 
-
-
 Vue.component('user-login', require('./components/auth/Login.vue'));
 
-import {store} from './store'
+
+
+import VueSocketio from 'vue-socket.io'
+import store from './store'
+
+Vue.use(VueSocketio, 'http://localhost:8890');
 
 const app = new Vue({
     el: '#app',

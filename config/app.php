@@ -165,6 +165,9 @@ return [
         Illuminate\View\ViewServiceProvider::class,
         NikhilPandey\Esewa\EsewaServiceProvider::class,
         Anouar\Paypalpayment\PaypalpaymentServiceProvider::class,
+        Mews\Purifier\PurifierServiceProvider::class,
+        SahusoftCom\YoutubeApi\LiveStreamApiServiceProvider::class,
+
 
         /*
          * Package Service Providers...
@@ -229,6 +232,8 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Esewa'     => NikhilPandey\Esewa\Facades\Esewa::class,
         'Paypalpayment'   => Anouar\Paypalpayment\Facades\PaypalPayment::class,
+        'Purifier' => Mews\Purifier\Facades\Purifier::class,
+        
 
     ],
 

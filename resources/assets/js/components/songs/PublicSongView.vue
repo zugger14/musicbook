@@ -29,6 +29,9 @@
                     </div>
 
                     <div class="panel-footer">
+                    <div class="tags">Tagged in:
+                            <span v-for="tag in song.tags" class="label label-info">{{ tag.name }}</span>
+                    </div>
                         <span class="pull-right">
                             {{ song.created_at }}
                         </span>
@@ -76,7 +79,8 @@ export default {
         removeSong(s_id,p_id) {
             axios.get('/playlist/removesong/' + s_id + '/' + p_id).then(response => {
                 if(response.data !='') { 
-                    console.log(response);                }
+                    console.log(response);
+                }
 
             }).catch(error => {
                     console.log(error);

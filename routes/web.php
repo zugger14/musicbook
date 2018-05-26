@@ -22,6 +22,12 @@ Route::group(['middleware' => ['web']], function () {
 	// handles all routes for normal users as fans and artists login
 	Auth::routes();
 
+	//video routes
+	Route::get('/live', 'VideoController@getToken')->name('gettoken');
+
+	Route::get('/video', 'VideoController@index')->name('video');
+
+
 	
 });
 
@@ -48,6 +54,10 @@ Route::group(['prefix' => 'admin'], function () {
 
 		Route::get('/','AdminController@index')->name('admin.dashboard');
 		Route::post('/logout','Auth\AdminLoginController@adminLogout')->name('admin.logout');
+		Route::resource('tags', 'TagController', ['except' => ['create']]);
+
+		
+
 	});
 
 });
@@ -56,6 +66,21 @@ Route::group(['prefix' => 'admin'], function () {
 
 
 Route::group(['middleware' => ['auth:web']], function () {
+
+	//chat routes
+
+	//private message routes
+	Route::get('/inbox','PageController@inbox')->name('inbox');
+
+	Route::get('get-private-message-notifications','PrivateMessageController@getUserNotifications');
+	Route::post('get-private-messages','PrivateMessageController@getPrivateMessages');
+	Route::get('get-private-message-by-id/{message_id}','PrivateMessageController@getPrivateMessageById');
+	Route::post('get-private-messages-sent','PrivateMessageController@getPrivateMessagesSent');
+	Route::post('/send-private-message','PrivateMessageController@sendPrivateMessage');
+	Route::get('users-list', function(){
+		return App\User::all()->except(Auth::id());
+	});
+
 
 	//profile routes
 	Route::get('/profile/{slug}', 'ProfileController@index')->name('profile.show');//laravel reurn view call
@@ -137,6 +162,7 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friedns
 	Route::get('songs/liked/{user_id}','SongController@showLikedSongPage')->name('songs.liked');
 	Route::get('/getLikedSongs/{user_id}','SongController@getLikedSongs');
+	Route::post('/gettagids', 'TagController@getTagIds');
 
 
 
@@ -156,6 +182,8 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::get('/playlist/songs/{user_id}', 'PlaylistController@getPlaylistSongs')->name('playlist.songs');
 	Route::delete('/playlist/{playlist_id}', 'PlaylistController@destroy')->name('playlist.songs');
 	Route::put('/playlist/{playlist_id}', 'PlaylistController@update')->name('playlist.update');
+	Route::post('/playlist/multi', 'PlaylistController@multiStore')->name('playlist.multistore');
+
 
 	//song notes routes
 	Route::get('/getnotes/{user_id}', 'NoteController@getNotes');

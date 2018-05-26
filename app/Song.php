@@ -7,11 +7,18 @@ use Storage;
 
 class Song extends Model
 {   
-    public $with = ['user','like'];
+    public $with = ['user','like','tags'];
 
 	protected $hidden = [
          
     ];
+
+    public function tags()
+    {
+        return $this->belongsToMany('App\Tag')->withTimestamps();
+
+    }
+
 
     public function user()
     {

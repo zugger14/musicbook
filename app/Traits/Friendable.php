@@ -39,7 +39,18 @@
 
 		public function removeFriend($user)
 		{
-			$friendship = Friendship::where('requester', $this->id)->where('user_requested', $user)->first();
+
+			$friendship = Friendship::where(function ($query) {
+					   	$query->where('requester', $this->id)
+					          ->orWhere('user_requested', $this->id);
+						})
+						->Where(function($query) use($user) {
+					    	$query->where('requester', $user)
+					          ->orWhere('user_requested', $user);
+						})
+						->where('status', 1)
+						->first();		//dont use get and try to delte the collection instead try delte directly without get().
+
 			$friendship->delete();
 			return 1;
 

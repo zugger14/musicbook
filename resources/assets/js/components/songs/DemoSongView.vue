@@ -151,8 +151,9 @@ export default {
 
            //the error for not updating in my case seems to be vye player beause only title and image is not changing..
 
-           this.songs.splice(index, 1, songdata);//in place patch only array item value are updated but dom element is same
+          // this.songs.splice(index, 1, songdata);//in place patch only array item value are updated but dom element is same
            console.log(this.songs[songdata.index].title);
+           this.getAllSongs();
 
         }
     },

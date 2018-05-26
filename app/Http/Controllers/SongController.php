@@ -211,20 +211,24 @@ class SongController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * single file upload
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    
+   
     public function store(Request $request)
-    {
+    {//max amount for pricing song would be 10000
         $validator = Validator::make($request->all(), [
             'file' => 'required|mimes:mpga,wav',
             'filename' => 'required|max:255',
             'filesize' => 'sometimes|max:2048000',
             'description' => 'sometimes|max:255',
             'img' => 'nullable',
-            'upload_type' =>'required'
+            'upload_type' =>'required',
+            'amount'    =>'sometimes|max:10000',
+            'tags'      =>'required'
         ]);
 
         if($validator->fails()){
@@ -236,8 +240,8 @@ class SongController extends Controller
             $song->title = $request->filename;
             $song->user_id = Auth::guard('web')->id();
             $song->upload_type = $request->upload_type;
-            if ($request->hasFile('file')) {
 
+            if ($request->hasFile('file')) {
                 $music_file = $request->file('file');
 
                 $filename = time() . '.' . $music_file->getClientOriginalExtension();
@@ -261,11 +265,16 @@ class SongController extends Controller
             
             $song->song_description = $request->description;
             $song->save();
+            $tags = json_decode($request->tags);
+            $tags_id = collect($tags)->pluck('id');
+           // return $tags_id;
+            $song->tags()->sync($tags_id, false);
 
             return response()->json("Successfully uploaded your song. ");
 
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -304,7 +313,10 @@ class SongController extends Controller
             'title' => 'required|max:255',
             'description' => 'sometimes|max:255',
             'img' => 'nullable',
-            'upload_type' =>'required'
+            'upload_type' =>'required',
+            'amount'    =>'sometimes|max:10000',
+            'tags'      =>'required'
+
         ]);
 
         if($validator->fails()){
@@ -327,6 +339,17 @@ class SongController extends Controller
             
             $song->song_description = $request->description;
             $song->save();
+
+             if(isset($request->tags)){ //required atleast one if made optional then if else part is needed.
+               /* $tags = json_decode($request->tags);
+                $tags_id = collect($tags)->pluck('id');*/
+               // return $tags_id;
+                $song->tags()->sync($request->tags,false);
+
+            } else {
+
+                $song->tags()->sync(array());
+            }
 
             return response()->json("Successfully edited your song. ");
        }

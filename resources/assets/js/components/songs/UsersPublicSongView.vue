@@ -6,9 +6,8 @@
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}
-                        
-                        <div class="pull-right">
-                            <manage-song :song="song" :id="id">{{ id++ }}</manage-song>
+                        <div class="pull-right" >
+                            <manage-song :song="song" :tags="tags" :modalid="id">{{ id++ }}</manage-song>
                         </div>
                     </div>
 
@@ -28,6 +27,10 @@
                     </div>
 
                     <div class="panel-footer">
+                         <div class="tags">Tagged in:
+                            <span v-for="tag in song.tags" class="label label-info">{{ tag.name }}</span>
+                    </div>
+
                         <span class="pull-right">
                             {{ song.created_at }}
                         </span>
@@ -59,7 +62,7 @@ import ManageSong from './ManageSong';
 
 export default {
 //change name to userpubliciview 
-    props: ['user_id'],
+    props: ['user_id', 'tags'],
 
     components: { Aplayer,Like,ManageSong },
     
@@ -98,6 +101,7 @@ export default {
             ],
 
             songExists:false,
+            edit:false,
             songLocation:'http://localhost:8000/storage/songs/',
             id:1
         }

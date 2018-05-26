@@ -4,7 +4,7 @@
 @section('content')
 	<div class="row">
 		<div class="col-md-8">
-			<h2>{{ $tag->name }}<div class="badge">{{ $tag->posts()->count() }}</div></h2>
+			<h2>{{ $tag->name }}<div class="badge">{{ $tag->songs()->count() }}</div></h2>
 		</div>
 		<div class="col-md-2">
 			<a href="{{ route('tags.edit', $tag->id) }}" class="btn btn-primary btn-block pull-right btn-top-spacing">edit</a>
@@ -30,16 +30,16 @@
 			</tr>
 		</thead>
 		<tbody>
-		@foreach ($tag->posts as $post)
+		@foreach ($tag->songs as $song)
 			<tr>
-				<th>{{ $post->id }}</th>
-				<td>{{ $post->title}}</td>
+				<th>{{ $song->id }}</th>
+				<td>{{ $song->title}}</td>
 				<td>
-					@foreach ($post->tags as $tag)
+					@foreach ($song->tags as $tag)
 						<span class="label label-info">{{ $tag->name }}</span>
 					@endforeach
 				</td>
-				<td><a href="{{ route('posts.show', $post->id)}}" class="btn btn-default btn-sm">view</a></td>
+				<td><a href="{{ route('songs.show', $song->id)}}" class="btn btn-default btn-sm">view</a></td>
 			</tr>
 		@endforeach
 		</tbody>

@@ -10,13 +10,23 @@ use Auth;
 use App\Message;
 use DB;
 use Validator;
+use App\Tag;
 use App\Events\MessagePosted;
 
 class PageController extends Controller
 {
 
-	public function __construct()
+
+	public function inbox()
 	{
+		return view('messages.pm');
+
+	}
+	public function __construct()
+	{	
+
+	    parent::__construct();//when construct() defined in child class need to call parent construct implicitly else not defined here calls the parent construct atomatically. 
+
 		$this->middleware('guest')->only('index');
 	}
 
@@ -29,7 +39,7 @@ class PageController extends Controller
 
 	public function artistHome()
     {       
-        return view('artists.home');
+    	return view('artists.home');
 
     }
 

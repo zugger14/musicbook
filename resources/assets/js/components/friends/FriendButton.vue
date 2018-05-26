@@ -8,7 +8,7 @@
            <div class="dropdown" v-if="status == 'friends' ">
                 <button class="btn btn-default btn-sm  btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Friends <span class="caret"></span></button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <li><a href="" @click="removeFriend">remove as friend</a></li>
+                    <li><a href="" @click.prevent="removeFriend">remove as friend</a></li>
                 </ul>
                 <button class="btn btn-default btn-sm">Send Message</button>
             </div>
@@ -72,6 +72,7 @@ export default {
             axios.get('/removefriend/' + this.profile_user_id).then((response) => {
                 if(response.data === 1) {
                     this.status = 0;
+                    window.reload();
                 }
                 this.loading = false;
             

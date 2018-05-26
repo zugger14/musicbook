@@ -25,6 +25,7 @@ class AdminLoginController extends Controller
     		'email'	=> 'required|email',
     		'password' =>'required|min:6'
     	]);
+//        dd(bcrypt($request->password));
 
     	if(Auth::guard('admin')->attempt(['email'=>$request->email,'password'=>$request->password],$request->remember)) {
 

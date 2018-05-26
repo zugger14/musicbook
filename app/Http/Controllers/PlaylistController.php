@@ -76,7 +76,7 @@ class PlaylistController extends Controller
         }
     }
 
-    //adds song to playlist 
+    //adds uploaded songs of users to playlist 
     public function addSongToPlaylist(Request $request)
     { 
         //return $request->all();
@@ -93,18 +93,116 @@ class PlaylistController extends Controller
 
     }
 
+    //multifile upload to palylist
+    public function multiStore(Request $request)
+    {
+
+        $input_data = $request->all();
+        $validator = Validator::make(
+            $input_data, [
+            'file.*' => 'required|mimes:mpga,wav|max:20000'
+            ],[
+                'file.*.required' => 'Please upload an audio file',
+                'file.*.mimes' => 'Only mp3 and wav audio are allowed',
+                'file.*.max' => 'Sorry! Maximum allowed size for an image is 20MB',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(),500);
+        }
+
+
+        $validator = Validator::make($request->all(), [
+            'file' => 'required',//|mimes:mpga,wav
+            'name' => 'required|max:255',
+            'filesize' => 'sometimes',
+            //'description' => 'sometimes|max:255',
+            'img' => 'nullable|mimes:jpeg,png,bmp',
+            'private' =>'sometimes',
+            //'amount'    =>'sometimes|max:10000',
+            //'tags'      =>'required'
+        ]);
+
+        if($validator->fails()){
+            return response()->json($validator->errors(),500);
+
+        } else {
+
+            //first create playlist
+            $playlist = new Playlist;
+            $playlist->playlist_title = $request->name;
+            $playlist->user_id = Auth::id();
+            if($request->private == true) $private = 1;
+            else $private = 0;
+            $playlist->private = $private;
+
+            $playlist->save();
+
+            if($request->file != ''){
+                    $files = $request->file;
+
+                    foreach ($files as $music_file) { //create new song instance for very file and stores in playlist
+
+                        $song = new Song;
+                        $song->user_id = Auth::guard('web')->id();
+
+                        if($request->private == true) $song->upload_type = 'private';
+                        else $song->upload_type = 'public';
+                        
+                        $song->title = $music_file->getClientOriginalName();
+                        
+                        $filename = 'lastones'.time() . '.' . $music_file->getClientOriginalExtension();
+                        $location = storage_path('app/public/songs');
+                        $music_file->move($location,$filename);
+                        
+                        $song->song_filename = $filename;
+
+/*                        if ($request->hasFile('img')) { image for everysongs in playlist selected
+                            $image_file = $request->file('img');
+                            $filename = time() . '.' . $image_file->getClientOriginalExtension();
+                            $location = storage_path('app/public/images/songcovers');  // add artists id name anything here for folder structure.
+                            $image_file->move($location,$filename);
+                            
+                            $song->image = $filename;
+                        } */
+
+                        $song->save();
+
+                        $playlist->songs()->sync($song->id, false);
+                    }
+
+            } else {
+                
+                return response()->json("no audio file");
+            }
+
+            //$song->song_description = $request->description;
+
+            //$tags = json_decode($request->tags);
+            //$tags_id = collect($tags)->pluck('id');
+            //return $tags_id;
+            //$song->tags()->sync($tags_id, false);
+
+            return response()->json("Successfully uploaded your song. ");
+        }
+                
+
+    }
+
     //removes song from playlist
     public function removeSong($s_id,$p_id)
     { 
         
         $song = Song::find($s_id);
         $song->playlists()->detach($p_id);
-/*        $playlist = Playlist::find($p_id); works this way also since both modal has belongsTomany relation
-        $playlist->songs()->detach($s_id);*/
-        
+        /*
+            $playlist = Playlist::find($p_id); works this way also since both modal has belongsTomany relation
+            $playlist->songs()->detach($s_id);
+        */
         //$song->delete();
 
-        return 'success in removing song to playlist';
+        return 'success in removing song from playlist';
 
 
     }

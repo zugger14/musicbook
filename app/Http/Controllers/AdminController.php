@@ -23,6 +23,6 @@ class AdminController extends Controller
      */
     public function index()
     {
-        return view('tags.admin');
+        return view('admins.admin');
     }
 }

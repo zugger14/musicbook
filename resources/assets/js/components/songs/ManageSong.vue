@@ -1,6 +1,6 @@
 <template>
     <div>
-        <a data-toggle="modal" :data-target="'#EditModal'+ modalid"><span title="edit" class="glyphicon glyphicon-pencil" ></span></a>
+        <a data-toggle="modal" :data-target="'#EditModal'+ modalid" @click="select(song)"><span title="edit" class="glyphicon glyphicon-pencil" ></span></a>
         <a class=""><span title="delete" class="glyphicon glyphicon-trash"></span></a>
 
         <!-- Modal for editing song tracks-->
@@ -30,6 +30,12 @@
                                                 <label for="title">Song Title:</label>
                                                 <input type="text" v-model="esong.title" class="form-control" required maxlength="255">
                                             </div>
+
+                                            <div class="form-group">
+                                                <label for="genre"> Genre (tag atleast one) </label>
+                                                <v-select :placeholder="'choose tag'" v-model="tagids" label="name" multiple :options="tags"></v-select>
+                                            </div>
+
                                             <div class="form-group">
                                                 <label for="upload_type">Song Upload Type</label>
                                                 <select name="upload_type" v-model="esong.upload_type" class="form-control">
@@ -64,30 +70,53 @@
 </template>
 
 <script>
+import vSelect from 'vue-select'
+
     export default {
+
+        props: ['song','modalid','index','tags'],
+
+        components: {vSelect},
+        
         mounted() {
-            console.log('index' + this.index);
+
         },
-
-        props: ['song','modalid','index'],
-
+/*
+        watch: {
+            tagids() {
+                console.log('changed tagids value');
+               // this.value = this.tagsid;
+            }
+        },
+*/
         computed: {
             private() {
                 if(this.esong.upload_type == 'private') {
                     return true;
                 }
                 return false;
-            }
+            },
+
+            
+
         },
 
         methods: {
+            
+            select(song) {
+                console.log(song.title);
+                this.getTagIds(song);   
+            },
+
             edit() {
                 let formData = new FormData();
                 formData.append('title', this.esong.title);
                 formData.append('img', this.esong.img);
                 formData.append('description', this.esong.song_description);
                 formData.append('upload_type', this.esong.upload_type);
-                formData.append('_method', 'PUT')
+                formData.append('amount', this.esong.amount);
+                formData.append('tags', JSON.stringify(this.tagids));
+                formData.append('_method', 'PUT');
 
                 axios.post('/artist/songs/' + this.esong.id, formData,{
                     headers: {//no need to put headers here dont know why it works with multipart-fromdata??
@@ -102,13 +131,40 @@
                 });
             },
 
-
             delete() {
                 // ofr private soongs send request to admin for delete then admin decides when to delete..
 
                 //axios.get('delete')
             },
 
+            getTagIds(song) {
+
+                axios.post('/gettagids', song ).then(response =>{
+                    this.t  = response.data;
+                    this.tagids = Object.assign({},this.t);
+                   console.log(this.tagids);
+                }).catch(error =>{
+                    console.log(error);
+                });
+
+                  // this.tagids = response.data;
+            /*       console.log(response.data);
+                   let obj = response.data;
+                    this.tagids = obj;//if assigned with = cannot change in v-model anymore
+                    $("#selectm").trigger('change');
+            */
+                    //this.tagid =[];
+                    /*this.tagids.forEach( (tag)=>{
+                       this.tagid.push(tag);
+
+                    })*/
+                   // this.tagid =  JSON.stringify(this.tagid);
+                   // console.log(this.tagid);
+                    //this.$emit('change',response.data);
+                   // this.esong.tags = response.data;
+                   // $('#selectm').trigger('change');
+
+            },
 
             browseImage() {
                 this.$refs.imageinput.click();
@@ -124,14 +180,16 @@
         data() {
                 //seperetate data send to databse and just for vuejs part
             return {
-                esong:this.song,
-                image:this.song.image//image not chnged when using esong as props image only stored..
-                                    
+
+                esong: this.song,
+                tagids: {id:'', name:'', label:''},
+                name:'name',
+                image:this.song.image//image not chnged when using esong as props image only stored..   
             }
         }
     }
-</script>
 
+</script>
 <style scoped>
 
 input[type="file"] {
@@ -147,4 +205,6 @@ input[type="file"] {
 }
 
 </style>
+
+
 

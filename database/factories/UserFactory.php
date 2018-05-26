@@ -29,6 +29,6 @@ $factory->define(App\User::class, function (Faker $faker) {
 $factory->define(App\Profile::class, function (Faker $faker) { 
     return [
         'location' => $faker->city,
-        'about' =>$faker->paragraph(4);
+        'about' =>$faker->paragraph(4)
     ];
 });
