@@ -23,9 +23,9 @@ Route::group(['middleware' => ['web']], function () {
 	Auth::routes();
 
 	//video routes
-	Route::get('/live', 'VideoController@getToken')->name('gettoken');
+	Route::get('/live', 'LiveEventController@getToken')->name('gettoken');
 
-	Route::get('/video', 'VideoController@index')->name('video');
+	Route::get('/video', 'LiveEventController@index')->name('video');
 
 
 	
@@ -135,15 +135,32 @@ Route::group(['middleware' => ['auth:web']], function () {
 		Auth::user()->unreadNotifications->markAsRead();
 	});
 
-
 	//like and unlike routes
 	Route::get('/auth_user_data', function() {
 		return Auth::user();
 	});
-
 	Route::get('/like/{song_id}','LikeController@like' );
-
 	Route::get('/unlike/{song_id}','LikeController@unLike' );
+
+	//share routes
+	Route::get('/share/{song_id}','ShareController@share' );
+	Route::get('/unshare/{song_id}','ShareController@unshare' );
+
+	//comment routes
+	Route::post('/comment', 'CommentController@store')->name('comment.store');
+	Route::get('/comment/{song_id}', 'CommentController@index')->name('comment.index');
+	Route::delete('/comment/{comment_id}', 'CommentController@destroy')->name('comment.destroy');
+	Route::put('/comment/{comment_id}', 'CommentController@update')->name('comment.update');
+
+
+
+
+
+
+
+
+
+
 
 
 	//song routes for authenticated users
@@ -162,6 +179,7 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friedns
 	Route::get('songs/liked/{user_id}','SongController@showLikedSongPage')->name('songs.liked');
 	Route::get('/getLikedSongs/{user_id}','SongController@getLikedSongs');
+	Route::get('/getSharedSongs/{user_id}','SongController@getSharedSongs');
 	Route::post('/gettagids', 'TagController@getTagIds');
 
 
@@ -232,7 +250,7 @@ Route::group(['middleware' => ['auth:web', 'fan']], function () {
 		Route::get('/','PaypalController@index');
 		//Route::get('/show/{payment_id}','PaypalController@show');
 		Route::get('with-credit-card','PaypalController@paywithCreditCard')->name('payment.creditcard');
-		Route::get('with-paypal','PaypalController@paywithPaypal')->name('payment.paypal');
+		Route::post('with-paypal','PaypalController@paywithPaypal')->name('payment.paypal');
 
 		Route::get('success', 'PaypalController@store');//check if payment is success or fail i have only used pyment id to verify but sometimes the payment may fail and redirect in success.
 		Route::get('fails', function () {

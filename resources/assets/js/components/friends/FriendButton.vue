@@ -38,9 +38,9 @@ export default {
         addFriend() {
             this.loading = true;
             axios.get('/addfriend/' + this.profile_user_id).then((response) => {
-               // console.log( response.data );
-                if(response.data == true) {
                 console.log( response.data );
+                if(response.data == true) {
+                //  console.log( response.data );
 
                     this.status = 'waiting';
                 }
@@ -56,7 +56,7 @@ export default {
             axios.get('/acceptfriend/' + this.profile_user_id).then((response) => {
               //  console.log( response.data );
                 if(response.data === 1) {
-                console.log( response.data );
+               // console.log( response.data );
 
                     this.status = 'friends';
                 }

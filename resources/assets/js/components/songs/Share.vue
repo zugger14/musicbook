@@ -1,14 +1,14 @@
 <template>
     <div>
-        <p class="small" v-for="like in song.like">
-            <img :src="like.user.avatar" width="25px" height="25px">
+        <p class="small" v-for="share in song.share">
+            <img :src="share.user.avatar" width="25px" height="25px">
         </p>
-        <button class="btn btn-default btn-sm" v-if="!authUserLikedPost" @click="like">
-            like
+        <button class="btn btn-default btn-sm" v-if="!authUserSharedPost" @click="share">
+            share
         </button>
 
-        <button class="btn btn-primary btn-sm" v-else="authUserLikedPost"  @click="unLike">
-            unlike
+        <button class="btn btn-primary btn-sm" v-else="authUserSharedPost"  @click="unShare">
+            unshare
         </button>
     </div>
 </template>
@@ -36,24 +36,27 @@
                 });
             },
 
-            like() {
-                axios.get('/like/' +this.id ).then(response => {
-                   // console.log((response.data))
-                        this.song.like.push(response.data);
-                        toastr.success('you have liked the song');//imported in parent class not ins cope here so i defined globally using windows.toastr which is pretty naive
-
+            share() {
+                axios.get('/share/' +this.id ).then(response => {
+                    // console.log((response.data))
+                    if(response.data == 0) {
+                        console.log('you have already shared this song.you need to delete previous share to share again.');
+                    } else {
+                        this.song.share.push(response.data);
+                        toastr.success('you have shared the song');
+                    }
                 }).catch(error => {
                     console.log(error);
                 });
-
             },
 
-            unLike() {
-                axios.get('/unlike/' +this.id ).then(response => {
+            unShare() {
+                axios.get('/unshare/' +this.id ).then(response => {
 
-                    var index = this.song.like.indexOf(response.data);//www.youtube.com/watch?v=Anham4RDlbU&list=PLZAiN3wmUtzV1eI7mAxERQaE2LkyA5Nh6&index=50    hee makes use of state if want to change look on this using vuex states
-                    this.song.like.splice(index,1);//check this one i think wrong
-                    toastr.success('you have unliked the song');
+                    var index = this.song.share.indexOf(response.data);
+                    this.song.share.splice(index,1);//--when same song appers twice splice not working for unshare.
+                    toastr.success('you have unshared the song');
+                    location.reload();
 
                 }).catch(error => {
                     console.log(error);
@@ -81,20 +84,20 @@
                 })
             },
 
-            likers() {
+            sharers() {
 
-                var likers = [];
+                var sharers = [];
 
-                this.song.like.forEach( (like) =>{
-                    likers.push(like.user.id)
+                this.song.share.forEach( (share) =>{
+                    sharers.push(share.user.id)
                 })
 
-                return likers;
+                return sharers;
             },
 
-            authUserLikedPost() {
+            authUserSharedPost() {
 
-                var checkindex = this.likers.indexOf(
+                var checkindex = this.sharers.indexOf(
                     this.user.id
                 )
 

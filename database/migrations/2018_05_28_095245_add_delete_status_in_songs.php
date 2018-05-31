@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddTagsTable extends Migration
+class AddDeleteStatusInSongs extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,8 @@ class AddTagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('tags', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->timestamps();
+        Schema::table('songs', function (Blueprint $table) {
+            $table->string('status')->nullable();
         });
     }
 
@@ -27,6 +25,8 @@ class AddTagsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tags');
+        Schema::table('songs', function (Blueprint $table) {
+            $table->dropColumn('status');
+        });
     }
 }

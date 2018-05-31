@@ -7,7 +7,7 @@
                     <td>sent to : {{ message.receiver.name }}</td>
                         <td class="col-sm-3">sent by :{{ message.sender.name }}</td>
                         <td class="com-sm-7">
-                            {{ message.subject }}
+                            {{ message.message }}
                         </td>
                         <td class="col-sm-2">
                             {{ message.subject }}
@@ -28,7 +28,8 @@ export default {
 
     mounted() {
         console.log('Component mounted.')
-       // this.$store.dispatch('getPrivateMessageById');
+        this.$store.dispatch('setUserMessageR');//to load new messages after view for marking notification as read for viewd message else can put thismethod i=on parent componet that is sidebar component
+ 
     },
 
     computed: {

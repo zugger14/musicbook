@@ -9,7 +9,7 @@
 
         </div>
         <li>
-        <a class="btn btn-md btn-default" id="custom-file-upload" data-toggle="modal" data-target="#exampleModal" @click="browseSong">
+        <a class="btn btn-md btn-default" id="custom-file-upload" data-toggle="modal" data-target="#exampleModal">
             upload song
         </a>
 
@@ -23,9 +23,9 @@
                     <div class="modal-header">
                         <h5 class="modal-title" id="exampleModalLabel">upload song</h5>
 
-                        <button v-if="singleup" class="btn btn-default btn-md" @click="browseMultiSong">upload mutiple songs at once in a playlist</button>
+                        <button class="btn btn-default btn-md" @click="browseMultiSong">upload mutiple songs at once in a playlist</button>
 
-                         <button v-if="!singleup" class="btn btn-default btn-md" @click="browseSong">upload single song</button>
+                         <button class="btn btn-default btn-md" @click="browseSong">upload single song</button>
 
                         <button type="button" class="close" ref="closemodal" data-dismiss="modal" aria-label="Close" @click="resetForm">
                             <span aria-hidden="true">&times;</span>
@@ -37,8 +37,8 @@
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="col-md-5">
+                                            <div id="image_previews" v-if="singleup || multiup">
                                             <button type="button" @click="browseImage" class="btn btn-md btn-default">Choose image:</button>
-                                            <div id="image_previews" v-if="singleup">
                                                 <img ref='image' class="" v-bind:src="song.imgpreview" width="200px" height="200px" >
                                                 <input class="form-control-file" ref="imageinput" type="file" name="feature_image" @change="showImage($event)">
                                             </div>
@@ -49,14 +49,14 @@
                                                 <input type="text" v-model="song.filename" class="form-control" required maxlength="255">
                                             </div>
 
-                                            <div class="form-group" v-else="!singleup">
+                                            <div class="form-group" v-if="multiup">
                                                 <label for="title">Playlist Title:</label>
                                                 <input type="text" v-model="playlist.name" class="form-control" required maxlength="255">
                                             </div>
                                             <div class="form-group">
                                                 <p v-if="singleup" class="text-success small" for="size">Size (in MB): {{ song.filesize }}</p><!-- change text color for upload max limit -->
 
-                                                <p v-else class="text-success small" for="size">Total Size (in MB): {{ playlist.filesize }}</p>
+                                                <p v-if="multiup" class="text-success small" for="size">Total Size (in MB): {{ playlist.filesize }}</p>
                                             </div>
 
                                             <div class="form-group" v-if="singleup">
@@ -72,7 +72,7 @@
                                                 </select>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group" v-if="multiup">
                                                <div class="checkbox">
                                                   <label><input type="checkbox" v-model="playlist.private">private</label>
                                                 </div>                                        
@@ -118,7 +118,7 @@ export default {
 
     mounted() {
         console.log('song upload Component mounted.');
-        console.log(this.tags);
+       // console.log(this.tags);
     },
 
     components: {vSelect},
@@ -136,7 +136,6 @@ export default {
         getFileInfo(event) {
             console.log('file selected');
             this.song.file = event.target.files[0];
-           //console.log(typeof(this.song.file));
             this.song.filename = this.song.file.name;
             this.song.filesize = this.song.file.size/1000000; 
             //$("#exampleModal").modal('show');         
@@ -152,12 +151,16 @@ export default {
         },
 
         browseSong() {
+            this.multiup=false;
             this.singleup = true;
+            this.resetForm();
             this.$refs.audioinput.click();
         },
 
         browseMultiSong() {
             this.singleup = false;
+            this.multiup=true;
+            this.resetForm();
             this.$refs.multiaudioinput.click();
         },
 
@@ -182,25 +185,26 @@ export default {
             this.song.description = ''
 
             this.playlist.file = [];
+            this.playlist.name = '';
             this.playlist.filesize = 0;
             this.playlist.private = '';
-
-
         },
 
         uploadSong() {
             var self = this;
             let formData = new FormData();
-    
-            formData.append('file[]', this.song.file[i]);
+            formData.append('file', this.song.file);
             formData.append('filename', this.song.filename);
             formData.append('filesize', this.song.filesize);
             formData.append('img', this.song.img);
             formData.append('description', this.song.description);
             formData.append('upload_type', this.song.upload_type);
             formData.append('amount', this.song.amount);
-            formData.append('tags', JSON.stringify(this.song.tags));//sometimes the complex nested objects needs stringify to pass
-//try json encode in song without using formdata.append prevviously used this.song instead self.song so maybe
+            if(this.song.tags.length > 0 ){
+
+                formData.append('tags', JSON.stringify(this.song.tags));//sometimes the complex nested objects needs stringify to pass
+            }
+            //try json encode in song without using formdata.append prevviously used this.song instead self.song so maybe
             axios.post('/artist/songs',formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
@@ -220,7 +224,7 @@ export default {
         uploadPlaylist() {//php/apache/php.ini postmaxsize and upload max size 300mb set
             var self = this;
             let formData = new FormData();
-            for(let i=0;i < this.playlist.file.length;i++) {
+            for(let i=0; i < this.playlist.file.length;i++) {
                 formData.append('file[]', this.playlist.file[i]);
 
             }
@@ -230,14 +234,12 @@ export default {
             formData.append('private', this.playlist.private);
             formData.append('img', this.playlist.img);
 
-
-//try json encode in song without using formdata.append prevviously used this.song instead self.song so maybe
             axios.post('/playlist/multi',formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             }).then(function (response) {
-               console.log(response.data);
+                console.log(response.data);
                 self.resetForm();
                 self.$refs.closemodal.click();
                 
@@ -252,7 +254,7 @@ export default {
     data() {
         return {
             song: {
-                file: [],
+                file: '' ,
                 filename: '',
                 filesize: '',
                 img: '',
@@ -272,7 +274,8 @@ export default {
                 private:'',
             },
 
-            singleup:true,
+            singleup:'',
+            multiup:''
         }
     }
 

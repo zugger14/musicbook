@@ -47,10 +47,15 @@ class ProfileController extends Controller
     		'location' => 'required',
     		'about'	   => 'required|max:255',
             'name'     => 'required|max:255',
+            'email'    => 'required|unique:users,email,'.$r->id,
+            'slug'     => 'required|unique:users,slug,'.$r->id
+
     	]);
 
         Auth::user()->update([
-            'name' => $r->name
+            'name' => $r->name,
+            'email' =>$r->email,
+            'slug'  =>$r->slug
         ]);
 
     	Auth::user()->profile()->update([

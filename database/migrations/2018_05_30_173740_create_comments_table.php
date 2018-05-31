@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSongTagTable extends Migration
+class CreateCommentsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,17 @@ class CreateSongTagTable extends Migration
      */
     public function up()
     {
-        Schema::create('song_tag', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table) {
             $table->increments('id');
+            $table->text('comment');
+            $table->string('status');
+            $table->integer('user_id')->unsigned();
             $table->integer('song_id')->unsigned();
-
-            $table->integer('tag_id')->unsigned();
-
             $table->timestamps();
-        });
-        Schema::table('song_tag', function (Blueprint $table) {
-            //$table->foreign('song_id')->references('id')->on('songs');
-            //$table->foreign('tag_id')->references('id')->on('tags');
 
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('song_id')->references('id')->on('songs')->onDelete('cascade');
+            
         });
     }
 
@@ -35,6 +34,6 @@ class CreateSongTagTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('song_tag');
+        Schema::dropIfExists('comments');
     }
 }

@@ -26,18 +26,18 @@
                     </div>
 
                     <div class="panel-footer">
-                    <like :songs="songs" :id="song.id"></like>
-                    <share :songs="songs" :id="song.id"></share>
-
                         <span class="pull-right">
                             {{ song.created_at }}
                         </span>
+                        <like :songs="songs" :id="song.id"></like>
+                        <share :songs="songs" :id="song.id"></share>
+
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="panel panel-default">
-                    <div class="panel-heading"> Most played by users </div>
+                    <div class="panel-heading"> Most played by users among shared</div>
 
                     <div class="panel-body" style="height:500px;">
                         songs list                  
@@ -56,19 +56,20 @@ import Aplayer from 'vue-aplayer';
 import Like from './Like.vue';
 import Share from './Share.vue';
 
+
 export default {
 
     props: ['user_id'],
 
-    components: { Aplayer,Like,Share },
+    components: { Aplayer,Like,Share},
     
     mounted() {
-        this.getLikedSongs();
+        this.getSharedSongs();
     },
 
     methods: {
-        getLikedSongs() {
-            axios.get('/getLikedSongs/' + this.user_id ).then(response => {
+        getSharedSongs() {
+            axios.get('/getSharedSongs/' + this.user_id ).then(response => {
                 if(response.data !='') { 
                     this.songExists=true;
                     //console.log(response.data);

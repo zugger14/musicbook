@@ -5,7 +5,7 @@
 @section('content')
     <div class="row">
         <div class="col-md-12" >
-            <div class="panel panel-default">
+{{--             <div class="panel panel-default">
                 <div class="panel-heading"> Artist Dashboard</div>
 
                 <div class="panel-body">
@@ -13,7 +13,7 @@
 
                 </div>
             </div>
-            <song-feeds></song-feeds>
+ --}}            <song-feeds></song-feeds>
         </div>
     </div>
 @endsection

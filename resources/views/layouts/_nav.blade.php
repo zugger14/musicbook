@@ -37,19 +37,24 @@
                     </li>
                 </ul>
             @endif
-            <ul class="nav navbar-nav">
-                <li>
-                    <search-users></search-users>
-                </li>
-            </ul>
-    
+
+            @if (Auth::guard('web')->check())
+                <ul class="nav navbar-nav">
+                    <li>
+                        <search-users></search-users>
+                    </li>
+                </ul>
+            @endif
+
             <ul class="nav navbar-nav navbar-right">
                 
                 <audio id='noty_audio' src="{{ asset('audio/notify.mp3') }}"></audio>
-                    @if (Auth::guard('web')->check())
+                @if (Auth::guard('web')->check())
                     <li>
                         <song-upload :tags="{{ $tags }}" style="margin-top: -8px;"></song-upload>    
                     </li>
+                @endif
+                    @if (Auth::guard('web')->check()  && Auth::user()->is_artist)
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ Auth::user()->name }} <span class="caret"></span></a>
                         <ul class="dropdown-menu">
@@ -120,6 +125,7 @@
 
 
                 @if (Auth::guard('web')->check())
+                    <pm-nav :user_id="{{ Auth::id() }}"></pm-nav>
                     <friend-requests :user_id="{{ Auth::guard('web')->id() }}"></friend-requests>
                     <notification 
                         :reads="{{ Auth::guard('web')->user()->readNotifications  }}"

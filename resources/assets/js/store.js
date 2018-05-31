@@ -8,6 +8,7 @@ export default new Vuex.Store({// export const store = what does that mean
 
 	state: { 
 
+		//for private messages
 		notifications: [],
 		messagesR: [],
 		messagesS: [],
@@ -16,14 +17,18 @@ export default new Vuex.Store({// export const store = what does that mean
 			message: '',
 			sender: '',
 			receiver: ''
-
-
 		},
-		usersList: []
+		usersList: [],
+
+
+		//for friend requests
+		friendsPending:[],
+		friendsSent:[],
 
 	},
 
 	getters: {
+
 		getMessagesR(state) {
 			return state.messagesR;
 		},
@@ -38,6 +43,21 @@ export default new Vuex.Store({// export const store = what does that mean
 
 		getUsersList(state) {
 			return state.usersList;
+		},
+
+		getNotification(state) {
+			return state.notifications;
+		},
+
+
+
+
+		getFriendsPending(state) {
+			return state.friendsPending;
+		},
+
+		getFriendsSent(state) {
+			return state.friendsSent;
 		}
 
 
@@ -67,8 +87,24 @@ export default new Vuex.Store({// export const store = what does that mean
 
 		newMessageNotification(state, message) {
 			state.messagesR.unshift(message);
+		//	state.notifications.push(message); no need as we can get notfications for all unread messages
 
-		}
+		},
+
+
+		//for friendsRequests
+		setFriendsPending(state, friends) {
+			state.friendsPending = friends;
+		},
+
+		setFriendsSent(state, friends) {
+			state.friendsSent = friends;
+
+		},
+
+		newFriendRequest(state, friend) {
+			state.friendsPending.unshift(friend);
+		}	
 
 	},
 
@@ -77,6 +113,7 @@ export default new Vuex.Store({// export const store = what does that mean
 		setUserMessageR(context) {
 
 			let postData = {};
+			
 			axios.post('/get-private-messages', postData).then(response => {
 				context.commit('setMessageR',response.data);
 			})
@@ -123,7 +160,29 @@ export default new Vuex.Store({// export const store = what does that mean
 			//console.log('event is emitted to sent users also');
 			context.commit('newMessageNotification', message);
 
+		},
+
+		//for friends Requests
+		setFriendsPending(context) {
+			axios.get('/getpendingrequests').then((response) => {
+                if(response.data != '') {
+					context.commit('setFriendsPending', response.data);
+                }
+            }).catch(error => {
+                console.log(error);
+            });
+		},
+
+		setFriendsSent(context, friends) {
+			context.commit('setFriendsSent', friends)
+
+		},
+
+		newFriendRequest(context, user) {
+			context.commit('newFriendRequest', user);
 		}
+
+
 	}
 
 });

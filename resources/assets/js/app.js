@@ -28,8 +28,12 @@ Vue.component('song-download', require('./components/songs/SongDownload.vue'));
 Vue.component('userpublicsong-view', require('./components/songs/UsersPublicSongView.vue'));
 Vue.component('publicsong-view', require('./components/songs/PublicSongView.vue'));
 Vue.component('liked-song', require('./components/songs/LikedSong.vue'));
+Vue.component('shared-song', require('./components/songs/SharedSong.vue'));
+
 
 Vue.component('pm-sidebar', require('./components/private-messages/PrivateMessageSidebar.vue'));
+Vue.component('pm-nav', require('./components/private-messages/PrivateMessageNav.vue'));
+
 
 Vue.component('friend-button', require('./components/friends/FriendButton.vue'));
 Vue.component('friend-requests', require('./components/friends/FriendRequests.vue'));

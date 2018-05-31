@@ -22,17 +22,26 @@
                                     </div>
                                     <div class="col-md-8">
                                         <div class="form-group">
+                                            <label> Full Name</label>
                                             <input type="text" class="form-control" v-model="user.name">
                                         </div>
                                         <div class="form-group">
-                                            <input type="text" class="form-control" v-model="user.profile.about">
+                                            <label> User Name</label>
+                                            <input type="text" class="form-control" v-model="user.slug">
+                                        </div>
+                                        </div><div class="form-group">
+                                            <label> Email</label>
+                                            <input type="text" class="form-control" v-model="user.email">
                                         </div>
                                         <div class="form-group">
+                                            <label> Location</label>
                                             <input type="text" class="form-control" v-model="user.profile.location">
-                                        </div><div class="form-group">
-                                            <input type="text" class="form-control" v-model="user.profile.about">
                                         </div>
-                                    </div>
+
+                                        <div class="form-group">
+                                            <label> About Me</label>
+                                          <input type="text" class="form-control" v-model="user.profile.about">
+                                        </div>
                                 </div> 
 
                                 <div class="row">
@@ -60,7 +69,7 @@
         props: ['slug'],
 
         mounted() {
-           // console.log('thikch edit progfile loaded');
+
             this.getUserProfile();
         },
 
@@ -78,11 +87,15 @@
 
             updateProfile() {
                 this.user.profile.name = this.user.name;
+                this.user.profile.slug = this.user.slug;
+                this.user.profile.email = this.user.email;
+                this.user.profile.id = this.user.id;
+
                  axios.put('/profile/update', this.user.profile).then( response =>{
                     if(response.data != '') {
                         this.$refs.closemodal.click();
                         setTimeout(()=>{
-                            location.reload();//for giving time to see success message
+                            window.location.href = this.profile_url + this.user.slug;//for giving time to see success message
                         },1000);
                         toastr.success(response.data)
                     }
@@ -95,7 +108,8 @@
         data() {
             return {
                 user: {profile: { } },
-                pslug: this.slug
+                pslug: this.slug,
+                profile_url:'http://localhost:8000/profile/'
             }
 
         }

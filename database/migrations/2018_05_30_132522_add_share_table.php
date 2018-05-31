@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddVideosTable extends Migration
+class AddShareTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,18 +13,16 @@ class AddVideosTable extends Migration
      */
     public function up()
     {
-        Schema::create('videos', function (Blueprint $table) {
+        Schema::create('shares', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('title');
-            $table->integer('artist_id')->unsigned();
+            $table->integer('user_id')->unsigned();
+            $table->integer('song_id')->unsigned();
+
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('song_id')->references('id')->on('songs');
 
             $table->timestamps();
         });
-        Schema::table('videos', function (Blueprint $table) {
-           // $table->foreign('artist_id')->references('id')->on('artists');
-        
-        });
-
     }
 
     /**
@@ -34,6 +32,6 @@ class AddVideosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('videos');
+        Schema::dropIfExists('shares');
     }
 }

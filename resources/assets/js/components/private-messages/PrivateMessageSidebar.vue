@@ -28,6 +28,9 @@
 
 
     export default {
+
+        props: ['user_id'],
+
         mounted() {
             console.log('Component mounted.')
         },
@@ -51,8 +54,10 @@
         sockets: {
             message(data) {
                 let message = JSON.parse(data);
-                console.log(message);
-                this.$store.dispatch('newMessageNotification', message);
+                console.log(message.receiver_id);
+                if(message.receiver_id == this.user_id) {
+                    this.$store.dispatch('newMessageNotification', message);
+                }
             }
 
         }

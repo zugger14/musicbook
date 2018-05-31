@@ -20,7 +20,7 @@
         <div class="col-md-6" >
             <div class="panel panel-default">
                 <div class="panel-heading"> For Sale Songs</div>
-                    <demosong-view :artist_id="{{ Auth::id() }}" :is_artist={{ Auth::user()->is_artist }}></demosong-view>
+                    <demosong-view :tags="{{ $tags }}" :artist_id="{{ Auth::id() }}" :is_artist={{ Auth::user()->is_artist }}></demosong-view>
                 <div class="panel-body">
                     
 

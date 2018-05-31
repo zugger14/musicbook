@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Paypalpayment;
 use App\Order;
 use Auth;
+use App\Song;
 
 class PaypalController extends Controller
 {
@@ -30,7 +31,7 @@ class PaypalController extends Controller
         $order->paid_order = 1;
 
         $order->save();
-//        $payment = $this->show($payment_id);
+        //$payment = $this->show($payment_id);
 
         return redirect()->route('songs.download', $payment_id);
 
@@ -38,8 +39,7 @@ class PaypalController extends Controller
     }
 
     public function show($payment_id)//payment by particular payment id
-    {
-        
+    { 
         $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
         return $payment->toArray();//if i dont toArray also blade template can parse it but cannot read when set as response()->json()
     }
@@ -47,7 +47,7 @@ class PaypalController extends Controller
      /*
     * Process payment using credit card
     */
-     public function paywithCreditCard()
+     public function paywithCreditCard(Request $r)
     {
         // ### Address
         // Base Address object used as shipping or billing
@@ -165,12 +165,18 @@ class PaypalController extends Controller
         return response()->json([$payment->toArray()], 200);
     }
 
-    public function paywithPaypal()
-    {
+    public function paywithPaypal(Request $r)
+    {   
+        $song = Song::where('id', $r->id)->first();
+        if($song->amount != $r->amount) {
+            return response()->json('sorry the amount for the song is not correct.please start the process again from begining', 200);
+        }
+
         // ### Address
         // Base Address object used as shipping or billing
         // address in a payment. [Optional]
-     /*   $shippingAddress= Paypalpayment::shippingAddress();
+
+    /*   $shippingAddress= Paypalpayment::shippingAddress();
         $shippingAddress->setLine1("3909 Witmer Road")
         ->setLine2("Niagara Falls")
         ->setCity("Niagara Falls")
@@ -179,7 +185,7 @@ class PaypalController extends Controller
         ->setCountryCode("US")
         ->setPhone("716-298-1822")
         ->setRecipientName("Jhone");
-*/
+    */
         // ### Payer
         // A resource representing a Payer that funds a payment
         // Use the List of `FundingInstrument` and the Payment Method
@@ -188,13 +194,13 @@ class PaypalController extends Controller
         $payer->setPaymentMethod("paypal");
 
         $item1 = Paypalpayment::item();
-        $item1->setName('Ground Coffee 40 oz')
-        ->setDescription('Ground Coffee 40 oz')
+        $item1->setName($r->title)
+        ->setDescription('about description')
         ->setCurrency('USD')
         ->setQuantity(1)
-        ->setTax(0.3)
-        ->setPrice(7.50);
-
+       // ->setTax(0.3)
+        ->setPrice($r->amount);
+    /*
         $item2 = Paypalpayment::item();
         $item2->setName('Granola bars from paypal')
         ->setDescription('Granola Bars with Peanuts')
@@ -202,25 +208,24 @@ class PaypalController extends Controller
         ->setQuantity(5)
         ->setTax(0.2)
         ->setPrice(2);
-
-
+    */
         $itemList = Paypalpayment::itemList();
-        $itemList->setItems([$item1,$item2]);
-       // ->setShippingAddress($shippingAddress);
+        $itemList->setItems([$item1]);
+        // ->setShippingAddress($shippingAddress);
 
-
-        $details = Paypalpayment::details();
+    /*  $details = Paypalpayment::details();
         $details->setShipping("1.2")
         ->setTax("1.3")
                 //total of items prices
         ->setSubtotal("17.5");
-
+    */
+        
         //Payment Amount
         $amount = Paypalpayment::amount();
         $amount->setCurrency("USD")
-                // the total is $17.8 = (16 + 0.6) * 1 ( of quantity) + 1.2 ( of Shipping).
-        ->setTotal("20")
-        ->setDetails($details);
+        // the total is $17.8 = (16 + 0.6) * 1 ( of quantity) + 1.2 ( of Shipping).
+        ->setTotal($r->amount);
+        //->setDetails($details);
 
         // ### Transaction
         // A transaction defines the contract of a

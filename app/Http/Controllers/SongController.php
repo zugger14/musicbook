@@ -57,7 +57,7 @@ class SongController extends Controller
 
     public function getPublicSong($song_id)
     {
-        $songs = Song::where('id', $song_id)->get();
+        $songs = Song::where('id', $song_id)->where('status', 'present')->get();
         foreach ($songs as $song) {
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
@@ -69,7 +69,7 @@ class SongController extends Controller
 
     public function getPrivateSongDemo($artist_id )//loads all demo songs for sale purpose by individual artist
     {
-        $songs = Song::where('user_id', $artist_id)->where('upload_type', 'private')->orderBy('id', 'desc')->get();
+        $songs = Song::where('user_id', $artist_id)->where('upload_type', 'private')->where('status', 'present')->orderBy('id', 'desc')->get();
         $getID3 = new \getID3();
         foreach ($songs as $song) {
             //$fileContents = File::get($music_file);
@@ -143,9 +143,9 @@ class SongController extends Controller
         } catch(PayPalConnectionException $e) {
             return $e->getMessage();
         }
+        
         $order = Order::where('paypal_paymentid', $payment_id)->where('user_id', Auth::id())->get();
 
-        //$song_id = '';
         foreach ($order as $or) {
             if($or->paid_order == 1) {
                 $song_id = $or->song_id;
@@ -157,7 +157,7 @@ class SongController extends Controller
 
     public function getUserSongs($user_id)//get all public songs of a particular user maybe fan or artist by id
     {
-        $songs = Song::where('user_id', $user_id)->where('upload_type', 'public')->get();//if used all() instead get canot read value in vuejs by aplayer 
+        $songs = Song::where('user_id', $user_id)->where('status', 'present')->where('upload_type', 'public')->get();//if used all() instead get canot read value in vuejs by aplayer 
         foreach ($songs as $song) {
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
@@ -192,13 +192,31 @@ class SongController extends Controller
         return $songs;
     }
 
-    public function songFeeds() //returns all song feeds of users and their friends(basically public songs uploaded ) for users from thier added friends
+    public function getSharedSongs($user_id)
     {
+        $user = User::find($user_id);
+        $shares = $user->share;
+        $songs = array();
+        foreach ($shares as $share) {
+            $songs[] = $share->song;
+        }
+
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+
+        return $songs;
+
+    } 
+
+    public function songFeeds() //returns all song feeds of users and their friends(basically public songs uploaded ) for users from thier added friends
+    {      
+        
         $friends = Auth::guard('web')->user()->friends();
         $songfeeds = array();
-
+        
         foreach ($friends as $friend) {
-            
             foreach ($friend->songs as $song) {
                 if($song->upload_type == 'public') {
                     $song->src = asset('storage/songs') . '/' .$song->song_filename;// or change in frontend more easy i think so
@@ -207,6 +225,20 @@ class SongController extends Controller
             }
         }
 
+        $sharedfeeds = array();
+
+        $friendsId = Auth::guard('web')->user()->friendsId();
+        foreach ($friendsId as $fid) {
+            $shared_songs = $this->getSharedSongs($fid);
+            foreach ($shared_songs as $song) {
+                array_push($sharedfeeds, $song);
+            }
+        }
+        $songfeeds = array_merge($songfeeds, $sharedfeeds);
+       /* 
+        $unique = collect($songfeeds)->unique();    //great solution when shared and again next user shares the shared contain the first user gets same songs many times as shared by other users so unique helps here no matter how may other users again shares the songs the first sharer gets only one shared song  on his newsfeed
+        $songfeeds = $unique->values()->all();
+*/
         return response()->json($songfeeds); //aleady returns as response only but not json i guess
     }
 
@@ -240,6 +272,7 @@ class SongController extends Controller
             $song->title = $request->filename;
             $song->user_id = Auth::guard('web')->id();
             $song->upload_type = $request->upload_type;
+            $song->status = 'present';
 
             if ($request->hasFile('file')) {
                 $music_file = $request->file('file');
@@ -263,6 +296,7 @@ class SongController extends Controller
                 $song->image = $filename;
             } 
             
+            $song->amount = $request->amount;
             $song->song_description = $request->description;
             $song->save();
             $tags = json_decode($request->tags);
@@ -337,18 +371,19 @@ class SongController extends Controller
                 $song->image = $filename;
             } 
             
+            $song->amount = $request->amount;
             $song->song_description = $request->description;
             $song->save();
 
              if(isset($request->tags)){ //required atleast one if made optional then if else part is needed.
-               /* $tags = json_decode($request->tags);
-                $tags_id = collect($tags)->pluck('id');*/
-               // return $tags_id;
-                $song->tags()->sync($request->tags,false);
+                $tags = json_decode($request->tags);
+                $tags_id = collect($tags)->pluck('id');
+                //return $tags_id;
+                $song->tags()->sync($tags_id,true);
 
             } else {
 
-                $song->tags()->sync(array());
+                $song->tags()->sync(array());   //not necesarry but ..
             }
 
             return response()->json("Successfully edited your song. ");
@@ -366,11 +401,15 @@ class SongController extends Controller
     {
         $song = Song::find($id);
         if($song->upload_type == 'private') {
-            //get all users from
+            $song->status = 'deleted';
+        } else {
+
+            $song->status = 'deleted';
+            //$song->tags()->detach();
+            //$song->delete();//here also we can just change status to removed and free up space by deleting file and giving message to users about deleted info
         }
-
-        $song->delete();
-
+        
+        $song->save();
         return response()->json('succesfully deleted song');
     }
 
@@ -378,7 +417,14 @@ class SongController extends Controller
     {
         $order = new Order;
         $order->song_id = $request->id;
-        $order->total_amount = $request->amount;
+
+        $song = Song::find($request->id);
+        if($song->amount == $request->amount) {
+            $order->total_amount = $request->amount;
+        } else {
+            return 'amount for the song is not correct';
+        }
+        
         $order->user_id = Auth::guard('web')->id();
         $order->paid_order = 0;// set default in db 
         $order->save();

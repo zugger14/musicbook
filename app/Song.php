@@ -7,7 +7,7 @@ use Storage;
 
 class Song extends Model
 {   
-    public $with = ['user','like','tags'];
+    public $with = ['user','like','tags', 'share'];
 
 	protected $hidden = [
          
@@ -19,6 +19,11 @@ class Song extends Model
 
     }
 
+    public function comments()
+    {
+        return $this->hasMany('App\Comment');
+
+    }
 
     public function user()
     {
@@ -31,6 +36,13 @@ class Song extends Model
         return $this->hasMany('App\Like');
 
     }
+
+    public function share()
+    {
+        return $this->hasMany('App\Share');
+
+    }
+
 
     public function getImageAttribute($image)//changes image attribute before acces from anythwere $user->avatar
     {

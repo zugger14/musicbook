@@ -6,9 +6,9 @@
             <button class="btn btn-default" @click.prevent=""><span class="glyphicon glyphicon-search"></span></button>
         </div>
     </div>
-    <li class="search">
-        <ul class="well"  v-if="showSearch">
-            <li v-for="user in users"><a :href="'/profile/' + user.slug">{{ user.avatar }} {{  user.name }}</a></li>
+    <li class="search" @click="showSearch=true">
+        <ul class="well"  v-if="showSearch"><!-- add div element to display user info when hovered -->
+            <li v-for="user in users" :key=user.id><a :href="'/profile/' + user.slug"><img class="pull-left" :src="user.avatar" width="30px" height="30px">{{  user.name }}</a></li>
         </ul>
         <ul v-if="!showSearch && this.query.length > 1">
             <li><a href="#">no any matches</a></li>
@@ -31,7 +31,6 @@ export default {
                     if(response.data == false){
                         this.showSearch = false;
                     }
-
                     if(response.data != false) {
                         this.showSearch = true;
                         this.users = response.data;
@@ -42,10 +41,15 @@ export default {
                     console.log(error);
                 });
             }
+            else {
+              this.showSearch=false;
+
+            }
 
         }
 
     },
+
 
     data() {
         return {
@@ -80,9 +84,9 @@ ul li a {
   border: 1px solid #ddd;
   margin-top: -1px; /* Prevent double borders */
   background-color: #f6f6f6;
-  padding: 2px;
+  padding: 5px;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 16px;
   display: block
 }
 

@@ -7,7 +7,8 @@
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}
                         <div class="pull-right" >
-                            <manage-song :song="song" :tags="tags" :modalid="id">{{ id++ }}</manage-song>
+                            <add-playlist :song_id="song.id" :user_id="user_id" :id="id"></add-playlist>
+                            <manage-song :song="song" :tags="tags" :modalid="id + 'public'">{{ id++ }}</manage-song>
                         </div>
                     </div>
 

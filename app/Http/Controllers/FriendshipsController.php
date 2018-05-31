@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Notifications\NewFriendRequest;
 use App\Notifications\FriendRequestAccepted;
 use Auth;
+use Redis;
 use App\User;
 
 class FriendshipsController extends Controller
@@ -32,19 +33,37 @@ class FriendshipsController extends Controller
     {
         //return 'hey';
         $resp = Auth::user()->addFriend($user_id);
-        User::find($user_id)->notify(new NewFriendRequest(Auth::guard('web')->user()) );
-        return $resp;
+        if($resp === true) {
+            $user = User::find($user_id);
+            $user->notify(new NewFriendRequest(Auth::guard('web')->user()) );
+                $redis = Redis::connection();
+
+                $user_data = Auth::user();
+                $user_data->intended_userid = $user_id;
+
+                $redis->publish('addfriend', $user_data);
+        }
+        return response()->json($resp);
     }
 
     public function acceptFriend($user_id)
     {
         $resp = Auth::user()->acceptFriend($user_id);
-        User::find($user_id)->notify(new FriendRequestAccepted(Auth::guard('web')->user()) );
+        if($resp === 1) {
+            $user = User::find($user_id);
+            $user->notify(new FriendRequestAccepted(Auth::guard('web')->user()) );
+            $redis = Redis::connection();
+
+            $user_data = Auth::user();
+            $user_data->intended_userid = $user_id;
+
+            $redis->publish('acceptfriend', $user_data);
+        }
         return $resp;
     }
 
     public function removeFriend($user_id)
-    {
+    {   
         $resp = Auth::user()->removeFriend($user_id);
         return $resp;
     }
@@ -57,8 +76,8 @@ class FriendshipsController extends Controller
     }
 
     public function removePendingRequest($user_id)
-    {
-        $resp = Auth::user()->removePendingRequest($user_id);
+    {   
+        $resp = Auth::guard('web')->user()->removePendingRequest($user_id);
         return $resp;
 
     }

@@ -110,13 +110,15 @@ class TagController extends Controller
         $ids = $song->tags()->allRelatedIds();
         $tags = Tag::all('id','name')->whereIn('id', $ids);//pluck returns array so all('','')
 
+        $taged = array();
         foreach ($tags as $tag) {
-            $tag->label = $tag->name;
+            array_push($taged, $tag);//if collection sent js will get nested object so for v-select i need array of objects or i should have used get() above with select instead of all.
+           // $tag->label = $tag->name;
         }
 
-       // $tags = Tag::all('id','label')->whereIn('id', $ids);
-        //$tags = collect($tags)->pluck('id');
-        return $tags;
+        //$tags = Tag::all('id','label')->whereIn('id', $ids);
+        //$tags = collect($tags)->pluck('id');//only one sigle column but i need name for label also so dont use 
+        return $taged;
 
     }
 }

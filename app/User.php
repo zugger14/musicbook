@@ -38,11 +38,11 @@ class User extends Authenticatable
         return $this->hasOne('App\Profile');
     }
 
-  /*  public function orders()
+    /*  public function orders()
     {
         return $this->hasMany('App\Order');
     }
-*/
+    */
     public function songs()
     {
         return $this->hasMany('App\Song');
@@ -51,6 +51,12 @@ class User extends Authenticatable
     public function like()
     {
         return $this->hasMany('App\Like');
+
+    }
+
+    public function share()
+    {
+        return $this->hasMany('App\Share');
 
     }
 

@@ -1,7 +1,7 @@
 <template>
     <div>
         <a data-toggle="modal" :data-target="'#EditModal'+ modalid" @click="select(song)"><span title="edit" class="glyphicon glyphicon-pencil" ></span></a>
-        <a class=""><span title="delete" class="glyphicon glyphicon-trash"></span></a>
+        <a @click="deletes"><span title="delete" class="glyphicon glyphicon-trash"></span></a>
 
         <!-- Modal for editing song tracks-->
         <div class="modal fade" :id="'EditModal'+ modalid" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
@@ -72,6 +72,7 @@
 <script>
 import vSelect from 'vue-select'
 
+
     export default {
 
         props: ['song','modalid','index','tags'],
@@ -81,14 +82,7 @@ import vSelect from 'vue-select'
         mounted() {
 
         },
-/*
-        watch: {
-            tagids() {
-                console.log('changed tagids value');
-               // this.value = this.tagsid;
-            }
-        },
-*/
+
         computed: {
             private() {
                 if(this.esong.upload_type == 'private') {
@@ -96,26 +90,26 @@ import vSelect from 'vue-select'
                 }
                 return false;
             },
-
-            
-
         },
 
         methods: {
             
-            select(song) {
+            select(song) { //no need for this method idont know why i did this i will remove it later
                 console.log(song.title);
-                this.getTagIds(song);   
+                this.getTagIds(this.song);   
             },
 
             edit() {
+                console.log(this.tagids);
                 let formData = new FormData();
                 formData.append('title', this.esong.title);
                 formData.append('img', this.esong.img);
                 formData.append('description', this.esong.song_description);
                 formData.append('upload_type', this.esong.upload_type);
                 formData.append('amount', this.esong.amount);
-                formData.append('tags', JSON.stringify(this.tagids));
+                if(this.tagids.length > 0 ){
+                    formData.append('tags', JSON.stringify(this.tagids));
+                } 
                 formData.append('_method', 'PUT');
 
                 axios.post('/artist/songs/' + this.esong.id, formData,{
@@ -131,39 +125,27 @@ import vSelect from 'vue-select'
                 });
             },
 
-            delete() {
-                // ofr private soongs send request to admin for delete then admin decides when to delete..
-
-                //axios.get('delete')
+            deletes() { //delete name gives error
+                // only chnage status of private songs to removed so that fans who have bought can still acces the songs from their collections but no new purchase option will be available for new fans.
+               if(confirm('are you sure you want to delete this song? Theres no undoing this.')) {
+                    axios.delete('/artist/songs/' + this.song.id).then(response => {
+                        console.log(response.data);
+                        location.reload();
+                    }).catch(error => {
+                        console.log(error);
+                    });
+               }
             },
 
             getTagIds(song) {
 
                 axios.post('/gettagids', song ).then(response =>{
-                    this.t  = response.data;
-                    this.tagids = Object.assign({},this.t);
-                   console.log(this.tagids);
+                  //  console.log(response.data);
+                    this.tagids = response.data;
+
                 }).catch(error =>{
                     console.log(error);
                 });
-
-                  // this.tagids = response.data;
-            /*       console.log(response.data);
-                   let obj = response.data;
-                    this.tagids = obj;//if assigned with = cannot change in v-model anymore
-                    $("#selectm").trigger('change');
-            */
-                    //this.tagid =[];
-                    /*this.tagids.forEach( (tag)=>{
-                       this.tagid.push(tag);
-
-                    })*/
-                   // this.tagid =  JSON.stringify(this.tagid);
-                   // console.log(this.tagid);
-                    //this.$emit('change',response.data);
-                   // this.esong.tags = response.data;
-                   // $('#selectm').trigger('change');
-
             },
 
             browseImage() {
@@ -182,7 +164,7 @@ import vSelect from 'vue-select'
             return {
 
                 esong: this.song,
-                tagids: {id:'', name:'', label:''},
+                tagids: [],
                 name:'name',
                 image:this.song.image//image not chnged when using esong as props image only stored..   
             }

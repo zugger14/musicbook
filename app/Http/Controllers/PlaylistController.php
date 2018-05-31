@@ -29,8 +29,16 @@ class PlaylistController extends Controller
 
     //get all playlists and containing songs of a user
     public function getPlaylistSongs($user_id)
-    {
-        $playlists = Playlist::where('user_id', $user_id)->get();
+    {   
+        if (Auth::id() == $user_id) {
+            
+            $playlists = Playlist::where('user_id', $user_id)->get();
+
+        } else {
+
+            $playlists = Playlist::where('user_id', $user_id)->where('private', 0)->get();
+
+        }
         return response()->json($playlists);
     }
 
@@ -158,14 +166,16 @@ class PlaylistController extends Controller
                         
                         $song->song_filename = $filename;
 
-/*                        if ($request->hasFile('img')) { image for everysongs in playlist selected
+                        if ($request->hasFile('img')) { //image for everysongs in playlist selected
                             $image_file = $request->file('img');
-                            $filename = time() . '.' . $image_file->getClientOriginalExtension();
+                            $filename = 'playlist_pic' . time() . '.' . $image_file->getClientOriginalExtension();
                             $location = storage_path('app/public/images/songcovers');  // add artists id name anything here for folder structure.
                             $image_file->move($location,$filename);
                             
                             $song->image = $filename;
-                        } */
+                        } 
+
+                        //write for tags also same as image every song will have the tag selected for playlist
 
                         $song->save();
 

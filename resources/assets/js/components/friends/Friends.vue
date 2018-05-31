@@ -8,7 +8,7 @@
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="FriendsModalLabel">All friends</h5>
+                        <h5 class="modal-title" id="FriendsModalLabel">All friends ( {{ friends.length }} )</h5>
                         <button type="button" class="close" ref="closemodal" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -16,13 +16,15 @@
                     <div class="modal-body">
                             <div v-for="friend in show_friends" class="well">
                                 <div class="row">
-                                    {{ friend.name }} <a class="btn btn-primary btn-md" :href="friend.slug">view profile</a>
+                                    <img :src="friend.avatar" width="30px" height="30px">
+                                    {{ friend.name }} <a class="btn btn-primary btn-sm pull-right" :href="friend.slug">view profile</a>
                                 </div>
                             </div>  
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" @click="moreFriends">show more</button>
+                        <button v-if="!no_data" type="button" class="btn btn-primary" @click="moreFriends">show more</button>
+                        <button v-else="no_data" type="button" class="btn btn-primary">no more friends</button>
                     </div>
                 </div>
             </div>
@@ -41,9 +43,11 @@
         },
 
         watch: {
-
             count() {
                 this.show_friends = this.friends.slice(0,this.count);
+                if(this.friends.length < this.count) {
+                    this.no_data = true;
+                }
                 //return this.show_friends;
             }
         },
@@ -54,15 +58,17 @@
                     console.log(response.data);
                     if(response.data !='') { 
                         this.friends = response.data;
-                        this.show_friends = this.friends.slice(0,1);//total 1 starts from index 0
-                    } 
+                        this.show_friends = this.friends.slice(0,5);//total 5 starts from index 0
+                    } else {
+                        this.no_data = true;
+                    }
                 }).catch(error => {
                     console.log(error);
                 });
             },
 
             moreFriends() {
-                this.count = this.count + 1;
+                this.count = this.count + 5;
                 
             }
         },
@@ -71,8 +77,23 @@
             return {
                 friends:{},
                 show_friends:{},
-                count:1
+                count:5,
+                no_data:false
             }
         }
     }
 </script>
+
+<style scoped> 
+    .well{
+        height: 58px;
+        margin-bottom:0px;
+        padding:20px;
+    }
+
+    .modal-body{
+        height: 100px;
+        overflow-y: auto;
+    }
+
+</style>

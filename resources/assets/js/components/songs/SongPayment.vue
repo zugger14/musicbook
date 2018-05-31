@@ -19,8 +19,7 @@
                                     <div class="col-md-12">
                                         <div class="col-md-5">
                                             <div id="image_previews">
-                                                <img ref='image' class="" v-bind:src="songs.imgpreview" width="200px" height="200px" >
-                                                <input class="form-control-file" ref="imageinput" type="file" name="feature_image">
+                                                <img ref='image' class="" v-bind:src="songs.image" width="200px" height="200px" >
                                             </div>
                                         </div>
                                         <div class="col-md-7">
@@ -33,15 +32,14 @@
                                             </div>
                                             <div class="form-group">
                                                 <label for="upload_type">Payment Amount</label>
-                                                <input type="text"  v-model="songs.amount" class="form-control" required maxlength="255">
+                                                <input type="text"  v-model="songs.amount" class="form-control" required maxlength="255" disabled>
                                             </div>
                                         </div>
                                     </div>
                                 </div>  
                             </div>
                             <div class="form-group">
-                                <label for="info" class="col-form-label">We accept payment from either paypal or you can use cards as well </label>
-                                
+                                <label for="info" class="col-form-label">We accept payment from either paypal soon we are adding cards support as well </label>
                             </div>
                         </form>
                     </div>
@@ -78,7 +76,6 @@ export default {
         }
     },
 
-
     methods: {
         resetForm(event) {
             this.songs = ''    
@@ -88,13 +85,12 @@ export default {
 
             axios.post('/artist/songs/buy', this.songs).then(response => {
                 if(response.data != '') {
-                    axios.get('/payments/with-paypal').then(response => {
+                    axios.post('/payments/with-paypal', this.songs).then(response => {
                         console.log(JSON.stringify(response));
                         if(response.data !='') { 
                             this.paypal_approval_url = response.data.approval_url;
                            // this.payment_id = response.data.id;
                         } 
-
                     }).catch(error => {
                         console.log(error);
                     });

@@ -30,31 +30,21 @@
                         @endif
                     </p>
                     <p>
-                        Profile url:   {{  $user->profile->location }}
+                        UserName:   {{  $user->slug }}
 
                     </p>                    
                     <p>
-                        FirstName:   {{  $user->profile->location }}
+                        FullName:   {{  $user->name }}
 
                     </p>                
                     <p>
-                        LastName:   {{  $user->profile->location }}
+                        Email:   {{  $user->email }}
 
                     </p>
                     <p>
                         Address:   {{  $user->profile->location }}
 
                     </p>
-                    <p>
-
-                        phone:
-                    </p>
-                    <p>
-
-                        email:
-
-                    </p>
-
                 </div>
             </div>
 
@@ -97,9 +87,9 @@
                         songs for sale
                     </p>
                 </div>
-
+                
                 <div class="panel-body">
-                    <demosong-view :is_artist="{{ Auth::user()->is_artist }}" :artist_id="{{ $user->id }}"></demosong-view>
+                    <demosong-view :tags="{{ $tags }}" :is_artist="{{ Auth::user()->is_artist }}" :artist_id="{{ $user->id }}"></demosong-view>
                     <p class="">
                         hello uppoaded songs goes here....
                     </p>
@@ -116,7 +106,7 @@
                 </div>
 
                 <div class="panel-body">
-                    <publicsong-view :user_id={{ $user->id }}></publicsong-view>
+                    <userpublicsong-view :tags="{{ $tags }}" :user_id={{ $user->id }}></userpublicsong-view>
                     <p class="">
                         hello uppoaded songs goes here....
                     </p>

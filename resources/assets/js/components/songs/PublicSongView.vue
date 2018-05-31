@@ -2,7 +2,7 @@
     <div class="songview">
         <div class="row">
             <div class="col-md-12">
-                <div v-if="songExists" v-for="song in songs" class="panel panel-default">
+                <div v-if="songExists" v-for="song in songs" :key="song.id" class="panel panel-default">
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}

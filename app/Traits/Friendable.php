@@ -22,7 +22,7 @@
 			}
 
 			if($this->hasPendingRequestFrom($user_requested)) {
-				return $this->acceptFriend($user_requested);
+				return "user has just sent you a request..please reload the page and try accepting the request";
 			}
 
 			$friendship = Friendship::create([
@@ -32,7 +32,7 @@
 			]);
 
 			if($friendship) {
-				return response()->json(true);
+				return true;
 			}
 			return 0;
 		}
@@ -144,7 +144,7 @@
 		}
 
 		public function removePendingRequest($user_id)
-		{
+		{	
 			$friendship = Friendship::where('requester', $user_id)->where('user_requested', $this->id)->where('status', 0)->first();
 			$friendship->delete();//dont delete change status only aile lai garde 
 			return 1;

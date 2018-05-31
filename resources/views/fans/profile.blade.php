@@ -28,33 +28,23 @@
                     </div>                     
                     @if(Auth::guard('web')->id() == $user->id)
                         <p class="text-center">
-                            <a class="btn btn-default btn-md" href="{{ route('profile.edit', $user->slug) }}">Edit profile</a>
+                            <edit-profile :slug={{ json_encode($user->slug) }}></edit-profile>
                         </p>
                     @endif
                     <p>
-                        Profile url:   {{  $user->profile->location }}
+                        UserName:   {{  $user->slug }}
 
                     </p>                    
                     <p>
-                        FirstName:   {{  $user->profile->location }}
+                        FullName:   {{  $user->name }}
 
                     </p>                
                     <p>
-                        LastName:   {{  $user->profile->location }}
+                        Email:   {{  $user->email }}
 
                     </p>
                     <p>
                         Address:   {{  $user->profile->location }}
-
-                    </p>
-                    <p>
-
-                        phone:
-
-                    </p>
-                    <p>
-
-                        email:
 
                     </p>
                 </div>
@@ -82,8 +72,13 @@
                 </div>
 
                 <div class="panel-body">
-                  <p class="">
-                  tracks albums liked songs by users lyrics playlists are listed here...</p>
+                <p class="">
+                    <a href="{{ route('artists.playlist', $user->id) }}" class="btn btn-default btn-md">Albums(playlists)</a>
+                    <a href="{{ route('artist.tracks')  }}" class="btn btn-default btn-md">Songs</a>
+                    <a href="{{ route('artist.notes', $user->id) }}" class="btn btn-default btn-md">Song Notes</a>
+                    <a href="{{ route('songs.liked', $user->id) }}" class="btn btn-default btn-md">Liked Songs</a>
+                      tracks albums lyrics playlists are listed here...
+                </p>
               </div> 
           </div>
 

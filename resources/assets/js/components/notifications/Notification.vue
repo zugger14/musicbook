@@ -1,6 +1,6 @@
 <template>
     <li class="dropdown" @click="markNotificationsAsRead">
-        <a href="#" id="notification-tab" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-globe">Notifications</span><span class="badge" id="count">{{ unreadNotifications.length }}</span></a>
+        <a href="#" id="notification-tab" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span class="fa fa-bell-o" aria-hidden="true"></span><span class="badge" id="count">{{ unreadNotifications.length }}</span></a>
         <ul class="dropdown-menu text-center"  id="notification">
             <li>
                 <notification-item v-for="unread in unreadNotifications" :unread="unread"></notification-item>

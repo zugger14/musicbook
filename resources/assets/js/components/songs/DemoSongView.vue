@@ -2,14 +2,14 @@
     <div class="songview">
         <div class="row">
             <div class="col-md-8">
-                <div v-if="songExists" v-for="(song,index) in songs" v-bind:key="song.index" class="panel panel-default">
+                <div v-if="songExists" v-for="(song,index) in songs" v-bind:key="song.id" class="panel panel-default">
                     <div class="panel-heading" >
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}
                              <div class="pull-right">
                                 <add-playlist :song_id="song.id" :user_id="artist_id" :id="id"></add-playlist>
-                                <manage-song v-on:update="update" :index="index" :song="song" :modalid="id"></manage-song>
-                                {{ id++ }}
+                                <manage-song v-on:update="update"  :tags="tags" :index="index" :song="song" :modalid="id + 'private'">{{ id++ }}
+                                </manage-song>
                              </div>
                     </div>
 
@@ -112,7 +112,7 @@ Crunker.notSupported(() => {
 
 export default {
 
-    props: ['artist_id','is_artist'],
+    props: ['artist_id','is_artist','tags'],
 
     components: { Aplayer,Like,SongPayment,ManageSong },
     
@@ -160,11 +160,7 @@ export default {
 
     data() {
         return {
-            songs:
-                {   
-                    
-                }
-                ,
+            songs:{ },
             songExists:false,
             is_artists: this.is_artist,
             songLocation:'http://localhost:8000/storage/songs/',
