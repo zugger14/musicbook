@@ -28,6 +28,7 @@
     "vue-aplayer": "^1.4.3",
     "vue-multiselect": "^2.1.0",
     "vue-select": "^2.4.0",
-    "vue-socket.io": "^2.1.1-b"
+    "vue-socket.io": "^2.1.1-b",
+    "vuex": "^3.0.1"
   }
 }
