@@ -63,6 +63,7 @@
 
             addComment() {
                 axios.post('/comment', this.newcomment).then(response => {
+                    this.comments.push(response.data);
                     this.show_comments.push(response.data);
                     this.newcomment.comment = '';
                 }).catch(error => {

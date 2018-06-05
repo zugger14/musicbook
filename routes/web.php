@@ -22,10 +22,6 @@ Route::group(['middleware' => ['web']], function () {
 	// handles all routes for normal users as fans and artists login
 	Auth::routes();
 
-	//video routes
-	Route::get('/live', 'LiveEventController@getToken')->name('gettoken');
-
-	Route::get('/video', 'LiveEventController@index')->name('video');
 
 
 	
@@ -176,10 +172,14 @@ Route::group(['middleware' => ['auth:web']], function () {
 
 	Route::get('getusersongs/{user_id}','SongController@getUserSongs');
 	Route::get('getpublicsong/{song_id}','SongController@getPublicSong');
-	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friedns
+	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friends
+	Route::get('/topsongs','SongController@getMostPlayedSongs');	
+	Route::get('/recentsongs','SongController@getMostRecentSongs');
+	
 	Route::get('songs/liked/{user_id}','SongController@showLikedSongPage')->name('songs.liked');
 	Route::get('/getLikedSongs/{user_id}','SongController@getLikedSongs');
 	Route::get('/getSharedSongs/{user_id}','SongController@getSharedSongs');
+	Route::get('/addSongPlayedTime/{song_id}','SongController@addSongPlayedTime');
 	Route::post('/gettagids', 'TagController@getTagIds');
 
 
@@ -211,6 +211,28 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::delete('/notes/{user_id}', 'NoteController@destroy')->name('notes.destroy');
 
 
+	//video routes
+	Route::get('/live', 'LiveEventController@getToken')->name('event.auth-token');
+	Route::get('/live-events', 'LiveEventController@index')->name('event.index');
+	Route::get('/google-login', 'LiveEventController@login')->name('event.login');
+
+	Route::post('/create-event/', 'LiveEventController@createLiveEvent')->name('event.store');
+	Route::get('/test-event/{event_id}', 'LiveEventController@testEventLiveStream')->name('event.start');
+	Route::get('/start-event/{event_id}', 'LiveEventController@startEventLiveStream')->name('event.start');
+
+	Route::get('/stop-event/{event_id}', 'LiveEventController@stopEventLiveStream')->name('event.start');
+	Route::get('/get-events/', 'LiveEventController@getEvents')->name('event.youtube-list');
+
+	Route::get('/get-event-by-id/{event_id}', 'LiveEventController@getEventById')->name('event.db-single');
+	Route::get('/watch-live/{user_id}', 'LiveEventController@live')->name('event.live');
+
+
+
+
+
+
+
+	
 
 
 

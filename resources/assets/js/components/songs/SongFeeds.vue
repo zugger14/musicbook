@@ -5,60 +5,98 @@
                 <div v-if="songExists" v-for="(song,index) in songs" :key="index" class="panel panel-default">
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
-                         {{ song.user.name }}
+                        {{ song.user.name }}
                     </div>
 
-                    <div class="panel-body">
-                        <aplayer theme='#FADFA3'
-                            :music="{
-
-                                title: song.title,
-                                artist: 'Silent Siren',
-                                src: song.src,
-                                pic: song.image
-                            }"
-                            :float="true" 
-                        />  
-                        <button @click="hide=!hide">show/hide description</button>
-                        <div class="panel-body" v-if="!hide">
+                    <div class="panel-body" @mouseenter="addSongPlayedTime($event, song)">
+                        <aplayer @play="playe" theme='#000005'
+                        :music="{
+                        title: song.title,
+                        artist: 'Silent Siren',
+                        src: song.src,
+                        pic: song.image
+                    }"
+                    :float="true" 
+                    />  
+                        <button @click="toggleDesc(song)">show/hide description</button>
+                        <div class="panel-body" v-if="!hide && songdesc == song.id">
                             {{ song.song_description }}
                         </div>
+
                     </div>
 
-                    <div class="panel-footer">
-                        <span class="pull-right">
-                            {{ song.created_at }}
-                        </span>
-                        <div class="row">
-                            <div class="col-md-1">
-                                <like :songs="songs" :id="song.id"></like><!-- i sent whole songs thats not needed i was imitating the state implemtation so refactor this one -->
-                            </div>
-                            <div class="col-md-1">
-                                <share :songs="songs" :id="song.id"></share>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <comment :song="song"></comment>
-                            </div>
-                        </div>    
-                    </div>                    
-                </div>
-            </div>
-        <div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading"> Most played by users </div>
-
-                <div class="panel-body" style="height:500px;">
-                    songs list                  
-                </div>
-
                 <div class="panel-footer">
-                    like comments
+                    <span class="pull-right">
+                        <i class="fa fa-play" style="font-size: 12px;">{{ song.played_time }}</i>
+                        {{ song.created_at }}
+
+                    </span>
+                    <div class="row">
+                        <div class="col-md-1">
+                            <like :songs="songs" :id="song.id"></like><!-- i sent whole songs thats not needed i was imitating the state implemtation so refactor this one -->
+                        </div>
+                        <div class="col-md-1">
+                            <share :songs="songs" :id="song.id"></share>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <comment :song="song"></comment>
+                        </div>
+                    </div>    
+                </div>                    
+            </div>
+        </div>
+
+
+        <div class="col-md-3">
+            <div class="">
+            <div class="panel panel-default most">
+                <div class="panel-heading"> Most Played Songs </div>
+                <div v-for="(song,index) in top_songs" :key="index" class="row">
+                <hr style="width:100%;">                    
+                    <div class="panel-body" @mouseenter="addSongPlayedTime($event, song)">
+                        <div class="col-md-6">
+                            <aplayer :mini=true theme='#000005'
+                            :music="{
+                            title: song.title,
+                            artist: 'Silent Siren',
+                            src: song.src,
+                            pic: song.image
+                            }"
+                            :float="true" 
+                            /> 
+                        </div>
+                        <div class="col-md-6">
+                            {{ song.name }} by {{ song.user.name }}
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer">like comments</div>
+            </div>
+            </div>
+        </div>
+
+        <div class="col-md-2">
+                <div v-for="(song,index) in recent_songs" :key="index" class="panel panel-default recent">
+                <div class="panel-heading"> Recently Added Songs </div>
+                    <div class="panel-body" @mouseenter="addSongPlayedTime($event, song)">
+                        <aplayer :mini=true theme='#000005'
+                        :music="{
+                        title: song.title,
+                        artist: 'Silent Siren',
+                        src: song.src,
+                        pic: song.image
+                    }"
+                    :float="true" 
+                    /> 
+                    </div>                 
+                    <div class="panel-footer">
+                        like comments
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 </div>
 </template>
 
@@ -76,14 +114,41 @@ export default {
     
     beforeMount() {
        this.getSongFeeds();
+       this.getMostPlayedSongs();
+       this.getRecentSongs();
+
+   },
+
+   watch: {
+
+    clicked() {
+        var self = this;
+            $(".aplayer-pic").unbind('click');//need to unbind many click events added whenever new mouse is over new panel body or a song panel and adding only one below
+            $(".aplayer-pic").on('click', function(event) {
+                if(self.played == self.clicked) {
+                    //the same song is clicked so maybe paused so no count increase do nothing.
+                } else {
+                    axios.get('/addSongPlayedTime/' + self.clicked).then(response => {
+                        console.log('return' + response.data);
+                        self.played = self.clicked;
+                       /* self.songs.forEach((song)=> {
+                            if(song.id == self.clicked) {
+                                //aile yo vue-aplayer bhann el egarda ho esko bhitra ko file chlauana man nai lagena garo hola jasto cha data pass garna 
+                                //song.played_time = response.data; //cannot update value after immediate play
+                            }
+                        });*/
+                    });
+                }
+            });
+        }
     },
     
-    mounted() {
-        
-        console.log('song feeds Component mounted.');
-    },
-
     methods: {
+
+        playe() {
+            console.log('emitting from player');
+        },
+
         getSongFeeds() {
             axios.get('/songfeeds').then(response => {
                 console.log((response.data))
@@ -92,28 +157,107 @@ export default {
                 }
                 this.songs = response.data;
             }).catch(error => {
-                    console.log(error);
+                console.log(error);
             });
+        },
+
+        getMostPlayedSongs() {
+            axios.get('/topsongs').then(response => {
+                console.log((response.data))
+                this.top_songs = response.data;
+            }).catch(error => {
+                console.log(error);
+            });
+
+        },
+
+        getRecentSongs() {
+            axios.get('/recentsongs').then(response => {
+                console.log((response.data))
+                this.recent_songs = response.data;
+            }).catch(error => {
+                console.log(error);
+            });
+
+        },
+
+
+        addSongPlayedTime(event, song) {// to send the songid to click event above in clicked watcher so send songplayed incerement request
+            if(this.clicked == song.id) {
+
+            } else {
+            //this.played = false;
+            this.clicked = song.id;
+            }
+        },
+
+        toggleDesc(song) {
+            if(this.songdesc == song.id) {
+                if(this.hide == false) {
+                    this.hide = true;
+                } else {
+                    this.hide= false;
+                }
+            } else {
+                this.songdesc  = song.id;
+                this.hide = false;
+            }
         }
     },
 
     data() {
         return {
-            songs:[
-                {
-                    title: '',
-                    src: '',
-                    song_description: '',
-                    image: '',
-                }
+            songs: [ 
+            {
+                title: '',
+                src: '',
+                song_description: '',
+                image: '',
+            }
             ],
 
-            songExists:false,
-            hide:true,
+            top_songs: [],
 
-            songLocation:'http://localhost:8000/storage/songs/'
+            recent_songs: [],
+
+            clicked: '',
+            songdesc:'',
+            played: '',
+            songExists: false,
+            hide: true,
+            songLocation: 'http://localhost:8000/storage/songs/'
         }
     }
 }
-    
+
 </script>
+
+<style scoped>
+    
+    .most {
+        overflow-y:scroll;
+        height:400px;
+        position:fixed;
+        width: 200px;
+        margin: 0; padding: 0;
+    }
+
+    .recent {
+        overflow-y:scroll;
+        height:400px;
+        position:fixed;
+        width: 200px;
+        margin: 0; padding: 0;
+        float:right;
+        margin-left:200px;
+    }
+
+    .row {
+        margin-left:0px;
+        margin-right:0px;
+
+    }
+
+
+
+</style>

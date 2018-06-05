@@ -238,7 +238,7 @@ export default {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
-            }).then(function (response) {
+            }).then(function (response) { //here used self necause callback function does not have lexiacl sccope
                 console.log(response.data);
                 self.resetForm();
                 self.$refs.closemodal.click();

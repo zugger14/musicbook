@@ -383,7 +383,7 @@ class SongController extends Controller
 
             } else {
 
-                $song->tags()->sync(array());   //not necesarry but ..
+                $song->tags()->sync(array());   //not necesarry but useful to make tags selection optional..
             }
 
             return response()->json("Successfully edited your song. ");
@@ -412,6 +412,36 @@ class SongController extends Controller
         $song->save();
         return response()->json('succesfully deleted song');
     }
+
+    public function addSongPlayedTime($song_id)
+    {
+        $song = Song::find($song_id);
+        $song->played_time ++;
+        $song->save();
+
+        return $song->id;
+    }
+
+    public function getMostPlayedSongs()
+    {
+        $songs = Song::orderBy('played_time', 'desc')->limit(20)->get();
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+        return $songs;
+    }
+
+      public function getMostRecentSongs()
+    {
+        $songs = Song::orderBy('created_at', 'desc')->limit(20)->get();
+        foreach ($songs as $song) {//make dry
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+        return $songs;
+    }
+
 
     public function addToOrderList(Request $request)
     {

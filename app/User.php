@@ -48,6 +48,12 @@ class User extends Authenticatable
         return $this->hasMany('App\Song');
     }
 
+    public function events()
+    {
+        return $this->hasMany('App\LiveEvent');
+    }
+
+
     public function like()
     {
         return $this->hasMany('App\Like');

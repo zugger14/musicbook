@@ -12,7 +12,7 @@ io.on('connection',function(socket){
 	redisClient.subscribe('message', 'addfriend', 'acceptfriend');
 	
 	redisClient.on('message', function(channel, message){
-		//console.log('message in que' , channel, message);
+		console.log('message in que' , channel, message);
 		socket.emit(channel, message);
 	}).on('error', function (error) {
 	 	console.log(error)

@@ -34,9 +34,7 @@
 
                 unreadNotifications: this.unreads,
                 readNotifications:this.reads
-
             }
-
         },
 
         methods:{

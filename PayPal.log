@@ -2155,3 +2155,4 @@
 [30-05-2018 12:30:37] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/undefined
 [30-05-2018 12:30:38] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 404
 [30-05-2018 12:30:38] PayPal\Core\PayPalHttpConnection : ERROR: Got Http response code 404 when accessing https://api.sandbox.paypal.com/v1/payments/payment/undefined. {"name":"INVALID_RESOURCE_ID","message":"Requested resource ID was not found.","information_link":"https://developer.paypal.com/docs/api/payments/#errors","debug_id":"bba9f1d861659"}
+[04-06-2018 06:35:33] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token

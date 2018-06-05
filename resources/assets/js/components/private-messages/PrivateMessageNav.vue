@@ -38,7 +38,18 @@ export default {
             return unreadmessages;
         }
 
-    }
+    },
+
+    sockets: {
+        message(data) {
+            let message = JSON.parse(data);
+            console.log('socket' + message.receiver_id);
+            if(message.receiver_id == this.user_id) {
+                this.$store.dispatch('newMessageNotification', message);
+            }
+        }
+}
+
 }
 
 </script>

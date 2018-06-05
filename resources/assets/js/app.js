@@ -30,6 +30,11 @@ Vue.component('publicsong-view', require('./components/songs/PublicSongView.vue'
 Vue.component('liked-song', require('./components/songs/LikedSong.vue'));
 Vue.component('shared-song', require('./components/songs/SharedSong.vue'));
 
+Vue.component('create-live-event', require('./components/live-events/CreateLiveEvent.vue'));
+Vue.component('live-events', require('./components/live-events/LiveEvents.vue'));
+
+
+
 
 Vue.component('pm-sidebar', require('./components/private-messages/PrivateMessageSidebar.vue'));
 Vue.component('pm-nav', require('./components/private-messages/PrivateMessageNav.vue'));
