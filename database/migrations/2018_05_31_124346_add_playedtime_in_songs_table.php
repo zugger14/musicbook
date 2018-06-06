@@ -14,7 +14,7 @@ class AddPlayedtimeInSongsTable extends Migration
     public function up()
     {
         Schema::table('songs', function (Blueprint $table) {
-            $table->integer('played_time')->unsinged()->after('upload_type');
+            $table->integer('played_time')->unsinged()->after('upload_type')->nullable();
         });
     }
 
