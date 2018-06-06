@@ -30,12 +30,18 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <label for="title">Live Event Description:</label>
+                                                <label for="description">Live Event Description:</label>
                                                 <input type="text"  v-model="event.description" class="form-control" required maxlength="255">
                                             </div>
                                             <div class="form-group">
-
+                                                <label for="date">Live Event Date </label>
+                                                <input type="date" v-model="event.date" class="form-control" required>
                                             </div>
+                                            <div class="form-group">
+                                                <label for="time">Live Event Time </label>
+                                                <input type="time" v-model="event.time" class="form-control" required>
+                                            </div>
+
                                             <div class="form-group">
                                                <div class="checkbox">
                                                   <label><input type="checkbox" v-model="event.privacy_status">private</label>
@@ -67,7 +73,7 @@
 
         mounted() {
             console.log('Component mounted.')
-            //console.log(this.auth_token);
+            console.log(this.auth_token);
         },
 
         methods: {
@@ -93,15 +99,16 @@
                 formData.append('thumbnail_path', this.event.thumbnail_path);
                 formData.append('privacy_status', this.event.privacy_status);
                 formData.append('image', this.event.image);
-                formData.append('auth_token', this.auth_token);
+                formData.append('date', this.event.date);
+                formData.append('time', this.event.time);
+
+                formData.append('auth_token', JSON.stringify(this.auth_token));//[object object ] and cannot decode in lravel if not stringified
 
                 axios.post('/create-event', formData ).then(response => {
-                    
-                    //this.$emit('new-event', response.data);
-                    //console.log(response.data);
+
                     this.event = {};
                     this.closeModal();
-                    location.reload();
+                    location.href="http://localhost:8000/live-events";
 
                 }).catch(error => {
                     console.log(error);
@@ -117,8 +124,10 @@
                     description:'',
                     privacy_status:'',
                     thumbnail_path:'',
-                    image:''
-                },
+                    image:'',
+                    date:'',
+                    time: ''
+                }
             }
         }
     }

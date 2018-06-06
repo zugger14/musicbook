@@ -8,10 +8,16 @@
                             <img :src="event.snippet.thumbnails.high.url" width="100px" height="100px">
                         
                         </div>
-                        <div class="col-md-1">
-                            {{ event.snippet.title }}
+                        <div class="col-md-4" v-show="event.snippet.actualEndTime==null || event.snippet.actualStartTime==null">
+                            <p>
+                                <strong>{{ event.snippet.title }} <label v-show="event.snippet.actualEndTime==null && event.snippet.actualStartTime!=null" class="label label-danger"> Live Now </label></strong>
+                            </p>
                             {{ event.snippet.description }}
-                            <manage-live-event :event_id="event.id"></manage-live-event>
+                            <manage-live-event :event_id="event.id" ></manage-live-event>
+                        </div>
+                        <div class="col-md-4" v-show="event.snippet.actualEndTime!=null && event.snippet.actualStartTime!=null">
+                            <p><strong>{{ event.snippet.title }}</strong></p>
+                           <p class="alert alert-success"> Event Completed</p>
                         </div>
                     </div>
             </div>
@@ -41,6 +47,7 @@ export default {
             events: {
 
             },
+
             empty: false
         }
     },
@@ -48,10 +55,14 @@ export default {
     methods: {
         getEvents() {
             axios.get('/get-events').then(response => {
-                //console.log(response.data[0].id);
-                this.events = response.data;
-                if(this.events.length < 1) 
+                if(response.data == 0) {
                     this.empty = true;
+                } else {
+                    this.events = response.data[0];
+                    if(this.events.length < 1) 
+                        this.empty = true;
+                }
+
             }).catch(error => {
                 console.log(error)
             })

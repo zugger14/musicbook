@@ -48,13 +48,16 @@ class LiveEventController extends Controller
 
     public function getEvents()
     {
-        $event = LiveEvent::where('user_id', Auth::id())->first();
-        $token = json_decode($event->auth_token, true);
+        $event = LiveEvent::where('user_id', Auth::id())->where('private', 0)->first();
+        if(!empty($event)) {
+            $token = json_decode($event->auth_token, true);
+            $ytEventObj = new YoutubeLiveEventService();
+            $events = $ytEventObj->getEvents($token);
 
-        $ytEventObj = new YoutubeLiveEventService();
-        $events = $ytEventObj->getEvents($token);
+            return $events;//[containes array 0=>all bordcast reposne and 1 contains next page token ]
+        }
 
-        return $events;
+        return 0;
 
     }
 
@@ -66,26 +69,23 @@ class LiveEventController extends Controller
 
     public function login()
     {
-            $authServiceObject = new AuthService();
-            $authUrl = $authServiceObject->getLoginUrl('','');
-            return redirect()->to($authUrl);
-
+        $authServiceObject = new AuthService();
+        $authUrl = $authServiceObject->getLoginUrl('','');
+        return redirect()->to($authUrl);
     }
 
     public function getToken()
     {       
-            $authServiceObject = new AuthService();
-            $code = request()->get('code');
-            $identifier = request()->get('state');
-            $authToken = $authServiceObject->getToken($code);
+        $authServiceObject = new AuthService();
+        $code = request()->get('code');
+        $identifier = request()->get('state');
+        $authToken = $authServiceObject->getToken($code);
 
-/*            $events = LiveEvent::where('user_id', Auth::id())->get();
-            foreach ($events as $event) {
-                $event->auth_token = json_encode($authToken);//update auth token in database after new login auth
-                $event->save();
-            }*/
-            
-            return view('artists.live_event')->withToken($authToken);
+/*      $event = LiveEvent::where('user_id', Auth::id())->first();
+        $event->auth_token = $authToken;
+        $event->save();
+*/            
+        return view('artists.live_event')->withToken($authToken);
     }
 
     public function createLiveEvent(Request $r)
@@ -107,17 +107,20 @@ class LiveEventController extends Controller
            // $r->request->add(['thumbnail_path'=>$filename]);add or set(key,value)
         } 
 
+        $datetime = date('Y-m-d H:i:s', strtotime("$r->date $r->time"));
+
         $data = array(
             "title" => $r->title,
             "description" => $r->description,
             "thumbnail_path" => isset($thumbnail_path) ? $thumbnail_path : '',             // Optional
-            "event_start_date_time" => date("Y-m-d H:i:s"),
+            "event_start_date_time" => $datetime,
             "event_end_date_time" => "",            // Optional
             "time_zone" => config('app.timezone'),
             'privacy_status' => $privacy_status,    // default: "public" OR "private"
             "language_name" => "",              // default: "English
             "tag_array" => []               // Optional and should not be more than 500 characters
         );
+
         $token = json_decode($r->auth_token, true);
 
         $ytEventObj = new YoutubeLiveEventService();
@@ -137,13 +140,95 @@ class LiveEventController extends Controller
             $r->youtubeEventId = $youtubeEventId;
             $r->streamUrl = $serverUrl;
             $r->streamKey = $serverKey;
+            $r->datetime = $datetime;
+            //$r->end_datetime = $end_datetime;
+
 
         }
 
         $stored_event = $this->store($r);
-
+        //notification for all users following the auth:user()
         return response()->json($stored_event);
 
+    }
+
+    /**
+    * The updateBroadcast response give details of the youtube_event_id,server_url and server_key. 
+    * The server_url & server_key gets updated in the process. (save the updated server_key and server_url).
+    */
+    public function updateEvent($youtubeEventId, Request $r) //dry
+    {
+        $ytEventObj = new YoutubeLiveEventService();
+
+        if($r->privacy_status == 'true') {
+            $privacy_status = 'private';
+        } else {
+            $privacy_status = 'public';
+        }
+
+        if ($r->hasFile('image')) {
+            $image_file = $r->file('image');
+            $filename = time() . '.' . $image_file->getClientOriginalExtension();
+            $location = storage_path('app/public/images/youtube-events/');  
+            $image_file->move($location,$filename);
+            $thumbnail_path = $location . $filename;
+            
+            $r->thumbnail_path = $filename;
+        } 
+
+        //validation for date and time and titles
+        $datetime = date('Y-m-d H:i:s', strtotime("$r->date $r->time"));
+
+        $data = array(
+            "title" => $r->title,
+            "description" => $r->description,
+            "thumbnail_path" => isset($thumbnail_path) ? $thumbnail_path : '',             // Optional
+            "event_start_date_time" => $datetime,
+            //"event_end_date_time" => "",            // Optional
+            "time_zone" => config('app.timezone'),
+            'privacy_status' => $privacy_status,    // default: "public" OR "private"
+            "language_name" => "",              // default: "English
+            "tag_array" => []               // Optional and should not be more than 500 characters
+        );
+
+
+        $event = LiveEvent::where('youtube_event_id', $youtubeEventId)->first();
+        $authToken = json_decode($event->auth_token, true);
+        
+
+        $response = $ytEventObj->updateBroadcast($authToken, $data, $youtubeEventId);
+
+        if(!empty($response)) {
+            $serverUrl = $response['stream_response']['cdn']->ingestionInfo->ingestionAddress;
+            $serverKey = $response['stream_response']['cdn']->ingestionInfo->streamName;
+            $r->youtubeEventId = $response['broadcast_response']['id'];
+            $r->streamUrl = $serverUrl;
+            $r->streamKey = $serverKey;
+            $r->youtubeEventId = $youtubeEventId;
+            $r->datetime = $datetime;
+            //$r->end_datetime = $end_datetime;
+
+        }
+
+        $edited_event = $this->update($r);
+
+        return $edited_event;
+
+    }
+
+
+    public function deleteEvent($youtubeEventId)
+    {
+        $ytEventObj = new YoutubeLiveEventService();
+
+        $event = LiveEvent::where('youtube_event_id', $youtubeEventId)->first();
+        $authToken = json_decode($event->auth_token, true);
+
+        $ytEventObj->deleteEvent($authToken, $youtubeEventId);
+        $event->status = 'deleted';
+        $event->save();
+        
+        return 1;
     }
 
     public function testEventLiveStream($event_id)
@@ -240,6 +325,9 @@ class LiveEventController extends Controller
         $event->youtube_event_id = $r->youtubeEventId;
         $event->stream_url = $r->streamUrl;
         $event->stream_key = $r->streamKey;
+        $event->schedule_start_datetime = $r->datetime;
+        //$event->schedule_end_time = $r->end_datetime;
+
 
 
         $event->save();
@@ -260,26 +348,31 @@ class LiveEventController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Video  $video
-     * @return \Illuminate\Http\Response
-     */
-    public function edit()
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Video  $video
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request)
-    {
-        //
+    public function update($r)
+    {   
+        $event = LiveEvent::where('youtube_event_id', $r->youtubeEventId)->first();
+        $event->title = $r->title;
+        $event->description = $r->description;
+        $event->user_id = Auth::id();
+        $event->status = 'upcoming';
+        $event->image = $r->thumbnail_path;
+        $event->private = $r->privacy_status == 'true' ? 1 : 0;
+        $event->youtube_event_id = $r->youtubeEventId;
+        $event->stream_url = $r->streamUrl;
+        $event->stream_key = $r->streamKey;
+        $event->schedule_start_datetime = $r->datetime;
+        //$event->schedule_end_datetime = $r->end_datetime;
+
+
+        $event->save();
+
+        return $event;
     }
 
     /**

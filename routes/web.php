@@ -18,12 +18,9 @@ Route::group(['middleware' => ['web']], function () {
 	Route::get('/', 'PageController@index')->name('landing');
 
 	Route::post('user/logout','Auth\LoginController@userLogout')->name('user.logout');
-	
-	// handles all routes for normal users as fans and artists login
+
+	// handles all auth routes for normal users which are fans and artists
 	Auth::routes();
-
-
-
 	
 });
 
@@ -150,15 +147,6 @@ Route::group(['middleware' => ['auth:web']], function () {
 
 
 
-
-
-
-
-
-
-
-
-
 	//song routes for authenticated users
 	Route::group(['prefix' => 'artist'], function () {
 
@@ -217,22 +205,17 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::get('/google-login', 'LiveEventController@login')->name('event.login');
 
 	Route::post('/create-event/', 'LiveEventController@createLiveEvent')->name('event.store');
-	Route::get('/test-event/{event_id}', 'LiveEventController@testEventLiveStream')->name('event.start');
+	Route::post('/edit-event/{event_id}', 'LiveEventController@updateEvent')->name('event.update');
+	Route::delete('/delete-event/{event_id}', 'LiveEventController@deleteEvent')->name('event.delete');
+
+	Route::get('/test-event/{event_id}', 'LiveEventController@testEventLiveStream')->name('event.test');
 	Route::get('/start-event/{event_id}', 'LiveEventController@startEventLiveStream')->name('event.start');
+	Route::get('/stop-event/{event_id}', 'LiveEventController@stopEventLiveStream')->name('event.stop');
 
-	Route::get('/stop-event/{event_id}', 'LiveEventController@stopEventLiveStream')->name('event.start');
 	Route::get('/get-events/', 'LiveEventController@getEvents')->name('event.youtube-list');
-
 	Route::get('/get-event-by-id/{event_id}', 'LiveEventController@getEventById')->name('event.db-single');
 	Route::get('/watch-live/{user_id}', 'LiveEventController@live')->name('event.live');
 
-
-
-
-
-
-
-	
 
 
 

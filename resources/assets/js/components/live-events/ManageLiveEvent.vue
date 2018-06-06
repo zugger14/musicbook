@@ -1,13 +1,19 @@
 <template>
     <div>
-    	<a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#LiveModal' + event_id">Manage live settings</a>
+    	<a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#LiveModal' + event_id">live control panel </a>
 
+    	<a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#EditModal' + event_id"><i class="fa fa-pencil"></i>Edit</a>
+
+        <a href="" class="btn btn-md btn-danger"  @click.prevent="deleteEvent(event_id)"><i class="fa fa-trash"></i>delete</a>
+
+
+    	<!-- live settings modal -->
         <div class="modal fade" :id="'LiveModal' + event_id" tabindex="-1" role="dialog" aria-labelledby="LiveModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h4 class="modal-title" id="LiveModalLabel">{{ event.title }} [{{ event.created_at }}]</h4>
-                        <button type="button" class="close" ref="closemodal" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" ref="closelivemodal" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -18,8 +24,8 @@
 	                        </div>
 	                        <div class="col-md-6">
 								<div class="form-group">
-		                            Stream Url: <input ref="url" disabled class="from-control" type="text" :value="event.stream_url"><span class="fa fa-pencil" @click="copy"></span><br>
-		                            Stream Name/Key: <input class="from-control" type="text" :value="event.stream_key"><br>
+		                            Stream Url: <input ref="url" disabled class="form-control" type="text" :value="event.stream_url">
+		                            Stream Name/Key: <input class="form-control" type="text" :value="event.stream_key">
 								</div>
 	                        </div>
 	                    </div>
@@ -35,6 +41,63 @@
                 </div>
             </div>
         </div><!-- end of modal -->
+
+
+        <!-- edit event modal -->
+        <div class="modal fade" :id="'EditModal' + event_id" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title" id="EditModalLabel"> Edit Events </h4>
+                        <button type="button" class="close" ref="closemodal" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                    	<div class="row">
+                    	<div class="col-md-4">
+	                    	<div class="form-group">
+								<div id="image_previews">
+		                            <button type="button" @click="browseImage" class="btn btn-md btn-default">Choose image:</button>
+		                            <img ref='image' class="" v-bind:src="event.thumbnail_path" width="150px" height="150px" >
+		                            <input class="form-control-file" ref="imageinput" type="file" name="feature_image" @change="showImage($event)">
+		                        </div>
+		                    </div>
+                    	</div>
+                    	<div class="col-md-8">
+	                    	<div class="form-group">
+	                            <label for="title">Live Event Title:</label>
+	                            <input type="text"  v-model="event.title" class="form-control" required maxlength="255">
+	                        </div>
+
+	                        <div class="form-group">
+	                            <label for="description">Live Event Description:</label>
+	                            <input type="text"  v-model="event.description" class="form-control" required maxlength="255">
+	                        </div>
+	                        <div class="form-group">
+	                            <label for="date">Live Event Date </label>
+	                            <input type="date" v-model="event.date" class="form-control" required>
+	                        </div>
+	                        <div class="form-group">
+	                            <label for="time">Live Event Time </label>
+	                            <input type="time" v-model="event.time" class="form-control" required>
+	                        </div>
+
+	                        <div class="form-group">
+	                              <label><input type="checkbox" v-model="event.privacy_status">private</label>
+	                        </div>
+                    	</div>	
+                    	</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary"  data-dismiss="modal">close</button>
+                        
+                        <button class="btn btn-primary" @click.prevent="editEvent(event.youtube_event_id)">save</button>
+                    </div>
+                </div>
+            </div>
+        </div><!-- end of modal -->
+
     </div>
 </template>
 
@@ -50,16 +113,40 @@
 
         data() {
         	return {
-        		event:{},
+        		event:
+        		{
+        			title:'',
+                    description:'',
+                    privacy_status:'',
+                    thumbnail_path:'',
+                    image:'',
+                    date:'',
+                    time: ''
+        		},
+
         		test_pass: false
 
         	}
         },
 
         methods: {
+
+        	browseImage() {
+                this.$refs.imageinput.click();
+            },
+
+            showImage(event) {
+                this.event.image = event.target.files[0];
+                this.event.thumbnail_path = URL.createObjectURL(event.target.files[0]);
+            },
+
         	getEvent() {
 	            axios.get('/get-event-by-id/' + this.event_id).then(response => {
 	                this.event = response.data;
+	                this.event.thumbnail_path = response.data.image; //for thumbnail display of event image
+                    if(response.data.private == 1) {//for setting private checkbox as in hte db
+                        this.event.privacy_status = true;
+                    }
 
 	            }).catch(error => {
 	                console.log(error)
@@ -73,16 +160,52 @@
 				document.execCommand('copy');
 	        },
 
-	        editEvent() {
+	        editEvent(event_id) {
+                //stop edit at the time of live
+	        	let formData = new FormData();
+                formData.append('title', this.event.title);
+                formData.append('description', this.event.description);
+                formData.append('thumbnail_path', this.event.thumbnail_path);
+                formData.append('privacy_status', this.event.privacy_status);
+                formData.append('image', this.event.image);
+                formData.append('date', this.event.date);
+                formData.append('time', this.event.time);
+
+                axios.post('/edit-event/' + event_id, formData ).then(response => {//when put formdata oesnot work or can spoof using __method=put 
+                
+                    console.log(response.data);
+                    this.event = {};
+                    this.closeModal('edit');
+                    location.reload();
+
+                }).catch(error => {
+                    console.log(error);
+                })
+	        },
+
+	        deleteEvent(event_id) {
+                //cannot delete at the time of live
+
+                //console.log(event_id);
+                if(confirm('are you sure to delete this event ?')) {  
+                    axios.delete('/delete-event/' + event_id).then(response => {
+                        if(response.data == 1){
+                            //console.log(response.data);
+                            location.reload();
+                        }
+
+                    }).catch(error => {
+                        console.log(error);
+                    })
+                }
 
 	        },
 
-	        deleteEvent() {
-
-	        },
-
-	        closeModal() {
-	        	this.$refs.closemodal.click();
+	        closeModal($select) {
+                if($select == 'live') {
+    	        	this.$refs.closelivemodal.click();
+                }
+                this.$refs.closemodal.click();
 	        },
 
 	        testEvent(event_id) {
@@ -100,7 +223,8 @@
 	        startEvent(event_id) {
 	            axios.get('/start-event/' + event_id).then(response => {
 	                console.log(response.data);
-	                this.closemodal;
+	                this.closeModal('live');
+                    location.reload();
 
 	            }).catch(error => {
 	                console.log(error);
@@ -108,9 +232,11 @@
 	        },
 
 	        stopEvent(event_id) {
-	            axios.get('/stop-event/ ' + event_id).then(response => {
-	                console.log(response.data);
-	                this.closeModal();
+
+                axios.get('/stop-event/ ' + event_id).then(response => {
+                    console.log(response.data);
+                    this.closeModal('live');
+                    location.reload();
 
 	            }).catch(error => {
 	                console.log(error);

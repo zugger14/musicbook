@@ -61,6 +61,7 @@
                             <li><a href="{{ route('profile.show', Auth::user()->slug) }}">profile(artist)</a></li>
                             <li><a href="{{ route('artist.tracks') }}">Songs</a></li>
                             <li><a href="{{ route('artists.playlist', Auth::id())  }}">Playlists</a></li>
+                            <li><a href="{{ route('event.index')  }}">Live Events</a></li>
                             <li><a href="">account settings</a></li>
                             <li role="separator" class="divider"></li>
                             <li>

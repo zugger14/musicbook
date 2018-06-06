@@ -18,7 +18,9 @@
                     @endif
                 </div>
             </div>
-            <live-events></live-events>
+            @if(isset($token))
+                <live-events></live-events>
+            @endif
         </div>
     </div>
 @endsection
