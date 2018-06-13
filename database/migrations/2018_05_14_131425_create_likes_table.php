@@ -18,6 +18,10 @@ class CreateLikesTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->integer('song_id')->unsigned();
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('song_id')->references('id')->on('songs')->onDelete('cascade');
+
         });
     }
 

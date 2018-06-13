@@ -48,7 +48,6 @@
                 if(this.friends.length < this.count) {
                     this.no_data = true;
                 }
-                //return this.show_friends;
             }
         },
 

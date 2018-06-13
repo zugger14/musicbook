@@ -8,6 +8,13 @@ use  SahusoftCom\YoutubeApi\YoutubeLiveEventService;//for live service
 use App\LiveEvent;
 use Log;
 use Auth;
+use App\Favourite;
+use Notification;
+use App\Notifications\NewLiveEvent;
+use App\Notifications\ActiveLiveEvent;
+use Session;
+
+
 
 
 class LiveEventController extends Controller
@@ -21,7 +28,7 @@ class LiveEventController extends Controller
     {   
         $event = LiveEvent::where('user_id', Auth::id())->first();
 
-        if(!empty($event)) {
+        if (!empty($event)) {
             $authToken = json_decode($event->auth_token,true);
 
             return view('artists.live_event')->withToken($authToken);
@@ -31,34 +38,75 @@ class LiveEventController extends Controller
 
     }
 
-    public function live($user_id)
+    public function live($event_id)
+    {
+        $event = LiveEvent::where('youtube_event_id',$event_id)->first();
+        $token = json_decode($event->auth_token, true);
+
+        $ytEventObj = new YoutubeLiveEventService();
+        $youtube_event = $ytEventObj->getActiveEvent($token);
+
+        if (!empty($youtube_event)) {
+            if ($youtube_event->id == $event_id) {
+                Session::flash('success','The live event is streaming..');
+                return view('livestreams.livestream')->with('event_id', $event_id);
+            }
+        }
+
+        Session::flash('success','The live has been completed.');
+        return view('livestreams.livestream')->with('event_id', $event_id);
+
+
+    }
+/*
+     public function videos($event_id)
+    {
+        return view('livestreams.livestream')->with('event_id', $event_id);    
+
+    }*/
+
+    public function liveId($user_id)
     {
         $event = LiveEvent::where('user_id',$user_id)->first();
         $token = json_decode($event->auth_token, true);
 
         $ytEventObj = new YoutubeLiveEventService();
-        $event = $ytEventObj->getActiveEvent($token);
+        $youtube_event = $ytEventObj->getActiveEvent($token);
 
-        if(!empty($event)) {
-            return view('livestreams.livestream')->with('event_id', $event->id);
-        }
-        return 'no any live session from this user';
-
+        return $youtube_event->id;
     }
 
     public function getEvents()
     {
         $event = LiveEvent::where('user_id', Auth::id())->where('private', 0)->first();
-        if(!empty($event)) {
+        if (!empty($event)) {
             $token = json_decode($event->auth_token, true);
             $ytEventObj = new YoutubeLiveEventService();
             $events = $ytEventObj->getEvents($token);
 
-            return $events;//[containes array 0=>all bordcast reposne and 1 contains next page token ]
+            return $events;//[contains array 0=>all bordcast response and 1 contains next page token ]
         }
 
         return 0;
 
+    }
+
+
+    public function getMoreEvents($pageToken)
+    {
+        $event = LiveEvent::where('user_id', Auth::id())->where('private', 0)->first();
+        if (!empty($event)) {
+            $token = json_decode($event->auth_token, true);
+            $ytEventObj = new YoutubeLiveEventService();
+            try{
+                $events = $ytEventObj->getMoreEvents($token, $pageToken);
+            } catch (Exception $e) {
+                return $e->getMessage();
+            }
+
+            return $events;//[contains array 0=>all bordcast response and 1 contains next page token ]
+        }
+        return response()->json('no any event for current user');
     }
 
     public function getEventById($event_id)
@@ -80,17 +128,13 @@ class LiveEventController extends Controller
         $code = request()->get('code');
         $identifier = request()->get('state');
         $authToken = $authServiceObject->getToken($code);
-
-/*      $event = LiveEvent::where('user_id', Auth::id())->first();
-        $event->auth_token = $authToken;
-        $event->save();
-*/            
+            
         return view('artists.live_event')->withToken($authToken);
     }
 
     public function createLiveEvent(Request $r)
     {   
-        if($r->privacy_status == 'true') {
+        if ($r->privacy_status == 'true') {
             $privacy_status = 'private';
         } else {
             $privacy_status = 'public';
@@ -104,7 +148,7 @@ class LiveEventController extends Controller
             $thumbnail_path = $location . $filename;
             
             $r->thumbnail_path = $filename;
-           // $r->request->add(['thumbnail_path'=>$filename]);add or set(key,value)
+            //$r->request->add(['thumbnail_path'=>$filename]);add or set(key,value)
         } 
 
         $datetime = date('Y-m-d H:i:s', strtotime("$r->date $r->time"));
@@ -143,7 +187,6 @@ class LiveEventController extends Controller
             $r->datetime = $datetime;
             //$r->end_datetime = $end_datetime;
 
-
         }
 
         $stored_event = $this->store($r);
@@ -160,7 +203,7 @@ class LiveEventController extends Controller
     {
         $ytEventObj = new YoutubeLiveEventService();
 
-        if($r->privacy_status == 'true') {
+        if ($r->privacy_status == 'true') {
             $privacy_status = 'private';
         } else {
             $privacy_status = 'public';
@@ -182,7 +225,7 @@ class LiveEventController extends Controller
         $data = array(
             "title" => $r->title,
             "description" => $r->description,
-            "thumbnail_path" => isset($thumbnail_path) ? $thumbnail_path : '',             // Optional
+            "thumbnail_path" => isset($thumbnail_path) ? $thumbnail_path : '',  // Optional
             "event_start_date_time" => $datetime,
             //"event_end_date_time" => "",            // Optional
             "time_zone" => config('app.timezone'),
@@ -198,7 +241,7 @@ class LiveEventController extends Controller
 
         $response = $ytEventObj->updateBroadcast($authToken, $data, $youtubeEventId);
 
-        if(!empty($response)) {
+        if (!empty($response)) {
             $serverUrl = $response['stream_response']['cdn']->ingestionInfo->ingestionAddress;
             $serverKey = $response['stream_response']['cdn']->ingestionInfo->streamName;
             $r->youtubeEventId = $response['broadcast_response']['id'];
@@ -244,10 +287,10 @@ class LiveEventController extends Controller
          * & in response it will return us the stream status.
          */
 
-        $event = LiveEvent::where('id', $event_id)->where('user_id', Auth::id())->first();
-
+        $event = LiveEvent::where('youtube_event_id', $event_id)->where('user_id', Auth::id())->first();
         $authToken = json_decode($event->auth_token, true);
-        $youtubeEventId = $event->youtube_event_id;
+        $youtubeEventId = $event_id;
+        
         $streamStatus = $ytEventObj->transitionEvent($authToken, $youtubeEventId, $broadcastStatus);
         return response()->json($streamStatus);
 
@@ -259,16 +302,26 @@ class LiveEventController extends Controller
 
         $broadcastStatus = ["live"];
 
-        $event = LiveEvent::where('id', $event_id)->where('user_id', Auth::id())->first();
+        $event = LiveEvent::where('youtube_event_id', $event_id)->where('user_id', Auth::id())->first();
 
         $authToken = json_decode($event->auth_token, true);
 
-        $youtubeEventId = $event->youtube_event_id;
+        $youtubeEventId = $event_id;
 
         $streamStatus = $ytEventObj->transitionEvent($authToken, $youtubeEventId, $broadcastStatus);
 
         $event->status = 'active';
         $event->save();
+
+        $favourites = Favourite::where('followed_id', Auth::id())->where('follower_id', '!=', Auth::id())->get();
+        $users = array();
+        foreach ($favourites as $favourite) {
+            $users[] = $favourite->follower;
+        }
+        if (!empty($users))
+            Notification::send($users, new ActiveLiveEvent(Auth::user() ,$event));
+
+        Auth::user()->notify(new ActiveLiveEvent(Auth::user() ,$event));
 
         return response()->json($streamStatus);
 
@@ -278,15 +331,13 @@ class LiveEventController extends Controller
     public function stopEventLiveStream($event_id)
     {   
         $ytEventObj = new YoutubeLiveEventService();
+
         $broadcastStatus = ["complete"];
-        /**
-         * $broadcastStatus - ["complete"]
-         * Once live streaming gets started succesfully. We can stop the streaming the video by passing broadcastStatus="complete" and in response it will give us the stream status.
-         */
-        $event = LiveEvent::where('id', $event_id)->where('user_id', Auth::id())->first();
+
+        $event = LiveEvent::where('youtube_event_id', $event_id)->where('user_id', Auth::id())->first();
 
         $authToken = json_decode($event->auth_token, true);
-        $youtubeEventId = $event->youtube_event_id;
+        $youtubeEventId = $event_id;
         $ytEventObj->transitionEvent($authToken, $youtubeEventId, $broadcastStatus); // $broadcastStatus = ["complete"]
 
         $event->status = 'completed';
@@ -328,9 +379,15 @@ class LiveEventController extends Controller
         $event->schedule_start_datetime = $r->datetime;
         //$event->schedule_end_time = $r->end_datetime;
 
-
-
         $event->save();
+
+        $favourites = Favourite::where('followed_id', Auth::id())->where('follower_id', '!=', Auth::id())->get();
+        $users = array();
+        foreach ($favourites as $favourite) {
+            $users[] = $favourite->follower;
+        }
+        if (!empty($users))
+            Notification::send($users, new NewLiveEvent(Auth::user() ,$event));
 
         return $event;
     }

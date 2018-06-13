@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Notifications\SongPurchased;
 use Paypalpayment;
 use App\Order;
 use Auth;
 use App\Song;
+use App\User;
 
 class PaypalController extends Controller
 {
@@ -24,18 +26,22 @@ class PaypalController extends Controller
     {//gets the payment information after paypal payment success and stores in order table and calls show() method to show detail
         $payment_id = request()->get('paymentId');
 
-        $order = Order::where('paypal_paymentid', $payment_id)->first();//selects previousy submitted form for purchase of songs..
+        $order = Order::where('paypal_paymentid', $payment_id)->where('user_id', Auth::id())->first();//selects previousy submitted form for purchase of songs..
 
         $order->paypal_payerid = request()->get('PayerID'); 
         $order->payal_token = request()->get('token');//payal bhayecha db ma
         $order->paid_order = 1;
 
+
         $order->save();
         //$payment = $this->show($payment_id);
 
+        $song = Song::find($order->song_id);
+        $user = User::find($song->user_id);
+        $user->notify(new SongPurchased(Auth::user(), $song, $order));
+
         return redirect()->route('songs.download', $payment_id);
 
-        /*$this->show($payment_id);*/
     }
 
     public function show($payment_id)//payment by particular payment id
@@ -120,7 +126,7 @@ class PaypalController extends Controller
         //Payment Amount
         $amount = Paypalpayment::amount();
         $amount->setCurrency("USD")
-                // the total is $17.8 = (16 + 0.6) * 1 ( of quantity) + 1.2 ( of Shipping).
+        //the total is $17.8 = (16 + 0.6) * 1 ( of quantity) + 1.2 ( of Shipping).
         ->setTotal("20")
         ->setDetails($details);
 
@@ -157,11 +163,11 @@ class PaypalController extends Controller
         }
 
         //check state then go to next download
-/*       if($payment->state === "approved") {
+        /*if($payment->state === "approved") {
         return view('songs.download')->withPayment($payment);*/
         //store current user in order table for giving them download acces for songs later on also..
         //then route to download method
-  //     }
+        //}
         return response()->json([$payment->toArray()], 200);
     }
 
@@ -176,7 +182,7 @@ class PaypalController extends Controller
         // Base Address object used as shipping or billing
         // address in a payment. [Optional]
 
-    /*   $shippingAddress= Paypalpayment::shippingAddress();
+        /*$shippingAddress= Paypalpayment::shippingAddress();
         $shippingAddress->setLine1("3909 Witmer Road")
         ->setLine2("Niagara Falls")
         ->setCity("Niagara Falls")
@@ -185,7 +191,7 @@ class PaypalController extends Controller
         ->setCountryCode("US")
         ->setPhone("716-298-1822")
         ->setRecipientName("Jhone");
-    */
+        */
         // ### Payer
         // A resource representing a Payer that funds a payment
         // Use the List of `FundingInstrument` and the Payment Method
@@ -198,9 +204,9 @@ class PaypalController extends Controller
         ->setDescription('about description')
         ->setCurrency('USD')
         ->setQuantity(1)
-       // ->setTax(0.3)
+        //->setTax(0.3)
         ->setPrice($r->amount);
-    /*
+        /*
         $item2 = Paypalpayment::item();
         $item2->setName('Granola bars from paypal')
         ->setDescription('Granola Bars with Peanuts')
@@ -208,22 +214,22 @@ class PaypalController extends Controller
         ->setQuantity(5)
         ->setTax(0.2)
         ->setPrice(2);
-    */
+        */
         $itemList = Paypalpayment::itemList();
         $itemList->setItems([$item1]);
         // ->setShippingAddress($shippingAddress);
 
-    /*  $details = Paypalpayment::details();
+        /*$details = Paypalpayment::details();
         $details->setShipping("1.2")
         ->setTax("1.3")
-                //total of items prices
+        //total of items prices
         ->setSubtotal("17.5");
-    */
+        */
         
         //Payment Amount
         $amount = Paypalpayment::amount();
         $amount->setCurrency("USD")
-        // the total is $17.8 = (16 + 0.6) * 1 ( of quantity) + 1.2 ( of Shipping).
+        //the total is $17.8 = (16 + 0.6) * 1 ( of quantity) + 1.2 ( of Shipping).
         ->setTotal($r->amount);
         //->setDetails($details);
 
@@ -263,11 +269,12 @@ class PaypalController extends Controller
         } catch (\PayPalConnectionException $ex) {
             return response()->json(["error" => $ex->getMessage()], 400);
         }
-    
+        
+        //after payment success
         $payment_id = $payment->id;
         $order = Order::orderBy('id', 'DESC')->where('user_id', Auth::id())->first();//orderby desc very imp as user may have cancelde paypal process after entry inside our system's  order table
-        $order->paypal_paymentid = $payment_id;
-        //add other ids as well like payer id but it is not calculated at this time i think check it once.
+        $order->paypal_paymentid = $payment_id;//add other ids as well like payer id but it is not calculated at this time i think check it once.
+        $order->total_amount = $r->amount;
         $order->save();
 
         return response()->json([$payment->toArray(), 'approval_url' => $payment->getApprovalLink()], 200);

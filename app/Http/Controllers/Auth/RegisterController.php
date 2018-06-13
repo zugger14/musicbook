@@ -7,6 +7,8 @@ use App\Profile;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Notifications\EmailVerify;
+use Session;
 
 class RegisterController extends Controller
 {
@@ -37,7 +39,7 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        $this->middleware('guest')->except('verify');
     }
 
     /**
@@ -78,13 +80,25 @@ class RegisterController extends Controller
             'is_artist' => $data['is_artist'],
             'password' => bcrypt($data['password']),
             'slug' => str_slug($data['name']),
-            'avatar' => $avatar
+            'avatar' => $avatar,
+            'token' => str_random(25)
         ]);
       
         Profile::create([
             'user_id' => $user->id
         ]);
 
+        $user->notify(new EmailVerify($user->token));
+
         return $user;
+    }
+
+    public function verify($token)
+    {
+        $user = User::where('token', $token)
+                      ->update(['token' => null]);
+        Session::flash('success','Your account has been verified. Now you can login with verified email');
+
+        return redirect()->route('landing');
     }
 }

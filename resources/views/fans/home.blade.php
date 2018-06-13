@@ -13,7 +13,7 @@
                 </div>
             </div> --}}
 
-            <song-feeds></song-feeds>
+            <song-feeds :is_artist="{{ Auth::user()->is_artist }}"></song-feeds>
 
         </div>
     </div>

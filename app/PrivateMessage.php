@@ -14,7 +14,7 @@ class PrivateMessage extends Model
 
     protected $appends = ['sender', 'receiver'];
 
-    public function getCreatedAttribute($value)
+    public function getCreatedAtAttribute($value)
     {
     	return Carbon::parse($value)->diffForHumans();
     }

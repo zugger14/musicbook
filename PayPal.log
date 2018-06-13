@@ -2156,3 +2156,74 @@
 [30-05-2018 12:30:38] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 404
 [30-05-2018 12:30:38] PayPal\Core\PayPalHttpConnection : ERROR: Got Http response code 404 when accessing https://api.sandbox.paypal.com/v1/payments/payment/undefined. {"name":"INVALID_RESOURCE_ID","message":"Requested resource ID was not found.","information_link":"https://developer.paypal.com/docs/api/payments/#errors","debug_id":"bba9f1d861659"}
 [04-06-2018 06:35:33] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 06:57:02] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 06:57:05] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 06:57:05] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[08-06-2018 06:57:07] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[08-06-2018 07:23:19] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 07:23:21] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 07:23:21] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[08-06-2018 07:23:23] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[08-06-2018 07:26:04] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 07:26:06] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 07:26:06] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/PAY-82243576HS5763535LMNC52Y
+[08-06-2018 07:26:07] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 07:26:18] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 07:26:20] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 07:26:20] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/undefined
+[08-06-2018 07:26:21] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 404
+[08-06-2018 07:26:21] PayPal\Core\PayPalHttpConnection : ERROR: Got Http response code 404 when accessing https://api.sandbox.paypal.com/v1/payments/payment/undefined. {"name":"INVALID_RESOURCE_ID","message":"Requested resource ID was not found.","information_link":"https://developer.paypal.com/docs/api/payments/#errors","debug_id":"52e7fb9b7b715"}
+[08-06-2018 07:31:44] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 07:31:46] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 07:31:46] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[08-06-2018 07:31:48] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[08-06-2018 07:35:22] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 07:35:24] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 07:35:24] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[08-06-2018 07:35:26] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[08-06-2018 07:36:04] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[08-06-2018 07:36:05] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[08-06-2018 07:36:05] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/PAY-68112014TX242115WLMNDDPQ
+[08-06-2018 07:36:07] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:33:41] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:33:45] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:33:45] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[10-06-2018 18:33:47] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[10-06-2018 18:33:52] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:33:54] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:33:54] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[10-06-2018 18:33:56] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[10-06-2018 18:34:25] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:34:26] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:34:26] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[10-06-2018 18:34:29] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[10-06-2018 18:34:29] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:34:30] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:34:30] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[10-06-2018 18:34:32] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[10-06-2018 18:35:33] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:35:34] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:35:34] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[10-06-2018 18:35:36] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[10-06-2018 18:37:07] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:37:09] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:37:09] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/PAY-5R501638DY3486148LMOW66A
+[10-06-2018 18:37:11] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:37:11] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:37:13] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:37:13] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/undefined
+[10-06-2018 18:37:14] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 404
+[10-06-2018 18:37:14] PayPal\Core\PayPalHttpConnection : ERROR: Got Http response code 404 when accessing https://api.sandbox.paypal.com/v1/payments/payment/undefined. {"name":"INVALID_RESOURCE_ID","message":"Requested resource ID was not found.","information_link":"https://developer.paypal.com/docs/api/payments/#errors","debug_id":"7975f6dea92d6"}
+[10-06-2018 18:39:18] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:39:19] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:39:19] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/payments/payment
+[10-06-2018 18:39:21] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 201
+[10-06-2018 18:41:03] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:41:04] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:41:04] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/PAY-856908372T513471WLMOXAWI
+[10-06-2018 18:41:07] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:41:07] PayPal\Core\PayPalHttpConnection : INFO: POST https://api.sandbox.paypal.com/v1/oauth2/token
+[10-06-2018 18:41:08] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 200
+[10-06-2018 18:41:08] PayPal\Core\PayPalHttpConnection : INFO: GET https://api.sandbox.paypal.com/v1/payments/payment/undefined
+[10-06-2018 18:41:10] PayPal\Core\PayPalHttpConnection : INFO: Response Status 	: 404
+[10-06-2018 18:41:10] PayPal\Core\PayPalHttpConnection : ERROR: Got Http response code 404 when accessing https://api.sandbox.paypal.com/v1/payments/payment/undefined. {"name":"INVALID_RESOURCE_ID","message":"Requested resource ID was not found.","information_link":"https://developer.paypal.com/docs/api/payments/#errors","debug_id":"88f10b21459fa"}

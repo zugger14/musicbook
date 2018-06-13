@@ -1,9 +1,9 @@
 <template>
 	<div> <!-- /artist/songs/buy -->
-		<a href="" class="btn btn-md btn-default" data-toggle="modal" data-target="#paymentModal">Buy for Nrs 100</a>
+		<a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#paymentModal' + song.id ">Buy for Nrs 100</a>
 
 		<!-- Modal for song payment information before before getting approval url to paypal payment-->
-        <div class="modal fade" id="paymentModal" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
+        <div class="modal fade" :id="'paymentModal' + song.id" tabindex="-1" role="dialog" aria-labelledby="paymentModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

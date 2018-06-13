@@ -64,14 +64,14 @@ export default {
     },
     watch:{
         playlist_title() {
-
-        console.log(this.playlist_title);
+            console.log(this.playlist_title);
         },
 
         playlist_id(newval,oldval) { 
             console.log(oldval);
             console.log(newval);
         },
+        
         newplaylist() {
             console.log(this.newplaylist);
         }

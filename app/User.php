@@ -21,7 +21,7 @@ class User extends Authenticatable
     public $with=['profile'];
 
     protected $fillable = [
-        'name', 'email', 'password','slug','gender','avatar','is_artist'
+        'name', 'email', 'password','slug','gender','avatar','is_artist', 'token'
     ];
 
     /**
@@ -38,14 +38,15 @@ class User extends Authenticatable
         return $this->hasOne('App\Profile');
     }
 
-    /*  public function orders()
+    public function orders()
     {
         return $this->hasMany('App\Order');
     }
-    */
+
     public function songs()
     {
         return $this->hasMany('App\Song');
+        //->orderBy('created_at', 'desc');
     }
 
     public function events()
@@ -71,13 +72,15 @@ class User extends Authenticatable
         return $this->hasMany('App\Note');
     }
 
-
-
     public function playlists()
     {
-        return $this->hasMany('App\Playlist');
+        return $this->hasMany('App\Playlist')->latest();
     }
 
+    public function favourite()
+    {
+        return $this->hasMany('App\Favourite')->latest();
+    }
 
     public function getAvatarAttribute($avatar)//changes avatar attribute before acces from anythwere $user->avatar
     {

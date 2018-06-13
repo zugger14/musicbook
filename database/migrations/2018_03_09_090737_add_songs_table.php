@@ -14,31 +14,21 @@ class AddSongsTable extends Migration
     public function up()
     {
         Schema::create('songs', function (Blueprint $table) {
-            $table->increments('id');
+            $table->increments('id')->unsigned();
             $table->string('title');
-            $table->integer('user_id')->unsigned()->nullable();
-
+            $table->integer('user_id')->unsigned();
             $table->integer('album_id')->unsigned()->nullable();
-
-            $table->integer('lyrics_id')->unsigned()->nullable();
             $table->double('length')->nullable();
-
             $table->string('song_filename');
             $table->string('song_description')->nullable();
-
-
-
-
             $table->string('image')->nullable();
-
-
             $table->timestamps();
+
         });
 
         Schema::table('songs', function (Blueprint $table) {
-            //$table->foreign('album_id')->references('id')->on('albums');
-            //$table->foreign('artist_id')->references('id')->on('artists');
-            //$table->foreign('lyrics_id')->references('id')->on('lyrics');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
         });
 
     }

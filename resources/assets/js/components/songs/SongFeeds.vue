@@ -2,10 +2,12 @@
     <div class="songview">
         <div class="row">
             <div class="col-md-8">
-                <div v-if="songExists" v-for="(song,index) in songs" :key="index" class="panel panel-default">
+                <div v-if="songExists" v-for="(song,index) in show_songs" :key="index" class="panel panel-default">
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
-                        {{ song.user.name }}
+
+                         <label v-if="song.shared == true"> <b v-for="share in song.share"> {{ share.user.name }}</b> shared {{ song.user.name }}'s song </label>
+                         <label v-else> {{ song.user.name }} <favourite-add :user="song.user"></favourite-add></label>
                     </div>
 
                     <div class="panel-body" @mouseenter="addSongPlayedTime($event, song)">
@@ -35,6 +37,7 @@
                         <div class="col-md-1">
                             <like :songs="songs" :id="song.id"></like><!-- i sent whole songs thats not needed i was imitating the state implemtation so refactor this one -->
                         </div>
+                            <song-payment v-if="song.upload_type == 'private' && is_artist == 0" :song="song"></song-payment>
                         <div class="col-md-1">
                             <share :songs="songs" :id="song.id"></share>
                         </div>
@@ -44,12 +47,11 @@
                             <comment :song="song"></comment>
                         </div>
                     </div>    
-                </div>                    
+                </div>   
             </div>
-        </div>
-
-
-        <div class="col-md-3">
+        <infinite-loading v-if="songExists" @infinite="infiniteHandler"></infinite-loading>                 
+        </div>  
+        <div class="col-md-2">
             <div class="">
             <div class="panel panel-default most">
                 <div class="panel-heading"> Most Played Songs </div>
@@ -105,24 +107,26 @@ import Aplayer from 'vue-aplayer';
 import Like from './Like.vue';
 import Share from './Share.vue';
 import Comment from './Comment.vue';
-
-
+import SongPayment from './SongPayment.vue';
+import InfiniteLoading from 'vue-infinite-loading';
 
 export default {
 
-    components: { Aplayer,Like,Share,Comment },
+    props: ['is_artist'],
+
+    components: { Aplayer,Like,Share,Comment,SongPayment,InfiniteLoading },
     
     beforeMount() {
        this.getSongFeeds();
        this.getMostPlayedSongs();
        this.getRecentSongs();
 
-   },
+    },
 
-   watch: {
+    watch: {
 
-    clicked() {
-        var self = this;
+        clicked() {
+            var self = this;
             $(".aplayer-pic").unbind('click');//need to unbind many click events added whenever new mouse is over new panel body or a song panel and adding only one below
             $(".aplayer-pic").on('click', function(event) {
                 if(self.played == self.clicked) {
@@ -140,9 +144,16 @@ export default {
                     });
                 }
             });
+        },
+
+        count() {
+            this.show_songs = this.songs.slice(0,this.count);
+            if(this.songs.length < this.count) {
+                this.no_data = true;
+            }
         }
     },
-    
+
     methods: {
 
         playe() {
@@ -154,8 +165,11 @@ export default {
                 console.log((response.data))
                 if(response.data !='') { 
                     this.songExists=true;
+                    this.songs = response.data;
+                    this.show_songs = this.songs.slice(0,5);
+                } else {
+                    this.no_data = true;    
                 }
-                this.songs = response.data;
             }).catch(error => {
                 console.log(error);
             });
@@ -181,7 +195,6 @@ export default {
 
         },
 
-
         addSongPlayedTime(event, song) {// to send the songid to click event above in clicked watcher so send songplayed incerement request
             if(this.clicked == song.id) {
 
@@ -202,6 +215,23 @@ export default {
                 this.songdesc  = song.id;
                 this.hide = false;
             }
+        },
+
+        infiniteHandler($state) {
+            setTimeout(() => {
+                this.moreFeeds();
+                if(this.no_data == true) {
+                    $state.complete();
+                } else {
+                    $state.loaded();
+                }
+
+            }, 500);
+        },
+
+        moreFeeds() {
+            this.count = this.count + 5 ;
+                
         }
     },
 
@@ -213,18 +243,24 @@ export default {
                 src: '',
                 song_description: '',
                 image: '',
+                user:{}
             }
             ],
 
-            top_songs: [],
+            show_songs:[],
+            no_data:false,
+            count:5,
 
+            top_songs: [],
             recent_songs: [],
 
             clicked: '',
-            songdesc:'',
             played: '',
+            
             songExists: false,
             hide: true,
+            songdesc:'',
+
             songLocation: 'http://localhost:8000/storage/songs/'
         }
     }
@@ -249,7 +285,7 @@ export default {
         width: 200px;
         margin: 0; padding: 0;
         float:right;
-        margin-left:200px;
+        //margin-left:200px;
     }
 
     .row {

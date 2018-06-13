@@ -16,10 +16,10 @@ class AddSongTagTable extends Migration
         Schema::create('song_tag', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('song_id')->unsigned();
-            $table->foreign('song_id')->references('id')->on('songs');
+            $table->foreign('song_id')->references('id')->on('songs')->onDelete('cascade');
 
             $table->integer('tag_id')->unsigned();
-            $table->foreign('tag_id')->references('id')->on('tags');
+            $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
             $table->timestamps();
         });
     }

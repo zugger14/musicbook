@@ -22,7 +22,9 @@ window.toastr = require('toastr');
 /*
 */
 Vue.component('song-upload', require('./components/songs/SongUpload.vue'));
-Vue.component('demosong-view', require('./components/songs/DemoSongView.vue'))
+Vue.component('demosong-view', require('./components/songs/DemoSongView.vue'));
+Vue.component('purchasedsong-view', require('./components/songs/PurchasedSongView.vue'))
+
 Vue.component('song-feeds', require('./components/songs/SongFeeds.vue'))
 Vue.component('song-download', require('./components/songs/SongDownload.vue'));
 Vue.component('userpublicsong-view', require('./components/songs/UsersPublicSongView.vue'));
@@ -32,6 +34,9 @@ Vue.component('shared-song', require('./components/songs/SharedSong.vue'));
 
 Vue.component('create-live-event', require('./components/live-events/CreateLiveEvent.vue'));
 Vue.component('live-events', require('./components/live-events/LiveEvents.vue'));
+
+Vue.component('favourite-view', require('./components/favourites/FavouriteView.vue'));
+Vue.component('favourite-add', require('./components/favourites/AddFavourite.vue'));
 
 
 

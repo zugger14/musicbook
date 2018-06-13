@@ -7,6 +7,8 @@ use App\Song;
 use Illuminate\Http\Request;
 use Validator;
 use Auth;
+use App\Album;
+
 
 class PlaylistController extends Controller
 {
@@ -31,13 +33,9 @@ class PlaylistController extends Controller
     public function getPlaylistSongs($user_id)
     {   
         if (Auth::id() == $user_id) {
-            
             $playlists = Playlist::where('user_id', $user_id)->get();
-
         } else {
-
             $playlists = Playlist::where('user_id', $user_id)->where('private', 0)->get();
-
         }
         return response()->json($playlists);
     }
@@ -74,6 +72,9 @@ class PlaylistController extends Controller
             $playlist = new Playlist;
             $playlist->playlist_title = $request->playlist_title;
             $playlist->user_id = Auth::id();
+
+            $playlist->playlist_type = 'collection';
+            
             if($request->private == true) $private = 1;
             else $private = 0;
             $playlist->private = $private;
@@ -120,14 +121,13 @@ class PlaylistController extends Controller
             return response()->json($validator->errors(),500);
         }
 
-
         $validator = Validator::make($request->all(), [
             'file' => 'required',//|mimes:mpga,wav
             'name' => 'required|max:255',
             'filesize' => 'sometimes',
             //'description' => 'sometimes|max:255',
             'img' => 'nullable|mimes:jpeg,png,bmp',
-            'private' =>'sometimes',
+            'private' =>'nullable',
             //'amount'    =>'sometimes|max:10000',
             //'tags'      =>'required'
         ]);
@@ -144,6 +144,7 @@ class PlaylistController extends Controller
             if($request->private == true) $private = 1;
             else $private = 0;
             $playlist->private = $private;
+            $playlist->playlist_type = 'collection';
 
             $playlist->save();
 
@@ -257,6 +258,28 @@ class PlaylistController extends Controller
     {
         $playlist = Playlist::find($playlist_id);
         $playlist->playlist_title = $r->playlist_title;
+        $playlist->playlist_type = $r->playlist_type;
+        if($r->private == true) $private = 1;
+        else $private = 0;
+        $playlist->private = $private;
+
+        $check = Album::where('playlist_id', $playlist_id)->first();
+        if(!empty($check)) {
+            if($r->playlist_type == 'collection') {
+                $album = Album::where('playlist_id', $playlist_id)->first();
+                $album->delete();
+            }
+            $album = Album::where('playlist_id', $playlist_id)->first();
+        } else {
+            $album = new Album;
+        }
+
+        if($r->playlist_type == 'album') {
+            $album->release_date = $r->release_date;
+            //$album->playlist()->associate($playlist);
+            $album->playlist_id = $playlist_id;
+            $album->save();
+        }
 
         $playlist->save();
 
@@ -273,7 +296,6 @@ class PlaylistController extends Controller
     {
         $playlist = Playlist::find($playlist_id);
         $playlist->songs()->detach();
-
         $playlist->delete();
 
         return 'deleted the playlist ' . $playlist->playlist_title;

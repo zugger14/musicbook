@@ -18,8 +18,8 @@ class AddShareTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->integer('song_id')->unsigned();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('song_id')->references('id')->on('songs');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('song_id')->references('id')->on('songs')->onDelete('cascade');
 
             $table->timestamps();
         });

@@ -15,10 +15,15 @@ class CreateFriendshipTable extends Migration
     {
         Schema::create('friendships', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('requester');
-            $table->integer('user_requested');
+            $table->integer('requester')->unsigned();
+            $table->integer('user_requested')->unsigned();
             $table->boolean('status')->default(0);
             $table->timestamps();
+
+            $table->foreign('requester')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_requested')->references('id')->on('users')->onDelete('cascade');
+
+
         });
     }
 

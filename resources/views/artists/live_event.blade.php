@@ -19,7 +19,8 @@
                 </div>
             </div>
             @if(isset($token))
-                <live-events></live-events>
+
+                <live-events :user_id="{{ Auth::id() }}"></live-events>
             @endif
         </div>
     </div>

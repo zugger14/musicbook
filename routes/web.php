@@ -21,6 +21,8 @@ Route::group(['middleware' => ['web']], function () {
 
 	// handles all auth routes for normal users which are fans and artists
 	Auth::routes();
+	Route::get('user/verify/{token}','Auth\RegisterController@verify')->name('user.verify');
+
 	
 });
 
@@ -36,10 +38,10 @@ Route::group(['prefix' => 'admin'], function () {
 		Route::post('/login','Auth\AdminLoginController@login')->name('admin.login.submit');
 
 		//admin password reset routes
-		Route::post('/password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('admin.password.email');
 		Route::get('/password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('admin.password.request');
-		Route::post('/password/reset','Auth\AdminResetPasswordController@reset');
+		Route::post('/password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('admin.password.email');
 		Route::get('/password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('admin.password.reset');
+		Route::post('/password/reset','Auth\AdminResetPasswordController@reset');
 	});
 	
 	//routes for authenticated admin
@@ -163,6 +165,8 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friends
 	Route::get('/topsongs','SongController@getMostPlayedSongs');	
 	Route::get('/recentsongs','SongController@getMostRecentSongs');
+	Route::get('/get-purchased-songs','SongController@getPurchasedSongs');
+
 	
 	Route::get('songs/liked/{user_id}','SongController@showLikedSongPage')->name('songs.liked');
 	Route::get('/getLikedSongs/{user_id}','SongController@getLikedSongs');
@@ -190,6 +194,9 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::put('/playlist/{playlist_id}', 'PlaylistController@update')->name('playlist.update');
 	Route::post('/playlist/multi', 'PlaylistController@multiStore')->name('playlist.multistore');
 
+	//Album routes
+	//Route::post('/album/', 'AlbumController@store')->name('album.store');
+
 
 	//song notes routes
 	Route::get('/getnotes/{user_id}', 'NoteController@getNotes');
@@ -199,7 +206,7 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::delete('/notes/{user_id}', 'NoteController@destroy')->name('notes.destroy');
 
 
-	//video routes
+	//video route
 	Route::get('/live', 'LiveEventController@getToken')->name('event.auth-token');
 	Route::get('/live-events', 'LiveEventController@index')->name('event.index');
 	Route::get('/google-login', 'LiveEventController@login')->name('event.login');
@@ -212,12 +219,18 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::get('/start-event/{event_id}', 'LiveEventController@startEventLiveStream')->name('event.start');
 	Route::get('/stop-event/{event_id}', 'LiveEventController@stopEventLiveStream')->name('event.stop');
 
-	Route::get('/get-events/', 'LiveEventController@getEvents')->name('event.youtube-list');
+	Route::get('/get-events', 'LiveEventController@getEvents')->name('event.youtube-list');
+	Route::get('/get-more-events/{page_token}', 'LiveEventController@getMoreEvents')->name('event.more-youtube-list');
 	Route::get('/get-event-by-id/{event_id}', 'LiveEventController@getEventById')->name('event.db-single');
-	Route::get('/watch-live/{user_id}', 'LiveEventController@live')->name('event.live');
+	Route::get('/watch-live/{event_id}', 'LiveEventController@live')->name('event.live');
+	Route::get('/get-live-id/{user_id}', 'LiveEventController@liveId');
 
 
 
+	//favourite routes
+	Route::get('/get-all-favourite/', 'FavouriteController@getAllFavourite')->name('favourite.index');
+	Route::get('/add-favourite/{followed_id}', 'FavouriteController@addToFavourite')->name('favourite.store');
+	Route::get('/remove-favourite/{followed_id}', 'FavouriteController@removeFavourite')->name('favourite.destroy');
 
 
 });
@@ -240,7 +253,7 @@ Route::group(['middleware' => ['auth:web', 'artist']], function () {
 Route::group(['middleware' => ['auth:web', 'fan']], function () {
 
 	Route::group(['prefix' => 'fan'], function () {
-		//page routes
+		//page routes for fans
 		Route::get('home', 'PageController@fanHome')->name('fan.home');
 		Route::get('collections', 'PageController@fanCollection')->name('fan.collections');
 

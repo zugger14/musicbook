@@ -98,6 +98,7 @@
 			$friends1 = array();
 			$friendships1 = Friendship::where('requester', $this->id)
 							->where('status', 1)
+							//->orderBy('created_at','desc')
 							->get();
 
 			foreach ($friendships1 as $friendship1) {
@@ -108,6 +109,7 @@
 
 			$friendships2 = Friendship::Where('user_requested', $this->id)
 			->where('status', 1)
+			//->orderBy('created_at','desc')
 			->get();
 
 			foreach ($friendships2 as $friendship2) {
@@ -140,7 +142,6 @@
 				}
 			}
 			return $users;
-			//return response()->json($friends);
 		}
 
 		public function removePendingRequest($user_id)

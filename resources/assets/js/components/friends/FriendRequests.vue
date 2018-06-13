@@ -18,8 +18,7 @@
         props: ['user_id'],
 
         updated() {
-           this.getPendingRequests();//methods call which needs computed property will be accesed only after this lifecycle hook..it does nt work in mounted lifecycle...instead also can use another computed property for request as well
-
+           this.getPendingRequests();//methods that runs after the computed properties have been all executed in this case this.users is accesible in this lifecycle hook but not in mounted
         },
         
         mounted() {

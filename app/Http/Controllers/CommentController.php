@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-//use App\Notifications\CommentToPost;
+use App\Notifications\CommentSong;
 use App\Comment;
 use App\Song;
 use Auth;
@@ -53,6 +53,12 @@ class CommentController extends Controller
 
         $song = song::find($request->song_id);
 
+        $user = User::find($song->user_id);
+
+        if($user->id != Auth::id()) {
+            $user->notify(new CommentSong(Auth::guard('web')->user(), $song));
+        }
+        
         $comment = new Comment;
         $comment->user_id = Auth::id();
         $comment->comment = $request->comment;

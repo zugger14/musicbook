@@ -21,25 +21,30 @@
                         src: song.src,
                         pic: song.image
                         }"
-                        :float="true" :list="songs" 
-                    />  
+                        :float="true" 
+                        />  
                         <div class="panel-body">
                             {{ song.song_description }}
                         </div>
                     </div>
 
+                    <span v-for="tag in song.tags" class="label label-info">{{ tag.name }}</span>
                     <div class="panel-footer">
+
                         <span class="pull-right">
                             {{ song.created_at }}
                         </span>
                         <like :songs="songs" :id="song.id"></like>
+                        <share :songs="songs" :id="song.id"></share>
+
                         <song-payment v-if="is_artists == false" :song="song"></song-payment>
                     </div>
+                    <comment :song="song"></comment>
                 </div>
             </div>
         <div class="col-md-4">
             <div class="panel panel-default">
-                <div class="panel-heading"> Most played by users </div>
+                <div class="panel-heading"> Most sold out songs </div>
 
                 <div class="panel-body" style="height:500px;">
                     songs list                  
@@ -58,7 +63,11 @@
 import Aplayer from 'vue-aplayer';
 import Like from './Like.vue';
 import SongPayment from './SongPayment.vue';
-import ManageSong from './ManageSong.vue'
+import ManageSong from './ManageSong.vue';
+import Comment from './Comment.vue';
+import Share from './Share.vue';
+
+
 
 
 //import Crunker from 'crunker/src/crunker.js';
@@ -114,7 +123,7 @@ export default {
 
     props: ['artist_id','is_artist','tags'],
 
-    components: { Aplayer,Like,SongPayment,ManageSong },
+    components: { Aplayer,Like,SongPayment,ManageSong,Comment,Share},
     
     beforeMount() {
         //this.getAllSongs();

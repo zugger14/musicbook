@@ -26,6 +26,7 @@
     "pusher-js": "^4.2.2",
     "toastr": "^2.1.4",
     "vue-aplayer": "^1.4.3",
+    "vue-infinite-loading": "^2.3.1",
     "vue-multiselect": "^2.1.0",
     "vue-select": "^2.4.0",
     "vue-socket.io": "^2.1.1-b",

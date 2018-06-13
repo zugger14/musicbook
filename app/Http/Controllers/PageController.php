@@ -45,7 +45,7 @@ class PageController extends Controller
 
     public function artistCollection()
     {       
-        return view('artists.home');
+        return view('artists.collection');
 
     }
 
@@ -56,7 +56,7 @@ class PageController extends Controller
 
     public function fanCollection()
     {       
-        return view('fans.home');
+        return view('fans.collection');
 
     }
     

@@ -5,15 +5,18 @@ namespace App\Http\Controllers;
 use App\Song;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use App\Notifications\NewSongSale;
+use Notification;
 use Validator;
 use File;
 use Response;
 use App\Order;
 use App\User;
 use App\Like;
+use App\Favourite;
 use Auth;
 use Paypalpayment;
-
+use Carbon\Carbon;
 
 class SongController extends Controller
 {
@@ -27,7 +30,6 @@ class SongController extends Controller
         //$this->songFeeds();
     }
 
-
     /**
      * allow the user to have full song and access to download full song after payment process.
      *
@@ -35,7 +37,7 @@ class SongController extends Controller
      */
     public function getPrivateSong($song_id)//used to fetch privates song fro download to users who bought the song...
     {
-        //check if user id present in order before giving them song access.
+        //check if user id present in order table before giving them song access.
         $user_id = Auth::guard('web')->id();
         $orders = Order::where('user_id', $user_id)->where('song_id', $song_id)->get();
         foreach ($orders as $order) {
@@ -45,15 +47,12 @@ class SongController extends Controller
 
                         $music_file = asset('storage/songs') . '/' .$song->song_filename;
                         $song->src = $music_file;   
-                }       
-                //  return response()->download($song->src, $song->title)  not working how to use download response no idea
-                
+                }                       
                 return $songs;
             }
         }
         return 'please purchase before accesing this song';
     }
-
 
     public function getPublicSong($song_id)
     {
@@ -62,23 +61,43 @@ class SongController extends Controller
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }     
-
         return $songs;
+    }
+
+    public function getPrivateSongDemoBySongId($song_id )//loads single demo songs for shared private songs.
+    {
+
+        $song = Song::where('id', $song_id)->where('upload_type', 'private')->where('status', 'present')->first();
+        $getID3 = new \getID3();
+        $music_file = public_path('storage/songs/') . $song->song_filename;
+        $id3_info = $getID3->analyze($music_file);
+
+        list($t_min, $t_sec) = explode(':', $id3_info['playtime_string']);  
+
+        $time = ($t_min * 60) + $t_sec;  
+        $preview = $time / 10; // Preview time of 10 seconds  
+        $handle = fopen($music_file, 'r');
+        $content = fread($handle, filesize($music_file));  
+        $length = round(strlen($content) / $preview);
+        $start_length = $length * 0.1;
+        $contents = base64_encode(substr($content, $start_length, $length));
+        $song->src ='data:audio/mp3;base64,' . $contents;
+
+        return $song;
 
     }
+
 
     public function getPrivateSongDemo($artist_id )//loads all demo songs for sale purpose by individual artist
     {
         $songs = Song::where('user_id', $artist_id)->where('upload_type', 'private')->where('status', 'present')->orderBy('id', 'desc')->get();
         $getID3 = new \getID3();
         foreach ($songs as $song) {
-            //$fileContents = File::get($music_file);
+
             $music_file = public_path('storage/songs/') . $song->song_filename;
-            // return response($music_file);
             $id3_info = $getID3->analyze($music_file);
-                                     /*$id3_info = json_encode($id3_info);
-                                        return response($id3_info['playtime_string']); 
-*/          list($t_min, $t_sec) = explode(':', $id3_info['playtime_string']);  
+
+            list($t_min, $t_sec) = explode(':', $id3_info['playtime_string']);  
 
             $time = ($t_min * 60) + $t_sec;  
 
@@ -91,52 +110,13 @@ class SongController extends Controller
             $length = round(strlen($content) / $preview);
             $start_length = $length * 0.1;//starts extracting length about 0.1 percent of total length playtime
             $contents = base64_encode(substr($content, $start_length, $length));
-            //$contents = base64_encode($content);
             $song->src ='data:audio/mp3;base64,' . $contents;
-
-            /*for ($length;$length < $totallength;$length = $length*2// condition is not right to find out the next length of a song
-            )  {
-                $content = substr($content, $start_length, $length);
-                $start_length = $length;
-                //$contentl = strlen($content);
-                $contents = base64_encode($content);
-                $src[] ='data:audio/mp3;base64,' . $contents;
-            }
-*/            
-            //$song->src = $src;
-
         }
-           /*$mime_type = $id3_info['mime_type'];   
-            $headers = array(
-                'Accept-Ranges: 0-' . (filesize($music_file) -1) ,
 
-                'Content-Length:'.$length,
-                'Content-Type:' . $mime_type,
-                'Content-Disposition: inline; filename="'.$music_file.'"'
-            );
-*/          /*  $songnew = $songs->map(function ($song) use ($contents){
-                $song['file'] = $contents; brings out same content for all  song objects 
-                return $song;
-            });
-*/
         return Response::make($songs, 200);
-        //return response()->json($songs)->header($headers);
-       // return response()->json($content)->header('Content-Type', $id3_info['mime_type'])->header('Content-Length', $length);
-
-        //$length = round(strlen($content) / $preview);  
-       // $content = substr($content, $length * .66 /* Start extraction ~20 seconds in */, $length);  
-
-        /*header("Content-Type: {$id3_info['mime_type']}");  
-        header("Content-Length: {$length}"); */ 
-        //return response($content)->header('Content-Type', $id3_info['mime_type'])->header('Content-Length', $length);
-
-        //return response(storage_path());
-       // $songs['storage'] = storage_path();
-        //return response()->json($songs);
-
     }
 
-    public function viewDownSong($payment_id)   //used to show download song page after paypal payment success
+    public function viewDownSong($payment_id)//used to show download song page after paypal payment success
     {   
         try {
             $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
@@ -162,8 +142,23 @@ class SongController extends Controller
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
+        return response()->json($songs, 200);//json response can be used sending to vuejs only doesnot work if sent to blade files(protected json response error) but can send jsonecode without response thats the difference of response..
+    }
 
-        return response()->json($songs, 200);   //json response can be used sending to vuejs only doesnot work if sent to blade files(protected json response error) but can send jsonecode without response thats the difference of response..
+    public function getPurchasedSongs()//gets all purchased songs by user id
+    {   
+        $user_id = Auth::id();
+        $orders = Order::where('user_id', $user_id)->where('paid_order', 1)->get();
+        $songs_id = $orders->pluck('song_id');
+
+        $songs = Song::whereIn('id', $songs_id)->get();
+
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+        return $songs;
+
     }
 
 
@@ -174,12 +169,10 @@ class SongController extends Controller
 
     public function getLikedSongs($user_id)
     {   
-       // $user = Like::find(2);
-        //wrong with  realtion defining in foreignkey and local key i think coz we cannot use like::get() to get like->songs here
-      //  $songs = Song::where('user_id', Auth::id())->get();
         $user = User::find($user_id);
         $likes = $user->like;
         $songs = array();
+
         foreach ($likes as $like) {//also only show public songs that are liked...private songs like features should be removed lets think ;ater..
             $songs[] = $like->song;//needs [] even declared as array above FFFFF
         }
@@ -197,13 +190,18 @@ class SongController extends Controller
         $user = User::find($user_id);
         $shares = $user->share;
         $songs = array();
+
         foreach ($shares as $share) {
             $songs[] = $share->song;
         }
 
-        foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
-            $song->src = $music_file;   
+        foreach ($songs as &$song) {
+            if($song->upload_type == 'private' && $song->status == 'present') {
+                $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object pass referene in foreach
+            } else {
+                $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                $song->src = $music_file;   
+            }
         }
 
         return $songs;
@@ -212,7 +210,6 @@ class SongController extends Controller
 
     public function songFeeds() //returns all song feeds of users and their friends(basically public songs uploaded ) for users from thier added friends
     {      
-        
         $friends = Auth::guard('web')->user()->friends();
         $songfeeds = array();
         
@@ -226,20 +223,23 @@ class SongController extends Controller
         }
 
         $sharedfeeds = array();
-
         $friendsId = Auth::guard('web')->user()->friendsId();
+
         foreach ($friendsId as $fid) {
             $shared_songs = $this->getSharedSongs($fid);
             foreach ($shared_songs as $song) {
+                $song->shared = true;
                 array_push($sharedfeeds, $song);
             }
         }
+        
         $songfeeds = array_merge($songfeeds, $sharedfeeds);
-       /* 
-        $unique = collect($songfeeds)->unique();    //great solution when shared and again next user shares the shared contain the first user gets same songs many times as shared by other users so unique helps here no matter how may other users again shares the songs the first sharer gets only one shared song  on his newsfeed
-        $songfeeds = $unique->values()->all();
-*/
-        return response()->json($songfeeds); //aleady returns as response only but not json i guess
+        $songfeeds = array_reverse(array_values(array_sort($songfeeds, function ($value) {
+            return new Carbon($value['created_at']);
+        })));
+
+        //$unique = collect($songfeeds)->unique();
+        return response()->json($songfeeds);
     }
 
     /**
@@ -253,13 +253,13 @@ class SongController extends Controller
     public function store(Request $request)
     {//max amount for pricing song would be 10000
         $validator = Validator::make($request->all(), [
-            'file' => 'required|mimes:mpga,wav',
+            'file' => 'required|mimes:mpga,wav|max:20000',
             'filename' => 'required|max:255',
-            'filesize' => 'sometimes|max:2048000',
+            'filesize' => 'required|numeric|max:20',
             'description' => 'sometimes|max:255',
             'img' => 'nullable',
             'upload_type' =>'required',
-            'amount'    =>'sometimes|max:10000',
+            'amount'    =>'nullable|numeric|max:10000',
             'tags'      =>'required'
         ]);
 
@@ -272,6 +272,8 @@ class SongController extends Controller
             $song->title = $request->filename;
             $song->user_id = Auth::guard('web')->id();
             $song->upload_type = $request->upload_type;
+
+
             $song->status = 'present';
 
             if ($request->hasFile('file')) {
@@ -301,11 +303,20 @@ class SongController extends Controller
             $song->save();
             $tags = json_decode($request->tags);
             $tags_id = collect($tags)->pluck('id');
-           // return $tags_id;
+            // return $tags_id;
             $song->tags()->sync($tags_id, false);
+            
+            if($song->upload_type == 'private') {    
+                $favourites = Favourite::where('followed_id', Auth::id())->where('follower_id', '!=', Auth::id())->get();
+                $users = array();
+                foreach ($favourites as $favourite) {
+                    $users[] = $favourite->follower;
+                }
+                if (!empty($users))
+                    Notification::send($users, new NewSongSale(Auth::user() ,$song));
+            }
 
-            return response()->json("Successfully uploaded your song. ");
-
+            return response()->json(['message' =>"Successfully uploaded your song. "]);
         }
     }
 
@@ -424,7 +435,7 @@ class SongController extends Controller
 
     public function getMostPlayedSongs()
     {
-        $songs = Song::orderBy('played_time', 'desc')->limit(20)->get();
+        $songs = Song::orderBy('played_time', 'desc')->where('upload_type', 'public')->limit(20)->get();
         foreach ($songs as $song) {
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
@@ -432,9 +443,46 @@ class SongController extends Controller
         return $songs;
     }
 
-      public function getMostRecentSongs()
+    public function getMostPlayedUserSongs($user_id)
     {
-        $songs = Song::orderBy('created_at', 'desc')->limit(20)->get();
+        $songs = Song::orderBy('played_time', 'desc')->where('user_id', $user_id)->limit(20)->get();
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+        return $songs;
+    }
+
+    public function getMostSoldSongs($user_id)
+    {
+        $songs = Song::orderBy('played_time', 'desc')->where('user_id', $user_id)->limit(20)->get();
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+        return $songs;
+    }
+
+    public function getMostSoldUserSongs($user_id)
+    {
+        $songs = Order::select('*', 'COUNT(song_id) as fieldcount')
+                        ->orderBy('timestamp', 'desc')
+                        ->groupBy('song_id')
+                        ->sortBy('fieldcount', 'desc')
+                        ->get();
+
+        foreach ($songs as $song) {
+            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $song->src = $music_file;   
+        }
+        return $songs;
+    }
+
+
+
+    public function getMostRecentSongs()
+    {
+        $songs = Song::orderBy('created_at', 'desc')->where('upload_type', 'public')->limit(20)->get();
         foreach ($songs as $song) {//make dry
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   

@@ -26,6 +26,10 @@ class CreatePrivateMessagesTable extends Migration
             $table->index('receiver_id');
             $table->index(['sender_id', 'read']);
 
+            $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('receiver_id')->references('id')->on('users')->onDelete('cascade');
+
+
         });
     }
 

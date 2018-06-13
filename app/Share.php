@@ -12,7 +12,7 @@ class Share extends Model
 
     public function song()
     {
-    	return $this->belongsTo('App\Song');
+    	return $this->belongsTo('App\Song')->orderBy('created_at', 'Desc');
     }
 
     public function user()

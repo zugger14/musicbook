@@ -11,7 +11,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                      are you sure to delte thi splyist
+                      are you sure to delte this playlist
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -25,20 +25,14 @@
         <div class="col-md-8">
             <label for="playlist">playlists:</label>
             <div class="form-group">
-                <select v-model="playlist_id" class="form-control">
-                    <option selected v-for="(playlist,index) in playlists" :key="playlist.index" :value="playlist.id" >{{ playlist.playlist_title }}</option>
-
-                </select>
+                <input type="text" v-model="search" class="form-control">
             </div>
         </div>
-        <div class="col-md-8" v-for="playlist in playlists">
+        <div class="col-md-8" v-for="playlist in filteredList">
             <div class="panel panel-default">
-                <div class="panel-heading"><label v-if="!editMode"> {{ playlist.playlist_title }}</label> <input type="text" v-model="playlist.playlist_title" v-if="editMode">
-                    <span v-if="!editMode" title="edit" class="glyphicon glyphicon-pencil" @click="editMode = true" ></span>
-                    <div v-if="editMode">
-                        <button class="btn btn-success btn-sm" @click="editPlaylist(playlist)"> save </button> 
-                        <button class="btn btn-success btn-sm" @click="cancelEdit"> cancel </button> 
-                    </div>
+                <div class="panel-heading">{{ playlist.playlist_title }}</label>
+                    <label class="text-center" v-if="playlist.playlist_type == 'album' && playlist.album !=null">{{ playlist.album.release_date }}</label>
+                    <edit-playlist :playlist="playlist"></edit-playlist>
                     <div class="pull-right">
                         <span title="delete" class="glyphicon glyphicon-trash" @click="storePlaylistId(playlist)" data-target="#DeleteModal" data-toggle="modal" ></span>
                     </div>
@@ -54,58 +48,41 @@
 </template>
 
 <script>
+
+import EditPlaylist  from './EditPlaylist.vue';
+
 export default {
 
     props: ['user_id'],
 
+    components: {EditPlaylist},
+    
     mounted() {
         console.log('playlist Component mounted.');
-        
-        this.getPlaylistSongs();
 
+        this.getPlaylistSongs();
     },
 
     watch: {
-       'playlists.playlist_title': function() { //not woring so i have instead loaded all data once again thorug api call if canceled
-            console.log('changing');
-       }
+        search() {
+            //console.log(this.playlists);
+           this.filteredList = this.playlists.filter( (playlist) => {
+               return playlist.playlist_title.split(" ").join("").toLowerCase().includes(this.search.split(" ").join("").toLowerCase())
+            })
+        }
     },
 
     methods: {
         //get all user playlists and songs inside them as well
         getPlaylistSongs() {
-          // /  console.log('entering');
            axios.get('/playlist/songs/' + this.user_id).then(response =>{
-                //if(response != '') {
-                    this.playlists = response.data;
-                    console.log(this.playlists);
-                    //console.log('okkk');
-                //}
-            }).catch(error =>{
-                console.log(error);
-            })
- 
-        },
-
-        editPlaylist(playlist) { //add private button also 
-            axios.put('/playlist/' + playlist.id, playlist).then(response =>{
-                if(response != '') {
-                    //this.playlists = response.data;
-                    this.editMode = false;
-                    //let index = this.playlists.indexOf(playlist); no need as v-mmodel automatically updates the values
-                   // this.playlists.splice(index, 1, response.data);
-                    console.log(response.data);
-                }
+                this.playlists = response.data;
+                this.filteredList = this.playlists;
+        console.log(JSON.stringify(this.playlists));
             }).catch(error =>{
                 console.log(error);
             })
         },
-
-        cancelEdit() {
-            this.editMode = false;
-            this.getPlaylistSongs();
-        },
-
 
         closemodal() {
             this.$refs.closemodal.click();
@@ -135,11 +112,12 @@ export default {
     data() {
         return {
             playlists: { songs: ''},
+            filteredList:{},
             playlist_id:'',
             delete_confirmed: false,
             removedPlaylist:'',
-            editMode:false,
-            newtitle:''
+            newtitle:'',
+            search:''
         }
     }
 }

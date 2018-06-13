@@ -18,7 +18,6 @@ class AddPaidColumnOrdersTable extends Migration
             $table->string('paypal_payerid')->nullable();
             $table->string('paypal_paymentid')->nullable();
             $table->string('payal_token')->nullable();
-
             
         });
     }

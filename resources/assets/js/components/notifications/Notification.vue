@@ -47,7 +47,7 @@
             listen() {
                 Echo.private('App.User.' + this.id)
                 .notification( (notification) => {
-                    //console.log(notification);
+                    console.log(notification.type);
                     //toastr.success("working");
                     document.getElementById('noty_audio').play();
                     toastr.success(notification.name + notification.message);

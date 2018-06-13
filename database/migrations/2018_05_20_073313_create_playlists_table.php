@@ -19,6 +19,9 @@ class CreatePlaylistsTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->boolean('private');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+
         });
     }
 

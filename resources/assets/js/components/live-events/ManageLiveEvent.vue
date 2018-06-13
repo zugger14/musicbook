@@ -20,7 +20,7 @@
                     <div class="modal-body">
                         <div class="row">
 	                        <div class="col-md-4">
-	                        	<img :src="event.image" width="100px" height="100px">
+	                        	<img :src="img" width="100px" height="100px">
 	                        </div>
 	                        <div class="col-md-6">
 								<div class="form-group">
@@ -33,15 +33,14 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary"  data-dismiss="modal">close</button>
                         
-                        <button class="btn btn-primary" v-if="event.status=='upcoming' && test_pass==false" @click.prevent="testEvent(event.id)">start event</button>
+                        <button class="btn btn-primary" v-if="event.status=='upcoming' && test_pass==false" @click.prevent="testEvent(event.youtube_event_id)">start event</button>
 
-	                    <button class="btn btn-success" v-if="event.status=='upcoming' && test_pass==true" @click.prevent="startEvent(event.id)">Go live</button>
-	                    <button class="btn btn-danger" v-if="event.status=='active'" @click.prevent="stopEvent(event.id)">stop event</button>
+	                    <button class="btn btn-success" v-if="event.status=='upcoming' && test_pass==true" @click.prevent="startEvent(event.youtube_event_id)">Go live</button>
+	                    <button class="btn btn-danger" v-if="event.status=='active'" @click.prevent="stopEvent(event.youtube_event_id)">stop event</button>
                     </div>
                 </div>
             </div>
         </div><!-- end of modal -->
-
 
         <!-- edit event modal -->
         <div class="modal fade" :id="'EditModal' + event_id" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
@@ -104,11 +103,13 @@
 <script>
     export default {
 
-    	props:['event_id'],
+    	props:['event_id', 'img'],
 
         mounted() {
             //console.log('Component mounted event.' + this.event_id);
             this.getEvent();
+          //  this.$emit('startlive', 'asd');
+
         },
 
         data() {
@@ -147,6 +148,9 @@
                     if(response.data.private == 1) {//for setting private checkbox as in hte db
                         this.event.privacy_status = true;
                     }
+                    let date =  new Date(response.data.schedule_start_datetime);
+                    this.event.date = date.toISOString().slice(0,10); 
+                    this.event.time = date.toISOString().slice(11,19);
 
 	            }).catch(error => {
 	                console.log(error)
@@ -184,8 +188,6 @@
 	        },
 
 	        deleteEvent(event_id) {
-                //cannot delete at the time of live
-
                 //console.log(event_id);
                 if(confirm('are you sure to delete this event ?')) {  
                     axios.delete('/delete-event/' + event_id).then(response => {
@@ -209,31 +211,45 @@
 	        },
 
 	        testEvent(event_id) {
-	            axios.get('/test-event/' + event_id).then(response => {
+                setTimeout(function() {
+                    toastr.info('before starting thi event please make sure you don\'t have other liveevent active');
+                },1000);
+                axios.get('/test-event/' + event_id).then(response => {
 	                if(response.data != '' ) {
 	                    console.log(response.data);
-	                    this.test_pass = true;
+                        self = this;
+                        setTimeout(function() {
+    	                    self.test_pass = true;
+                        },5000);
+
 	                }
 
 	            }).catch(error => {
-	                console.log(error);
+                    console.log(error);
+	                let er = error.response.data.message;
+                    er = JSON.parse(er);
+                    if(er.error.errors[0].reason == "redundantTransition") {
+                        self = this;
+                        setTimeout(function() {
+                            self.test_pass = true;
+                        },3000);
+                    }
 	            })
 	        },
 
 	        startEvent(event_id) {
-	            axios.get('/start-event/' + event_id).then(response => {
-	                console.log(response.data);
-	                this.closeModal('live');
+                axios.get('/start-event/' + event_id).then(response => {
+                    this.closeModal('live');
                     location.reload();
 
-	            }).catch(error => {
-	                console.log(error);
-	            })
+                }).catch(error => {
+                    console.log(error);
+                })
 	        },
 
 	        stopEvent(event_id) {
 
-                axios.get('/stop-event/ ' + event_id).then(response => {
+                axios.get('/stop-event/' + event_id).then(response => {
                     console.log(response.data);
                     this.closeModal('live');
                     location.reload();

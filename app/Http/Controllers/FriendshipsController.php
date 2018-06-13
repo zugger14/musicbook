@@ -36,12 +36,13 @@ class FriendshipsController extends Controller
         if($resp === true) {
             $user = User::find($user_id);
             $user->notify(new NewFriendRequest(Auth::guard('web')->user()) );
-                $redis = Redis::connection();
 
-                $user_data = Auth::user();
-                $user_data->intended_userid = $user_id;
+            $redis = Redis::connection();
 
-                $redis->publish('addfriend', $user_data);
+            $user_data = Auth::user();
+            $user_data->intended_userid = $user_id;
+
+            $redis->publish('addfriend', $user_data);
         }
         return response()->json($resp);
     }

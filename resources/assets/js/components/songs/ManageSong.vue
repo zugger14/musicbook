@@ -120,6 +120,8 @@ import vSelect from 'vue-select'
                     this.$refs.closemodal.click();
                     toastr.success('successfully edited song.');
                     this.$emit('update', {song:this.esong,index:this.index});
+                    location.reload();
+                    
                 }).catch(error => {
                     console.log(error);
                 });

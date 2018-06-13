@@ -23,9 +23,6 @@ class NoteController extends Controller
     public function getNotes($user_id)
     {
         $notes = Note::where('user_id', $user_id)->where('private', 0)->get();
-        foreach ($notes as $note) {
-           // $note->content = strip_tags($note->content);
-        }
         return $notes;
     }
 
