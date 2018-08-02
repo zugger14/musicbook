@@ -2,7 +2,9 @@
     <div>
     	<a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#LiveModal' + event_id">live control panel </a>
 
-    	<a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#EditModal' + event_id"><i class="fa fa-pencil"></i>Edit</a>
+    	<a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#EditModal' + event_id" v-if="disabled == 'false'"><i class="fa fa-pencil"></i>Edit</a>
+<!--         <a href="" class="btn btn-md btn-default" data-toggle="modal" :data-target="'#EditModal' + event_id"><i class="fa fa-pencil"></i>Edit</a>
+  not disabled can edit info by putting try catch in binding part in youtube api-->
 
         <a href="" class="btn btn-md btn-danger"  @click.prevent="deleteEvent(event_id)"><i class="fa fa-trash"></i>delete</a>
 
@@ -103,7 +105,7 @@
 <script>
     export default {
 
-    	props:['event_id', 'img'],
+    	props:['event_id', 'img', 'disabled'],
 
         mounted() {
             //console.log('Component mounted event.' + this.event_id);

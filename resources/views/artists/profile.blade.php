@@ -16,8 +16,9 @@
                 <div class="panel-body">   
                     <div class="row">
                         <div class="col-md-5">
-                            <change-profile-pic :avatar={{ json_encode($user->avatar) }} ></change-profile-pic>
+                            <change-profile-pic :auth="{{ Auth::guard('web')->id()}}" :profile_user_id="{{ $user->id }}" :avatar="{{ json_encode($user->avatar) }}" ></change-profile-pic>
                            {{--  need to json encode the avatar which contaons special characters like http://asd/.. other wise cannot send the props value to vuejs component  --}}
+                            
                         </div>     
                         <div class="col-md-6">
                             <p><friend-button :profile_user_id="{{ $user->id }}"></friend-button></p>

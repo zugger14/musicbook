@@ -22,13 +22,13 @@
         </div><!-- end of modal -->
 
         <!-- sfilter bar for playlist -->
-        <div class="col-md-8">
+        <div class="col-md-12">
             <label for="playlist">playlists:</label>
             <div class="form-group">
                 <input type="text" v-model="search" class="form-control">
             </div>
         </div>
-        <div class="col-md-8" v-for="playlist in filteredList">
+        <div class="col-md-12" v-for="playlist in filteredList">
             <div class="panel panel-default">
                 <div class="panel-heading">{{ playlist.playlist_title }}</label>
                     <label class="text-center" v-if="playlist.playlist_type == 'album' && playlist.album !=null">{{ playlist.album.release_date }}</label>
@@ -40,10 +40,11 @@
                 <div class="panel-body" v-for="song in playlist.songs">
                     {{ song.title }}
                     {{ song.song_filename }}
-                    <publicsong-view :song_id="song.id" :playlist_id="playlist.id" :lists="playlist.songs"></publicsong-view>
+                    <publicsong-view :song_id="song.id" :playlist_id="playlist.id"></publicsong-view>
                 </div>
             </div>
         </div>
+        <infinite-loading v-if="songExists" @infinite="infiniteHandler"></infinite-loading>                 
     </div>
 </template>
 
@@ -59,16 +60,22 @@ export default {
     
     mounted() {
         console.log('playlist Component mounted.');
-
         this.getPlaylistSongs();
     },
 
     watch: {
         search() {
-            //console.log(this.playlists);
-           this.filteredList = this.playlists.filter( (playlist) => {
+                //console.log(this.playlists);
+               this.filteredList = this.playlists.filter( (playlist) => {
                return playlist.playlist_title.split(" ").join("").toLowerCase().includes(this.search.split(" ").join("").toLowerCase())
             })
+        },
+
+        count() {   //for limiting songs to load at beginging
+            this.filteredList = this.playlists.slice(0,this.count);
+            if(this.playlists.length < this.count) {
+                this.no_data = true;
+            }
         }
     },
 
@@ -76,9 +83,10 @@ export default {
         //get all user playlists and songs inside them as well
         getPlaylistSongs() {
            axios.get('/playlist/songs/' + this.user_id).then(response =>{
+                this.songExists = true;
                 this.playlists = response.data;
-                this.filteredList = this.playlists;
-        console.log(JSON.stringify(this.playlists));
+                this.filteredList = this.playlists.slice(0,5);
+                console.log(JSON.stringify(this.playlists));
             }).catch(error =>{
                 console.log(error);
             })
@@ -104,7 +112,22 @@ export default {
             }).catch(error =>{
                 console.log(error);
             });
+        },
+        infiniteHandler($state) {
+            setTimeout(() => {
+                this.moreFeeds();
+                if(this.no_data == true) {
+                    $state.complete();
+                } else {
+                    $state.loaded();
+                }
 
+            }, 500);
+        },
+
+        moreFeeds() {
+            this.count = this.count + 5 ;
+                
         }
 
     },
@@ -113,11 +136,15 @@ export default {
         return {
             playlists: { songs: ''},
             filteredList:{},
+            no_data:false,
+            count:5,
             playlist_id:'',
             delete_confirmed: false,
             removedPlaylist:'',
             newtitle:'',
-            search:''
+            search:'',
+            songExists:false,
+
         }
     }
 }

@@ -30,12 +30,14 @@
                 return this.$store.getters.getFriendsPending;
             },
 
-/*            requests() {  //esari gare ni huncha isntead of calling methods in updated lifecycle hooks
-                if( this.users.length > 0) {
-                    return true
+            /*
+                requests() {  //esari gare ni huncha isntead of calling methods in updated lifecycle hooks
+                    if( this.users.length > 0) {
+                        return true
+                    }
+                    return false;
                 }
-                return false;
-            }*/
+            */
         },
 
         methods: {          

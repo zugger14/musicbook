@@ -1,7 +1,7 @@
 <template>
     <div>
         <a data-toggle="modal" :data-target="'#EditModal'+ modalid" @click="select(song)"><span title="edit" class="glyphicon glyphicon-pencil" ></span></a>
-        <a @click="deletes"><span title="delete" class="glyphicon glyphicon-trash"></span></a>
+        <a @click="deletes(song.id)"><span title="delete" class="glyphicon glyphicon-trash"></span></a>
 
         <!-- Modal for editing song tracks-->
         <div class="modal fade" :id="'EditModal'+ modalid" tabindex="-1" role="dialog" aria-labelledby="EditModalLabel" aria-hidden="true">
@@ -26,31 +26,45 @@
                                             </div>
                                         </div>
                                         <div class="col-md-7">
-                                            <div class="form-group">
+                                            <div :class="['form-group',errors.title ? 'has-error' : '']">
                                                 <label for="title">Song Title:</label>
                                                 <input type="text" v-model="esong.title" class="form-control" required maxlength="255">
+                                                <div v-if="errors.title">
+                                                    <span class="help text-danger" v-text="errors.title[0]"></span>
+                                                </div>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div :class="['form-group',errors.tags ? 'has-error' : '']">
                                                 <label for="genre"> Genre (tag atleast one) </label>
                                                 <v-select :placeholder="'choose tag'" v-model="tagids" label="name" multiple :options="tags"></v-select>
+                                                <div v-if="errors.tags">
+                                                    <span class="help text-danger" v-text="errors.tags[0]"></span>
+                                                </div>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div :class="['form-group',errors.upload_type ? 'has-error' : '']">
                                                 <label for="upload_type">Song Upload Type</label>
                                                 <select name="upload_type" v-model="esong.upload_type" class="form-control">
                                                     <option value="public">public( free )</option>
                                                     <option value="private">private( for sale )</option>
                                                 </select>
+                                                <div v-if="errors.upload_type">
+                                                    <span class="help text-danger" v-text="errors.upload_type[0]"></span>
+                                                </div>
                                             </div>
-                                            <div class="form-group">
+                                            <div :class="['form-group',errors.description ? 'has-error' : '']">
                                                 <label for="message-text" class="col-form-label">Description:</label>
                                                 <textarea class="form-control" id="message-text" v-model="esong.song_description"></textarea>
+                                                <div v-if="errors.description">
+                                                    <span class="help text-danger" v-text="errors.description[0]"></span>
+                                                </div>
                                             </div>
-                                            <div class="form-group" v-if="private">
+                                            <div :class="['form-group',errors.amount ? 'has-error' : '']" v-if="private">
                                                 <label for="upload_type">Song price</label>
                                                 <input type="text" v-model="esong.amount" class="form-control" required maxlength="255">
-
+                                                <div v-if="errors.amount">
+                                                    <span class="help text-danger" v-text="errors.amount[0]"></span>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -106,7 +120,9 @@ import vSelect from 'vue-select'
                 formData.append('img', this.esong.img);
                 formData.append('description', this.esong.song_description);
                 formData.append('upload_type', this.esong.upload_type);
-                formData.append('amount', this.esong.amount);
+                if(this.private) {
+                    formData.append('amount', this.song.amount);
+                }
                 if(this.tagids.length > 0 ){
                     formData.append('tags', JSON.stringify(this.tagids));
                 } 
@@ -120,19 +136,20 @@ import vSelect from 'vue-select'
                     this.$refs.closemodal.click();
                     toastr.success('successfully edited song.');
                     this.$emit('update', {song:this.esong,index:this.index});
-                    location.reload();
-                    
+                    //location.reload();just send axios request to load again required songs 
                 }).catch(error => {
                     console.log(error);
+                    this.errors = error.response.data;
                 });
             },
 
-            deletes() { //delete name gives error
+            deletes(song_id) { //delete name gives error
                 // only chnage status of private songs to removed so that fans who have bought can still acces the songs from their collections but no new purchase option will be available for new fans.
                if(confirm('are you sure you want to delete this song? Theres no undoing this.')) {
-                    axios.delete('/artist/songs/' + this.song.id).then(response => {
+                    axios.delete('/artist/songs/' + song_id).then(response => {
                         console.log(response.data);
-                        location.reload();
+                        this.$emit('update', {song:this.esong,index:this.index});
+                        //location.reload();
                     }).catch(error => {
                         console.log(error);
                     });
@@ -166,6 +183,7 @@ import vSelect from 'vue-select'
             return {
 
                 esong: this.song,
+                errors:{},
                 tagids: [],
                 name:'name',
                 image:this.song.image//image not chnged when using esong as props image only stored..   

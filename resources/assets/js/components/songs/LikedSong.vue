@@ -1,7 +1,7 @@
 <template>
     <div class="songsview">
             <div class="col-md-8">
-                <div v-for="song in songs" class="panel panel-default">
+                <div v-for="song in show_songs" class="panel panel-default">
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
                          {{ song.user.name }}{{ song.user.avatar }}
@@ -34,6 +34,7 @@
                         </span>
                     </div>
                 </div>
+                <infinite-loading v-if="songExists" @infinite="infiniteHandler"></infinite-loading>                 
             </div>
             <div class="col-md-4">
                 <div class="panel panel-default">
@@ -66,6 +67,15 @@ export default {
         this.getLikedSongs();
     },
 
+    watch: {
+        count() {   //for limiting songs to load at beginging
+            this.show_songs = this.songs.slice(0,this.count);
+            if(this.songs.length < this.count) {
+                this.no_data = true;
+            }
+        }
+    },
+
     methods: {
         getLikedSongs() {
             axios.get('/getLikedSongs/' + this.user_id ).then(response => {
@@ -73,12 +83,30 @@ export default {
                     this.songExists=true;
                     //console.log(response.data);
                     this.songs = response.data;
+                    this.show_songs = this.songs.slice(0,5);
                     console.log(this.songs);
                 }
 
             }).catch(error => {
                     console.log(error);
             });
+        },
+
+        infiniteHandler($state) {
+            setTimeout(() => {
+                this.moreFeeds();
+                if(this.no_data == true) {
+                    $state.complete();
+                } else {
+                    $state.loaded();
+                }
+
+            }, 500);
+        },
+
+        moreFeeds() {
+            this.count = this.count + 5 ;
+                
         }
     },
 
@@ -93,6 +121,10 @@ export default {
                     image: ''
                 }
             ],
+            show_songs:[],
+            no_data:false,
+            count:5,
+            songExists:false,
         }
     }
 }

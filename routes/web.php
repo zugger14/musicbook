@@ -15,9 +15,10 @@
 
 Route::group(['middleware' => ['web']], function () {
 
-	Route::get('/', 'PageController@index')->name('landing');
+	Route::get('/', 'PageController@index')->name('landing')->middleware('guest:admin','guest');
 
 	Route::post('user/logout','Auth\LoginController@userLogout')->name('user.logout');
+
 
 	// handles all auth routes for normal users which are fans and artists
 	Auth::routes();
@@ -66,7 +67,7 @@ Route::group(['middleware' => ['auth:web']], function () {
 
 	//private message routes
 	Route::get('/inbox','PageController@inbox')->name('inbox');
-
+	
 	Route::get('get-private-message-notifications','PrivateMessageController@getUserNotifications');
 	Route::post('get-private-messages','PrivateMessageController@getPrivateMessages');
 	Route::get('get-private-message-by-id/{message_id}','PrivateMessageController@getPrivateMessageById');
@@ -161,6 +162,9 @@ Route::group(['middleware' => ['auth:web']], function () {
 	});
 
 	Route::get('getusersongs/{user_id}','SongController@getUserSongs');
+	Route::get('getmostplayedusersongs/{user_id}','SongController@getMostPlayedUserSongs');
+	Route::get('getmostsoldusersongs/{user_id}','SongController@getMostSoldUserSongs');
+
 	Route::get('getpublicsong/{song_id}','SongController@getPublicSong');
 	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friends
 	Route::get('/topsongs','SongController@getMostPlayedSongs');	
@@ -238,20 +242,16 @@ Route::group(['middleware' => ['auth:web']], function () {
 /*`````````````		 only artists usable routes 		``````````````````````	*/
 
 Route::group(['middleware' => ['auth:web', 'artist']], function () {
-
 	Route::group(['prefix' => 'artist'], function () {
 		//page routes for artists
 		Route::get('home', 'PageController@artistHome')->name('artist.home');
 		Route::get('collections', 'PageController@artistCollection')->name('artist.collections');
-
-
 	});
 });
 
 /*`````````````		 only fans usable routes 		``````````````````````	*/
 
 Route::group(['middleware' => ['auth:web', 'fan']], function () {
-
 	Route::group(['prefix' => 'fan'], function () {
 		//page routes for fans
 		Route::get('home', 'PageController@fanHome')->name('fan.home');
@@ -277,7 +277,6 @@ Route::group(['middleware' => ['auth:web', 'fan']], function () {
 
 	});
 
-
 	/* 
 	*** esewa payment gateay routes 
 	*/
@@ -286,6 +285,7 @@ Route::group(['middleware' => ['auth:web', 'fan']], function () {
 		    // The user cancelled the payment
 		    // Show appropriate view/message
 	});
+	
 	Route::get('success', function () {
 	    // Find the order from the order id
 	    $order = Order::find(request()->get('oid'));
@@ -300,10 +300,3 @@ Route::group(['middleware' => ['auth:web', 'fan']], function () {
 	});*/
 
 });
-
-
-
-
-
-
-

@@ -5,54 +5,51 @@
                 <div v-if="songExists" v-for="(song,index) in show_songs" :key="index" class="panel panel-default">
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
-
                          <label v-if="song.shared == true"> <b v-for="share in song.share"> {{ share.user.name }}</b> shared {{ song.user.name }}'s song </label>
                          <label v-else> {{ song.user.name }} <favourite-add :user="song.user"></favourite-add></label>
                     </div>
 
                     <div class="panel-body" @mouseenter="addSongPlayedTime($event, song)">
-                        <aplayer @play="playe" theme='#000005'
+                        <aplayer theme='#000005'
                         :music="{
-                        title: song.title,
-                        artist: 'Silent Siren',
-                        src: song.src,
-                        pic: song.image
-                    }"
-                    :float="true" 
-                    />  
-                        <button @click="toggleDesc(song)">show/hide description</button>
+                            title: song.title,
+                            artist: 'Silent Siren',
+                            src: song.src,
+                            pic: song.image
+                        }"
+                        :float="true" 
+                        /> 
+
+                    </div>
+
+                    <div class="panel-footer">
+                        <span class="pull-right">
+                            <i class="fa fa-play" style="font-size: 12px;">{{ song.played_time }}</i>
+                            {{ song.created_at }}
+                        </span>
+                        <div class="row">
+                            <div class="col-md-1">
+                                <like :songs="songs" :id="song.id"></like><!-- i sent whole songs thats not needed i was imitating the state implemtation so refactor this one -->
+                            </div>
+                                <song-payment v-if="song.upload_type == 'private' && is_artist == 0" :song="song"></song-payment>
+                            <div class="col-md-1">
+                                <share :songs="songs" :id="song.id"></share>
+                            </div>
+                        </div>
+                        <button  @click="toggleDesc(song)">show/hide description</button>
                         <div class="panel-body" v-if="!hide && songdesc == song.id">
                             {{ song.song_description }}
                         </div>
-
-                    </div>
-
-                <div class="panel-footer">
-                    <span class="pull-right">
-                        <i class="fa fa-play" style="font-size: 12px;">{{ song.played_time }}</i>
-                        {{ song.created_at }}
-
-                    </span>
-                    <div class="row">
-                        <div class="col-md-1">
-                            <like :songs="songs" :id="song.id"></like><!-- i sent whole songs thats not needed i was imitating the state implemtation so refactor this one -->
-                        </div>
-                            <song-payment v-if="song.upload_type == 'private' && is_artist == 0" :song="song"></song-payment>
-                        <div class="col-md-1">
-                            <share :songs="songs" :id="song.id"></share>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <comment :song="song"></comment>
-                        </div>
-                    </div>    
-                </div>   
-            </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <comment :song="song"></comment>
+                            </div>
+                        </div>    
+                    </div>   
+                </div>
         <infinite-loading v-if="songExists" @infinite="infiniteHandler"></infinite-loading>                 
         </div>  
         <div class="col-md-2">
-            <div class="">
             <div class="panel panel-default most">
                 <div class="panel-heading"> Most Played Songs </div>
                 <div v-for="(song,index) in top_songs" :key="index" class="row">
@@ -70,35 +67,34 @@
                             /> 
                         </div>
                         <div class="col-md-6">
-                            {{ song.name }} by {{ song.user.name }}
+                            {{ song.title }} by {{ song.user.name }} <!-- slice title in computed -->
                         </div>
                     </div>
                 </div>
                 <div class="panel-footer">like comments</div>
             </div>
-            </div>
         </div>
 
         <div class="col-md-2">
-                <div v-for="(song,index) in recent_songs" :key="index" class="panel panel-default recent">
+            <div v-for="(song,index) in recent_songs" :key="index" class="panel panel-default recent">
                 <div class="panel-heading"> Recently Added Songs </div>
-                    <div class="panel-body" @mouseenter="addSongPlayedTime($event, song)">
-                        <aplayer :mini=true theme='#000005'
-                        :music="{
-                        title: song.title,
-                        artist: 'Silent Siren',
-                        src: song.src,
-                        pic: song.image
+                <div class="panel-body" @mouseenter="addSongPlayedTime($event, song)">
+                    <aplayer :mini=true theme='#000005'
+                    :music="{
+                    title: song.title,
+                    artist: 'Silent Siren',
+                    src: song.src,
+                    pic: song.image
                     }"
                     :float="true" 
                     /> 
-                    </div>                 
-                    <div class="panel-footer">
-                        like comments
-                    </div>
+                </div>                 
+                <div class="panel-footer">
+                    like comments
                 </div>
             </div>
         </div>
+    </div>
 </div>
 </template>
 
@@ -108,13 +104,13 @@ import Like from './Like.vue';
 import Share from './Share.vue';
 import Comment from './Comment.vue';
 import SongPayment from './SongPayment.vue';
-import InfiniteLoading from 'vue-infinite-loading';
+//import InfiniteLoading from 'vue-infinite-loading';
 
 export default {
 
     props: ['is_artist'],
 
-    components: { Aplayer,Like,Share,Comment,SongPayment,InfiniteLoading },
+    components: { Aplayer,Like,Share,Comment,SongPayment },
     
     beforeMount() {
        this.getSongFeeds();
@@ -146,7 +142,7 @@ export default {
             });
         },
 
-        count() {
+        count() {   //for limiting songs to load at beginging
             this.show_songs = this.songs.slice(0,this.count);
             if(this.songs.length < this.count) {
                 this.no_data = true;
@@ -155,10 +151,6 @@ export default {
     },
 
     methods: {
-
-        playe() {
-            console.log('emitting from player');
-        },
 
         getSongFeeds() {
             axios.get('/songfeeds').then(response => {
@@ -199,8 +191,7 @@ export default {
             if(this.clicked == song.id) {
 
             } else {
-            //this.played = false;
-            this.clicked = song.id;
+                this.clicked = song.id;
             }
         },
 
@@ -270,29 +261,9 @@ export default {
 
 <style scoped>
     
-    .most {
-        overflow-y:scroll;
-        height:400px;
-        position:fixed;
-        width: 200px;
-        margin: 0; padding: 0;
-    }
+    
 
-    .recent {
-        overflow-y:scroll;
-        height:400px;
-        position:fixed;
-        width: 200px;
-        margin: 0; padding: 0;
-        float:right;
-        //margin-left:200px;
-    }
 
-    .row {
-        margin-left:0px;
-        margin-right:0px;
-
-    }
 
 
 

@@ -49,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="panel panel-default" v-if="noteExists" v-for="note in notes">
+                <div class="panel panel-default" v-if="noteExists" v-for="note in show_notes">
                     <div class="panel-heading">{{ note.title }}<span class="glyphicon glyphicon-pencil" @click="()=>{editMode = true;clicked = note.id;}"></span> 
                         <input type="text" v-model=note.title v-if="editMode && clicked == note.id">
                         <span class="glyphicon glyphicon-trash" data-target="#DeleteModal" data-toggle="modal" @click="storeNote(note)"></span>
@@ -68,6 +68,7 @@
                         </div>
                     </div>
                 </div>
+                <infinite-loading v-if="noteExists" @infinite="infiniteHandler"></infinite-loading>                 
             </div>
         </div>
     </div>
@@ -90,6 +91,15 @@
         },
 
         components: { Editor } ,
+
+        watch: {
+            count() {
+                this.show_notes = this.notes.slice(0,this.count);
+                if(this.notes.length < this.count) {
+                    this.no_data = true;
+                }
+            }
+        },
 
         methods: {
             addNote() {
@@ -123,6 +133,8 @@
                 axios.get('/getnotes/' + this.user_id ).then(response =>{
                     this.noteExists = true;
                     this.notes = response.data;
+                    this.show_notes = this.notes.slice(0,5);
+
                     console.log(response.data);
                 }).catch(error =>{
                     console.log(error);
@@ -160,6 +172,23 @@
 
                 this.editMode = false;
                 this.showNotes()
+            },
+
+            infiniteHandler($state) {
+                setTimeout(() => {
+                    this.moreFeeds();
+                    if(this.no_data == true) {
+                        $state.complete();
+                    } else {
+                        $state.loaded();
+                    }
+
+                }, 500);
+            },
+
+            moreFeeds() {
+                this.count = this.count + 5 ;
+                    
             }
 
         },
@@ -186,7 +215,12 @@
                 addMode:false,
                 noteExists:false,
                 editMode:false,
-                clicked:''
+                clicked:'',
+                show_notes: {},
+                no_data:false,
+                count:5,
+
+
             }
         }
     }

@@ -15,38 +15,29 @@ use App\Events\MessagePosted;
 
 class PageController extends Controller
 {
-
-
 	public function inbox()
 	{
 		return view('messages.pm');
-
 	}
 	public function __construct()
 	{	
-
 	    parent::__construct();//when construct() defined in child class need to call parent construct implicitly else not defined here calls the parent construct atomatically. 
-
-		$this->middleware('guest')->only('index');
+		//$this->middleware('guest')->only('index'); done in routes web.php
 	}
 
 	public function index()
 	{		
-		
 		return view('guests.welcome');
-
 	}
 
 	public function artistHome()
     {       
     	return view('artists.home');
-
     }
 
     public function artistCollection()
     {       
-        return view('artists.collection');
-
+        return view('artists.collection')->with('user_id', Auth::id());
     }
 
     public function fanHome()
@@ -57,7 +48,6 @@ class PageController extends Controller
     public function fanCollection()
     {       
         return view('fans.collection');
-
     }
     
     public function searchUsers($query)
@@ -65,7 +55,6 @@ class PageController extends Controller
     	if($query == '') return false;
     	$user = User::where('name', 'LIKE', '%' . $query . '%')->get();
     	return $user;
-
     }
 
     public function tracks()
@@ -100,7 +89,6 @@ class PageController extends Controller
 
 		Session::flash('success', 'you email was sent succesfully ');
 		return redirect('/');
-		
 	}
 
 	public function getMessage(Request $request)
@@ -137,9 +125,7 @@ class PageController extends Controller
 
 	    	$message = "Your message has been sent successfully";
             return response()->json($message);
-
 		}
-
 	}
 
 	public function chat()
@@ -165,8 +151,5 @@ class PageController extends Controller
 	    	broadcast(new MessagePosted($message, $user))->toOthers();
 	    	$message = "Your message has been sent successfully";
            	return response()->json($message);
-		
 	}
-
-    
 }

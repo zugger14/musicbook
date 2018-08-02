@@ -1,5 +1,5 @@
 <!-- default navbar -->
-<nav class="navbar navbar-default navbar-fixed" style="text-align: center;">
+<nav :class="'navbar navbar-default navbar-fixed-' + nav" style="text-align: center;">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -51,7 +51,7 @@
                 <audio id='noty_audio' src="{{ asset('audio/notify.mp3') }}"></audio>
                 @if (Auth::guard('web')->check())
                     <li>
-                        <song-upload :tags="{{ $tags }}" style="margin-top: -8px;"></song-upload>    
+                        <song-upload :isArtist="{{ Auth::user()->is_artist }}" :tags="{{ $tags }}" style="margin-top: -8px;"></song-upload>    
                     </li>
                 @endif
                     @if (Auth::guard('web')->check()  && Auth::user()->is_artist)

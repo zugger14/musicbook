@@ -17,6 +17,8 @@ use App\Favourite;
 use Auth;
 use Paypalpayment;
 use Carbon\Carbon;
+use DB;
+use Image;
 
 class SongController extends Controller
 {
@@ -62,6 +64,7 @@ class SongController extends Controller
             $song->src = $music_file;   
         }     
         return $songs;
+        
     }
 
     public function getPrivateSongDemoBySongId($song_id )//loads single demo songs for shared private songs.
@@ -137,7 +140,7 @@ class SongController extends Controller
 
     public function getUserSongs($user_id)//get all public songs of a particular user maybe fan or artist by id
     {
-        $songs = Song::where('user_id', $user_id)->where('status', 'present')->where('upload_type', 'public')->get();//if used all() instead get canot read value in vuejs by aplayer 
+        $songs = Song::where('user_id', $user_id)->where('status', 'present')->where('upload_type', 'public')->orderBy('id', 'desc')->get();//if used all() instead get canot read value in vuejs by aplayer 
         foreach ($songs as $song) {
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
@@ -177,9 +180,13 @@ class SongController extends Controller
             $songs[] = $like->song;//needs [] even declared as array above FFFFF
         }
 
-        foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
-            $song->src = $music_file;   
+        foreach ($songs as &$song) {
+            if($song->upload_type == 'private' && $song->status == 'present') {
+                $song = $this->getPrivateSongDemoBySongId($song->id);
+            } else {
+                $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                $song->src = $music_file;   
+            }
         }
 
         return $songs;
@@ -204,6 +211,7 @@ class SongController extends Controller
             }
         }
 
+        //dd($songs);
         return $songs;
 
     } 
@@ -259,7 +267,7 @@ class SongController extends Controller
             'description' => 'sometimes|max:255',
             'img' => 'nullable',
             'upload_type' =>'required',
-            'amount'    =>'nullable|numeric|max:10000',
+            'amount'    =>'sometimes|numeric|max:10000',
             'tags'      =>'required'
         ]);
 
@@ -292,9 +300,9 @@ class SongController extends Controller
             if ($request->hasFile('img')) {
                 $image_file = $request->file('img');
                 $filename = time() . '.' . $image_file->getClientOriginalExtension();
-                $location = storage_path('app/public/images/songcovers');  // add artists id name anything here for folder structure.
-                $image_file->move($location,$filename);
-                
+                $location = storage_path('app/public/images/songcovers/');  // add artists id name anything here for folder structure.
+                Image::make($image_file)->resize(800,400)->save($location . $filename);
+                //$image_file->move($location,$filename);without resizing
                 $song->image = $filename;
             } 
             
@@ -356,10 +364,10 @@ class SongController extends Controller
         //return $request->all();
         $validator = Validator::make($request->all(), [
             'title' => 'required|max:255',
-            'description' => 'sometimes|max:255',
+            'description' => 'nullable|max:255',
             'img' => 'nullable',
             'upload_type' =>'required',
-            'amount'    =>'sometimes|max:10000',
+            'amount'    =>'sometimes|numeric|max:10000',
             'tags'      =>'required'
 
         ]);
@@ -377,7 +385,8 @@ class SongController extends Controller
                 $image_file = $request->file('img');
                 $filename = time() . '.' . $image_file->getClientOriginalExtension();
                 $location = storage_path('app/public/images/songcovers');  // add artists id name anything here for folder structure.
-                $image_file->move($location,$filename);
+                Image::make($image_file)->resize(800,400)->save($location . $filename);
+                //$image_file->move($location,$filename);
                 
                 $song->image = $filename;
             } 
@@ -435,7 +444,7 @@ class SongController extends Controller
 
     public function getMostPlayedSongs()
     {
-        $songs = Song::orderBy('played_time', 'desc')->where('upload_type', 'public')->limit(20)->get();
+        $songs = Song::orderBy('played_time', 'desc')->where('upload_type', 'public')->where('status', 'present')->limit(20)->get();
         foreach ($songs as $song) {
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
@@ -445,7 +454,7 @@ class SongController extends Controller
 
     public function getMostPlayedUserSongs($user_id)
     {
-        $songs = Song::orderBy('played_time', 'desc')->where('user_id', $user_id)->limit(20)->get();
+        $songs = Song::orderBy('played_time', 'desc')->where('upload_type', 'public')->where('status', 'present')->where('user_id', $user_id)->limit(20)->get();
         foreach ($songs as $song) {
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
@@ -453,28 +462,74 @@ class SongController extends Controller
         return $songs;
     }
 
-    public function getMostSoldSongs($user_id)
+    public function getMostSoldSongs()
     {
-        $songs = Song::orderBy('played_time', 'desc')->where('user_id', $user_id)->limit(20)->get();
+        $songsByCount = DB::table('orders')
+         ->select(array('song_id', DB::raw('count(song_id) as fieldcount')))//select(*) not selecting song_id for grouping below groupby
+         ->groupBy('song_id')
+         ->orderBy('fieldcount', 'desc')
+         ->where('paid_order', true)
+         ->get();
+
+        $songs = Song::whereIn('id', $songsByCount->pluck('song_id'))->get();
+                
         foreach ($songs as $song) {
             $music_file = asset('storage/songs') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
-        return $songs;
+        return $songs;    
     }
 
     public function getMostSoldUserSongs($user_id)
-    {
-        $songs = Order::select('*', 'COUNT(song_id) as fieldcount')
-                        ->orderBy('timestamp', 'desc')
-                        ->groupBy('song_id')
-                        ->sortBy('fieldcount', 'desc')
-                        ->get();
+    {   
+        /*https://stackoverflow.com/questions/37951742/1055-expression-of-select-list-is-not-in-group-by-clause-and-contains-nonaggr/42183702*/
+        $songsByCount = DB::table('orders')
+                 ->select(array('song_id', DB::raw('count(song_id) as fieldcount')))//select(*) not selecting song_id for grouping below groupby
+                 ->groupBy('song_id')
+                 ->orderBy('fieldcount', 'desc')
+                 ->where('paid_order', true)
+                 ->get();
 
-        foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
-            $song->src = $music_file;   
-        }
+        $songs = Song::whereIn('id', $songsByCount->pluck('song_id'))->where('user_id', $user_id)->where('status', 'present')->get();
+        
+        $songs = $songs->map(function ($song) {
+            if($song->upload_type == 'private' && $song->status == 'present') {
+                $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object returning from called method.
+                return $song;
+            } else {
+                $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                $song->src = $music_file;
+                return $song;   
+            }
+        });
+
+        /*  
+            when collections instance is neede to replace with other foreach and each does not work but works in array of objects.[{}]
+            
+            $songs = $songs->each(function ($song, $key) {
+                if($song->upload_type == 'private' && $song->status == 'present') {
+                    $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object pass referene in foreach
+                    return $song;
+                } else {
+                    $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                    $song->src = $music_file;
+                    return $song;   
+                }
+            });    
+
+        */   
+
+        /*
+            foreach ($songs as &$song) {
+                if($song->upload_type == 'private' && $song->status == 'present') {
+                    $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object pass referene in foreach
+                } else {
+                    $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                    $song->src = $music_file;   
+                }
+            }
+        */
+
         return $songs;
     }
 

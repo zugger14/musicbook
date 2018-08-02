@@ -3,18 +3,11 @@
 @section('navbar_title', 'Collections')
 
 @section('content')
-    <div class="row">
-        <div class="col-md-8" >
-            <purchasedsong-view></purchasedsong-view>
-        </div>
-        <div class="col-md-4">
-        	<favourite-view></favourite-view>
-		</div>        	
-    </div>
-
+    <collections-sidebar :user_id="{{ $user_id }}" :tags="{{ $tags }}"></collections-sidebar>
 @endsection
-<style type="text/css">
+<style scoped>
 	[v-cloak] {
-  display: none;
-}
+      display: none;
+    }
+
 </style>

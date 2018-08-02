@@ -38,7 +38,7 @@ Vue.component('live-events', require('./components/live-events/LiveEvents.vue'))
 Vue.component('favourite-view', require('./components/favourites/FavouriteView.vue'));
 Vue.component('favourite-add', require('./components/favourites/AddFavourite.vue'));
 
-
+Vue.component('collections-sidebar', require('./components/collections/CollectionsSideBar.vue'));
 
 
 Vue.component('pm-sidebar', require('./components/private-messages/PrivateMessageSidebar.vue'));
@@ -63,15 +63,33 @@ Vue.component('notification', require('./components/notifications/Notification.v
 
 Vue.component('user-login', require('./components/auth/Login.vue'));
 
+Vue.component('InfiniteLoading', require('vue-infinite-loading'));
+
+
 
 
 import VueSocketio from 'vue-socket.io'
 import store from './store'
-
+       
 Vue.use(VueSocketio, 'http://localhost:8890');
 
 const app = new Vue({
     el: '#app',
-    store
-
+    store,
+    data: {
+        nav: ''
+    }
 });
+/*
+	    if(window.location.href.indexOf("collections") > -1) 
+        {  
+            alert('asd');
+            this.nav = 'top';
+            console.log('khai' + this.nav);
+         } else {
+            alert('asdsadasdsaasd');
+
+            this.nav = '';
+         }
+*/
+

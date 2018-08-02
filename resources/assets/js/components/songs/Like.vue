@@ -3,7 +3,8 @@
         <p class="small" v-for="like in song.like">
             <img :src="like.user.avatar" width="25px" height="25px">
         </p>
-        <button class="btn btn-default btn-sm" v-if="!authUserLikedPost" @click="like">
+        <button class="btn btn-d
+        +-efault btn-sm" v-if="!authUserLikedPost" @click="like">
             like
         </button>
 
@@ -113,5 +114,11 @@
     img {
         border-radius:50%;
     }
+
+    .btn {
+        border-radius: 50px;
+    }
+
+
 
 </style>

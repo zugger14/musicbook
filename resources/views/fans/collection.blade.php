@@ -5,7 +5,7 @@
 @section('content')
     <div class="row">
         <div class="col-md-12" >
-            <purchasedsong-view :tags="{{ $tags }}"> </purchasedsong-view>
+    		<collections-sidebar :user_id="{{ $user_id }}" :tags="{{ $tags }}"></collections-sidebar>
         </div>
     </div>
 @endsection

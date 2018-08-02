@@ -22,7 +22,7 @@
                             <p><strong>{{ event.snippet.title }}</strong></p>
                             <p class="alert alert-success small">Completed</p>
                         </div>
-                        <manage-live-event :img="event.snippet.thumbnails.high.url" :event_id="event.id" ></manage-live-event>
+                        <manage-live-event :disabled="(event.snippet.actualEndTime!=null && event.snippet.actualStartTime!=null) ? 'true' : 'false'" :img="event.snippet.thumbnails.high.url" :event_id="event.id" ></manage-live-event>
                     </div>
             </div>
             <button @click="getMoreEvents"> more</button>
@@ -76,7 +76,7 @@ export default {
             axios.get('/get-live-id/' + this.user_id).then(response => {
 
                 this.event_id = response.data;
-                console.log('asd' + this.event_id);
+                //console.log('asd' + this.event_id);
 
             }).catch(error => {
                 console.log(error)

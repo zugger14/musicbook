@@ -21,8 +21,8 @@
                             pic: song.image
                             }"
                             :float="true"
+                         
                         />  
-                        <!--  :list="lists"  -->
                         <div class="panel-body">
                             {{ song.song_description }}
                         </div>
@@ -50,7 +50,7 @@ import Like from './Like.vue';
 export default {
 
     //change name to userpubliciview 
-    props: ['song_id', 'playlist_id','lists'],
+    props: ['song_id', 'playlist_id'],
 
     components: { Aplayer,Like},
     

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Notifications\SongPurchased;
 use Paypalpayment;
 use App\Order;
+use App\Payment;
 use Auth;
 use App\Song;
 use App\User;
@@ -13,45 +14,57 @@ use App\User;
 class PaypalController extends Controller
 {
 
+    /*
+        every payments that have been created aprroved or failed
+        after collection all payment details make a call to this method to get all latest payment information ..change count to but same payment data appear maybe due to sandbox.
+    */
 	public function index()
-    {//every payments that have been created aprroved or failed
-    //after collection all payment details make a call to this method to get all latest payment information ..change count to but same payment data appear maybe due to sandbox.
-        $payments = Paypalpayment::getAll(['count' => 1, 'start_index' => 0], Paypalpayment::apiContext());
-        
+    {
+        $payments = Paypalpayment::getAll(['count' => 1, 'start_index' => 0], Paypalpayment::apiContext());   
         return response()->json([$payments->toArray()], 200);
-
     }
 
+    /*
+        gets the payment information after paypal payment success and stores in order table and calls show() method to show detail
+    */
     public function store()
-    {//gets the payment information after paypal payment success and stores in order table and calls show() method to show detail
+    {
         $payment_id = request()->get('paymentId');
 
         $order = Order::where('paypal_paymentid', $payment_id)->where('user_id', Auth::id())->first();//selects previousy submitted form for purchase of songs..
-
         $order->paypal_payerid = request()->get('PayerID'); 
         $order->payal_token = request()->get('token');//payal bhayecha db ma
         $order->paid_order = 1;
-
-
         $order->save();
+
+        $payment = new Payment;
+        $payment->song_id = $order->song_id;
+        $payment->user_id = $order->user_id;
+        $payment->order_id = $order->id;
+        $payment->status = 'remaining';
+        $payment->save();
+
         //$payment = $this->show($payment_id);
+        //dd($payment);
 
         $song = Song::find($order->song_id);
         $user = User::find($song->user_id);
         $user->notify(new SongPurchased(Auth::user(), $song, $order));
 
         return redirect()->route('songs.download', $payment_id);
-
     }
 
-    public function show($payment_id)//payment by particular payment id
+    /*
+        payment by particular payment id
+    */
+    public function show($payment_id)
     { 
         $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
         return $payment->toArray();//if i dont toArray also blade template can parse it but cannot read when set as response()->json()
     }
 
-     /*
-    * Process payment using credit card
+    /*
+        Process payment using credit card
     */
      public function paywithCreditCard(Request $r)
     {
@@ -279,4 +292,22 @@ class PaypalController extends Controller
 
         return response()->json([$payment->toArray(), 'approval_url' => $payment->getApprovalLink()], 200);
     }
+
+
+    /*
+        all payments that are remaining to be paid to song owner artist[middleware-admin]. 
+    */
+    public function getPayments()
+    {
+
+    }
+
+    /*
+        payment to artist for their songs sold[middleware-admin] 
+    */
+    public function payToArtist()
+    {
+        
+    }
+
 }

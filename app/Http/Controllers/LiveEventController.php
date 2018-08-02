@@ -72,8 +72,10 @@ class LiveEventController extends Controller
 
         $ytEventObj = new YoutubeLiveEventService();
         $youtube_event = $ytEventObj->getActiveEvent($token);
-
-        return $youtube_event->id;
+        if (!empty($youtube_event)) {
+            return $youtube_event->id;
+        }
+        return 0;
     }
 
     public function getEvents()

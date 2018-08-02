@@ -7,6 +7,7 @@ use App\User;
 use Auth;
 use Session;
 use App\Profile;
+use Image;
 
 class ProfileController extends Controller
 {
@@ -54,8 +55,8 @@ class ProfileController extends Controller
 
         Auth::user()->update([
             'name' => $r->name,
-            'email' =>$r->email,
-            'slug'  =>$r->slug
+            'email' => $r->email,
+            'slug'  => $r->slug
         ]);
 
     	Auth::user()->profile()->update([
@@ -64,11 +65,19 @@ class ProfileController extends Controller
     	]);
 
     	if($r->hasFile('avatar')) {
+            $file = $r->file('avatar');
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $image = Image::make($file)->resize(400,400)->save(storage_path('app/public/avatars/') . $filename);
+            Auth::user()->update([
+                'avatar' => 'public/avatars/'.$filename
+            ]);
 
-    		Auth::user()->update([
-    			'avatar' => $r->avatar->store('public/avatars')
-    		]);
-    	}
+    		/* without resizing also we can store using instance of upload file and creates unique name
+                Auth::user()->update([
+        			'avatar' => $r->avatar->store('public/avatars')
+        		]);
+            */    	
+        }
 
         return response()->json('succesfully saved the profile info ', 200);
 
@@ -80,9 +89,11 @@ class ProfileController extends Controller
     public function updateProfilePic(Request $r)
     {
         if($r->hasFile('avatar')) {
-
+            $file = $r->file('avatar');
+            $filename = time(). '.' . $file->getClientOriginalExtension();
+            $image = Image::make($file)->resize(400,400)->save(storage_path('app/public/avatars/').$filename);
             Auth::user()->update([
-                'avatar' => $r->avatar->store('public/avatars')
+                'avatar' => 'public/avatars/'.$filename
             ]);
         }
         return 'changed your profile picture';

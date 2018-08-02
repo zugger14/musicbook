@@ -8,14 +8,14 @@
 
 		<div class="panel-body">
 			<div class="row">
-				<div class="col-md-8">
-					<div v-if="songExists" v-for="song in filteredList" class="panel panel-default">
+				<div class="col-md-9">
+					<div v-if="songExists" v-for="(song,index) in filteredList" class="panel panel-default">
 						<div class="panel-heading">
 							<img :src="song.user.avatar" width="40px" height="40px">
 							{{ song.user.name }}
 							<div class="pull-right" >
 								<add-playlist :song_id="song.id" :user_id="user_id" :id="id"></add-playlist>
-								<manage-song :song="song" :tags="tags" :modalid="id + 'public'">{{ id++ }}</manage-song>
+								<manage-song v-on:update="update" :index="index" :song="song" :tags="tags" :modalid="index + 'public'"></manage-song>
 							</div>
 						</div>
 
@@ -46,13 +46,27 @@
 						<comment :song="song"></comment>
 
 					</div>
+			        <infinite-loading v-if="songExists" @infinite="infiniteHandler"></infinite-loading>                 
 				</div>
-				<div class="col-md-4">
-					<div class="panel panel-default">
-						<div class="panel-heading"> Most played by users </div>
 
+				<div class="col-md-3" >
+					<div class="panel panel-default">
+						<div class="panel-heading"> Most played Song </div>
 						<div class="panel-body" style="height:500px;">
-							songs list                  
+                        <div class="col-md-12" v-for="song in userSongs">
+                        	{{ song.title }}
+							<aplayer  :mini=true theme='#FADFA3'
+							:music="{
+								title: song.title,
+								artist: 'Silent Siren',
+								src: song.src,
+								pic: song.image
+							}"
+							:float="true" 
+							/>
+							<hr>   
+						</div>      
+
 						</div>
 
 						<div class="panel-footer">
@@ -75,14 +89,13 @@
 
 
 	export default {
-//change name to userpubliciview 
 	props: ['user_id', 'tags'],
 
 	components: { Aplayer,Like,ManageSong,Comment,Share },
 
 	beforeMount() {
-	        //this.getAllSongs();
-	    },
+
+    },
 
     watch: {
     	clicked() {
@@ -105,12 +118,20 @@
         	this.filteredList = this.songs.filter( (song) => {
         		return song.title.split(" ").join("").toLowerCase().includes(this.search.split(" ").join("").toLowerCase())
         	})
-        }
-    },
+        },
 
+        count() {
+            this.filteredList = this.songs.slice(0,this.count);
+            if(this.songs.length <= this.count) {
+                this.no_data = true;
+            }
+        }
+
+    },
 
     mounted() {
     	this.getUserSongs();
+    	this.getMostPlayedUserSongs();
     	console.log('song views Component mounted.');
     },
 
@@ -120,7 +141,20 @@
 	            if(response.data !='') { 
 	                this.songExists=true;
 	                this.songs = response.data;
-	                this.filteredList = this.songs;
+	                this.filteredList = this.songs.slice(0,5);
+	            }
+	            console.log(JSON.stringify(response.data));
+
+	        }).catch(error => {
+	        	console.log(error);
+	        });
+    	},
+
+    	getMostPlayedUserSongs() {
+    		axios.get('/getmostplayedusersongs/' + this.user_id ).then(response => {
+	            if(response.data !='') { 
+	                this.songExists=true;
+	                this.userSongs = response.data;
 	            }
 
 	        }).catch(error => {
@@ -135,7 +169,29 @@
             //this.played = false;
             this.clicked = song.id;
         	}
-    	}
+    	},
+
+    	update(songdata) {
+            this.getUserSongs();
+         	this.getMostPlayedUserSongs();
+		},
+
+        infiniteHandler($state) {
+            setTimeout(() => {
+                this.moreFeeds();
+                if(this.no_data == true) {
+                    $state.complete();
+                } else {
+                    $state.loaded();
+                }
+
+            }, 500);
+        },
+
+        moreFeeds() {
+            this.count = this.count + 5 ; 
+        }
+
 	},
 
 	data() {
@@ -149,6 +205,9 @@
 			}],
 
 			clicked: '',
+            no_data:false,
+            count:5,
+			userSongs:{},
 			played: '',
 			filteredList:{},
 			search:'',

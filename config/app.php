@@ -167,6 +167,7 @@ return [
         Anouar\Paypalpayment\PaypalpaymentServiceProvider::class,
         Mews\Purifier\PurifierServiceProvider::class,
         SahusoftCom\YoutubeApi\LiveStreamApiServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
 
 
         /*
@@ -233,6 +234,7 @@ return [
         'Esewa'     => NikhilPandey\Esewa\Facades\Esewa::class,
         'Paypalpayment'   => Anouar\Paypalpayment\Facades\PaypalPayment::class,
         'Purifier' => Mews\Purifier\Facades\Purifier::class,
+        'Image' => Intervention\Image\Facades\Image::class
         
 
     ],

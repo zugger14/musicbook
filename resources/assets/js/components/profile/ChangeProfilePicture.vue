@@ -2,10 +2,12 @@
     <div class="text-center">
         <img :src="uavatar" width="140px" height="140px" style="border-radius: 50%;">
         <input ref="imginput" type="file" @change="imgPreview">
+        <div v-if="auth == profile_user_id">
+            
+            <p v-if="!newimg" ><a class="btn btn-default btn-sm" @click="selectFile">change profile picture </a></p>
 
-        <p v-if="!newimg" ><a class="btn btn-default btn-sm" @click="selectFile">change profile picture </a></p>
-
-        <p class="text-center" v-else><a class="btn btn-success btn-sm" @click="changePic"> save picture </a></p>
+            <p class="text-center" v-else><a class="btn btn-success btn-sm" @click="changePic"> save picture </a></p>
+        </div>
 
     </div>
 
@@ -15,11 +17,13 @@
 
     export default {
 
-        props: ['avatar'],
+        props: ['avatar','auth','profile_user_id'],
 
         mounted() {
-            //console.log('change profile picture Component mounted.')
+            console.log('change profile picture Component mounted.')
             //console.log(this.uavatar);
+            //console.log(auth);
+            //console.log(profile_user_id);
         },
 
         watch: {

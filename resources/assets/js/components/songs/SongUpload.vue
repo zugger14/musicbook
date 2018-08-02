@@ -32,6 +32,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
+                        <progres v-if="uploadPercentage > 0" :value="uploadPercentage"></progres>
                         <form ref="uploadform" @mousedown="clearError($event)">
                             <div class="form-group">
                                 <div class="row">
@@ -52,23 +53,27 @@
                                                 </div>
                                             </div>
 
-                                            <div class="form-group" v-if="multiup">
+                                            <div :class="['form-group',errors.name ? 'has-error' : '']" v-if="multiup">
                                                 <label for="title">Playlist Title:</label>
                                                 <input type="text" name="name" v-model="playlist.name" class="form-control" required maxlength="255">
+                                                <div v-if="errors.name">
+                                                    <span class="help text-danger"  v-text="errors.name[0]"></span>
+                                                </div>
                                             </div>
                                             <div class="form-group">
                                                 <p v-if="singleup" :class="[uploadLimit ? 'text-danger': 'text-success','small']" for="size">Size (in MB): {{ song.filesize }}</p><!-- change text color for upload max limit -->
                                                 <div v-if="uploadLimit && !errors.filesize">
                                                     <span class="help text-danger">The filesize may not be greater than 20.(in MB)</span>
                                                 </div>
-<!--                                                 <div v-if="errors.file">
+                                                <div v-if="singleup && errors.file">
                                                     <span class="help text-danger" v-text="errors.file[0]"></span>
-                                                </div> -->
-                                                <div v-if="errors.filesize">
-                                                    <span class="help text-danger" v-text="errors.filesize[0]+'(in MB)'"></span>
                                                 </div>
-
                                                 <p v-if="multiup" class="text-success small" for="size">Total Size (in MB): {{ playlist.filesize }}</p>
+                                                <div v-if=" multiup && errors">
+                                                    <div v-for="e in errors">
+                                                        <span class="help text-danger" v-text="e.toString()"></span></br>
+                                                    </div>
+                                                </div>
 
                                             </div>
 
@@ -84,7 +89,7 @@
                                                 <label for="upload_type">Song Upload Type</label>
                                                 <select name="upload_type" v-model="song.upload_type" class="form-control">
                                                     <option value="public">public( free )</option>
-                                                    <option value="private">private( for sale )</option>
+                                                    <option value="private" v-if="isArtist">private( for sale )</option>
                                                 </select>
                                                 <div v-if="errors.upload_type">
                                                     <span class="help text-danger"  v-text="errors.upload_type[0]"></span>
@@ -100,8 +105,8 @@
                                             <div :class="{'form-group':true, 'has-error' : errors.amount}" v-if="private">
                                                 <label for="upload_type">Song price</label>
                                                 <input type="text" name="amount" v-model="song.amount" class="form-control" required maxlength="255">
-                                                <div v-if="errors.amount">
-                                                    <span class="help text-danger"  v-text="errors.amount[0]"></span>
+                                                <div v-if="private && errors.amount">
+                                                    <span class="help text-danger" v-text="errors.amount[0]"></span>
                                                 </div>
                                             </div>
 
@@ -135,17 +140,19 @@
 <script>
 
 import vSelect from 'vue-select';
+import Progres from './../progress-bars/Progres.vue';
+
         
 export default {
 
-    props: ['tags'],
+    props: ['tags', 'isArtist'],
 
     mounted() {
         console.log('song upload Component mounted.');
        // console.log(this.tags);
     },
 
-    components: {vSelect},
+    components: {vSelect, Progres},
 
     computed: {
         private() {
@@ -213,6 +220,7 @@ export default {
             this.song.amount = '';
             this.song.tags = '';
             this.errors = {};
+            this.uploadPercentage = 0;
 
             this.playlist.file = [];
             this.playlist.name = '';
@@ -238,15 +246,19 @@ export default {
             formData.append('img', this.song.img);
             formData.append('description', this.song.description);
             formData.append('upload_type', this.song.upload_type);
-            formData.append('amount', this.song.amount);
+            if(this.private) {
+                formData.append('amount', this.song.amount);
+            }
             if(this.song.tags.length > 0 ){
-
                 formData.append('tags', JSON.stringify(this.song.tags));//sometimes the complex nested objects needs stringify to pass
             }
             //try json encode in song without using formdata.append prevviously used this.song instead self.song so maybe
             axios.post('/artist/songs',formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: function( progressEvent ) {
+                    self.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded * 100 ) / progressEvent.total ) );
                 }
             }).then(function (response) {
                 //show progress bar
@@ -256,6 +268,7 @@ export default {
                 toastr.success(response.data.message);
                 
             }).catch(function (error) {
+                console.log(error);
                 self.errors = error.response.data;
             });
         },
@@ -265,7 +278,6 @@ export default {
             let formData = new FormData();
             for(let i=0; i < this.playlist.file.length;i++) {
                 formData.append('file[]', this.playlist.file[i]);
-
             }
             //console.log('ps' + this.playlist.filesize);
             formData.append('name', this.playlist.name);
@@ -276,18 +288,19 @@ export default {
             axios.post('/playlist/multi',formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
+                },
+                onUploadProgress: function( progressEvent ) {
+                    self.uploadPercentage = parseInt( Math.round( ( progressEvent.loaded * 100 ) / progressEvent.total ) );
                 }
             }).then(function (response) { //here used self necause callback function does not have lexiacl sccope
                 console.log(response.data);
                 self.resetForm();
                 self.$refs.closemodal.click();
-                
             }).catch(function (error) {
                 console.log(error);
+                self.errors = error.response.data;
             });
-
         }
-
     },
 
     data() {
@@ -314,6 +327,7 @@ export default {
             },
 
             uploadLimit: false,
+            uploadPercentage: 0,
 
             errors:{},
 

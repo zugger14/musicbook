@@ -105,7 +105,6 @@ class PlaylistController extends Controller
     //multifile upload to palylist
     public function multiStore(Request $request)
     {
-
         $input_data = $request->all();
         $validator = Validator::make(
             $input_data, [
@@ -113,7 +112,7 @@ class PlaylistController extends Controller
             ],[
                 'file.*.required' => 'Please upload an audio file',
                 'file.*.mimes' => 'Only mp3 and wav audio are allowed',
-                'file.*.max' => 'Sorry! Maximum allowed size for an image is 20MB',
+                'file.*.max' => 'Sorry! Maximum allowed size for an audio file is 20MB',
             ]
         );
 
@@ -122,9 +121,9 @@ class PlaylistController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'file' => 'required',//|mimes:mpga,wav
+            'file' => 'required',
             'name' => 'required|max:255',
-            'filesize' => 'sometimes',
+            'filesize' => 'required|numeric|max:200',
             //'description' => 'sometimes|max:255',
             'img' => 'nullable|mimes:jpeg,png,bmp',
             'private' =>'nullable',
@@ -158,15 +157,12 @@ class PlaylistController extends Controller
 
                         if($request->private == true) $song->upload_type = 'private';
                         else $song->upload_type = 'public';
-                        
+                        $song->status = 'present';
                         $song->title = $music_file->getClientOriginalName();
-                        
-                        $filename = 'lastones'.time() . '.' . $music_file->getClientOriginalExtension();
+                        $filename = 'playlist'.mt_rand().'time:'.time() . '.' . $music_file->getClientOriginalExtension();
                         $location = storage_path('app/public/songs');
                         $music_file->move($location,$filename);
-                        
                         $song->song_filename = $filename;
-
                         if ($request->hasFile('img')) { //image for everysongs in playlist selected
                             $image_file = $request->file('img');
                             $filename = 'playlist_pic' . time() . '.' . $image_file->getClientOriginalExtension();
