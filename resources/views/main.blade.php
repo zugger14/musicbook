@@ -1,5 +1,5 @@
-@if (Request::is('admin') && Auth::guard('admin')->check())    
-	@include('layouts._head-admin')
+@if (Auth::guard('admin')->check())    {{--  Request::is('admin')  for allorwing users and admin login in same browser without loggin out any one aacount.
+ --}}	@include('layouts._head-admin')
 		<div id="app">
 			<body class="nav-md"> {{-- class name same as in admin template from index file --}}
 				@include('layouts._nav-admin')

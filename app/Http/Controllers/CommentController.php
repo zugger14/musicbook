@@ -19,8 +19,8 @@ class CommentController extends Controller
      */
     public function index($song_id)
     {
-        $comment = Comment::where('song_id', $song_id)->get();
-        return $comment;
+        $comments = Comment::where('song_id', $song_id)->get();
+        return $comments;
     }
 
     /**

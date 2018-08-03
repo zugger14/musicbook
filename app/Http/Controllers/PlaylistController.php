@@ -19,7 +19,8 @@ class PlaylistController extends Controller
      */
     public function index()
     {
-        
+        $playlists = Playlist::all();
+        return view('admins.show_playlists')->withPlaylists($playlists);
     }
 
     //used to show the main playlists page of user as a vuejs component holder
@@ -219,6 +220,11 @@ class PlaylistController extends Controller
     {
         $playlists = Playlist::where('user_id', $user_id)->get();
         return $playlists;
+    }
+
+    public function deletedPlaylists()
+    {
+        //first just change status of playlist to delete....   
     }
 
     /**

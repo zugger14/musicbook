@@ -1,6 +1,7 @@
 @extends('main')
-@section('title', '| All tags')
-@section('navbar_title', 'tags')
+@section('title', 'Users')
+@section('navbar_title', 'Music Book')
+
 @section('content')
 
 <div class="right_col" role="main">
@@ -22,7 +23,7 @@
 		</div>
 		<div class="clearfix"></div>
 		<div class="row">
-			<div class="col-md-9 col-sm-9 col-xs-9">
+			<div class="col-md-12 col-sm-12 col-xs-12">
 				<div class="x_panel">
 					
 					<div class="x_content">
@@ -30,33 +31,39 @@
 						<table id="datatable-responsive" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
 							<thead>
 								<tr>
-									<th>#</th>
+									<th>cover pic</th>
 									<th>Title</th>
+									<th>Description</th>
+									<th>Private</th>
+									<th>Stream Url</th>
+									<th>Stream Key</th>
+									<th>Status</th>
+									<th>Added Date</th>
+									<th>Start Datetime</th>
+									<th>End Datetime</th>
+
 								</tr>
 							</thead>
 							<tbody>
-								@foreach ($tags as $tag)
-								<tr>
-									<th>{{ $tag->id }}</th>
-									<td><a href="{{ route('tags.show', $tag->id) }}"> {{ $tag->name }}</a></td>
-								</tr>
+								@foreach($liveevents as $liveevents)
+									<tr>
+										<td> <img src="{{ $liveevents->image }}" width=" 50px" height="50px" alt="avatar pic"></td>
+										<td>{{ $liveevents->title }}</td>
+										<td>{{ $liveevents->description }}</td>
+										<td>{{ $liveevents->private }}</td>
+										<td>{{ $liveevents->stream_url }}</td>
+										<td>{{ $liveevents->stream_key }}</td>
+										<td>{{ $liveevents->status }}</td>
+										<td>{{ $liveevents->created_at }}</td>
+										<td>{{ $liveevents->schedule_start_datetime }}</td>
+										<td>{{ $liveevents->schedule_end_datetime }}</td>
+									</tr>
 								@endforeach
 							</tbody>
 						</table>
 					</div>
 				</div>
 			</div>
-			<div class="col-md-3">
-			<div class="well">
-				<form method="POST" action="{{ route('tags.store') }}">
-					{{ csrf_field() }}
-					<h2>New tag</h2>
-					<label for="name">Name:</label>
-					<input type="text" value="{{ old('name') }}" name="name" class="form-control">
-					<input type="submit" value="add tag" class="btn btn-primary btn-block btn-h1-spacing">
-				</form>
-			</div>
-		</div>
 		</div>
 	</div>
 </div>
@@ -91,4 +98,5 @@
 
     <script src="{{ asset('admin-template/build/js/custom.min.js') }}"></script>
 @endsection
+
 

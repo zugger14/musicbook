@@ -9,7 +9,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#" style="opacity: 0.5">@yield('navbar_title')</a>
+            <a class="navbar-brand" href="/" style="opacity: 0.5">@yield('navbar_title')</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -62,7 +62,7 @@
                             <li><a href="{{ route('artist.tracks') }}">Songs</a></li>
                             <li><a href="{{ route('artists.playlist', Auth::id())  }}">Playlists</a></li>
                             <li><a href="{{ route('event.index')  }}">Live Events</a></li>
-                            <li><a href="">account settings</a></li>
+                            <li><a href="{{ route('password.form') }}">account settings</a></li>
                             <li role="separator" class="divider"></li>
                             <li>
                                 <a href="" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">
@@ -79,8 +79,8 @@
                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ Auth::user()->name }} <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{{ route('profile.show', Auth::user()->slug) }}">profile(fans)</a></li>
-                        <li><a href="">who to follow</a></li>
-                        <li><a href="">account settings</a></li>
+                       {{--  <li><a href="">who to follow</a></li> --}}
+                        <li><a href="{{ route('password.form') }}">account settings</a></li>
                         <li role="separator" class="divider"></li>
                         <li>
                             <a href="" onclick="event.preventDefault(); document.getElementById('frm-logout').submit();">

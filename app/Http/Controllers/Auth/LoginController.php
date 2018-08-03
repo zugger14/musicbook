@@ -60,8 +60,13 @@ class LoginController extends Controller
 
             return $this->sendLockoutResponse($request);
         }
+
+        if ($this->checkBanned($request) == true) {    
+            Session::flash('message', 'your account has been banned please contact system admin ');
+            return redirect()->route('login');
+        }
+
         if ($this->verified($request) == true) {    
-            
             if ($this->attemptLogin($request)) {
                 return $this->sendLoginResponse($request);
             } else {
@@ -82,6 +87,15 @@ class LoginController extends Controller
     {   
         $request = User::where('email', $request->email)->where('token', null)->first();
         if (!empty($request)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function checkBanned($request)
+    {
+        $user = User::where('email', $request->email)->first();
+        if($user->status == 'deleted') {
             return true;
         }
         return false;

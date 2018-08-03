@@ -5,7 +5,7 @@
                 <div v-for="song in show_songs" class="panel panel-default">
                     <div class="panel-heading">
                         <img :src="song.user.avatar" width="40px" height="40px">
-                         {{ song.user.name }}{{ song.user.avatar }}
+                         {{ song.user.name }}
                         
                         <div class="pull-right">
                         </div>

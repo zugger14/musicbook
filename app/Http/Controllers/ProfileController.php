@@ -53,13 +53,14 @@ class ProfileController extends Controller
 
     	]);
 
-        Auth::user()->update([
+        $user = User::where('slug', $r->slug)->first();
+        $user->update([
             'name' => $r->name,
             'email' => $r->email,
             'slug'  => $r->slug
         ]);
 
-    	Auth::user()->profile()->update([
+    	$user->profile()->update([
     		'location' => $r->location,
     		'about'    => $r->about
     	]);
@@ -88,11 +89,12 @@ class ProfileController extends Controller
 
     public function updateProfilePic(Request $r)
     {
+
         if($r->hasFile('avatar')) {
             $file = $r->file('avatar');
             $filename = time(). '.' . $file->getClientOriginalExtension();
             $image = Image::make($file)->resize(400,400)->save(storage_path('app/public/avatars/').$filename);
-            Auth::user()->update([
+            Auth::user()->update([//not working from admin side edit
                 'avatar' => 'public/avatars/'.$filename
             ]);
         }

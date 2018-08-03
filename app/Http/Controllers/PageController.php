@@ -47,7 +47,7 @@ class PageController extends Controller
 
     public function fanCollection()
     {       
-        return view('fans.collection');
+        return view('fans.collection')->with('user_id', Auth::id());
     }
     
     public function searchUsers($query)

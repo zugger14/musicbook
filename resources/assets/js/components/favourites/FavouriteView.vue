@@ -92,7 +92,7 @@
     }
 
     .modal-body{
-        height: 100px;
+        height: 400px;
         overflow-y: auto;
     }
 

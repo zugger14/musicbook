@@ -95,7 +95,8 @@
                     if(response.data != '') {
                         this.$refs.closemodal.click();
                         setTimeout(()=>{
-                            window.location.href = this.profile_url + this.user.slug;//for giving time to see success message
+                            //window.location.href = this.profile_url + this.user.slug;//for giving time to see success message
+                            window.location.reload();
                         },1000);
                         toastr.success(response.data)
                     }

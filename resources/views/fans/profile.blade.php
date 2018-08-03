@@ -77,28 +77,25 @@
                     <a href="{{ route('artist.tracks')  }}" class="btn btn-default btn-md">Songs</a>
                     <a href="{{ route('artist.notes', $user->id) }}" class="btn btn-default btn-md">Song Notes</a>
                     <a href="{{ route('songs.liked', $user->id) }}" class="btn btn-default btn-md">Liked Songs</a>
-                      tracks albums lyrics playlists are listed here...
+                      
                 </p>
               </div> 
           </div>
 
         </div>
 
+
         <div class="col-md-7">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <p class="">
-                        Songs uploaded
+                        songs uploaded for free listen
                     </p>
                 </div>
 
                 <div class="panel-body">
-                    <publicsong-view :user_id={{ $user->id }}></publicsong-view>
-                    <p class="">
-                        hello shared songs goes here....
-
-                    </p>
-                </div> 
+                    <userpublicsong-view :tags="{{ $tags }}" :user_id={{ $user->id }}></userpublicsong-view>
+=                </div> 
             </div>
         </div>
     </div>

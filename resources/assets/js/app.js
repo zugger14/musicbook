@@ -31,6 +31,8 @@ Vue.component('userpublicsong-view', require('./components/songs/UsersPublicSong
 Vue.component('publicsong-view', require('./components/songs/PublicSongView.vue'));
 Vue.component('liked-song', require('./components/songs/LikedSong.vue'));
 Vue.component('shared-song', require('./components/songs/SharedSong.vue'));
+Vue.component('song-home', require('./components/songs/SongHome.vue'));
+
 
 Vue.component('create-live-event', require('./components/live-events/CreateLiveEvent.vue'));
 Vue.component('live-events', require('./components/live-events/LiveEvents.vue'));

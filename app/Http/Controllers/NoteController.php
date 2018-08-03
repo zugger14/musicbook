@@ -20,6 +20,14 @@ class NoteController extends Controller
         return view('artists.notes')->with('user_id', $user_id);
     }
 
+    /*
+        for admin side all notes listing
+    */
+    public function allNotes()
+    {
+        $notes = Note::all();
+        return view('admins.show_notes')->withNotes($notes);
+    }
     public function getNotes($user_id)
     {
         $notes = Note::where('user_id', $user_id)->where('private', 0)->get();

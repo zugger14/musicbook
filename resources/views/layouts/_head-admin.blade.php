@@ -34,6 +34,13 @@
     <!-- Custom Theme Style -->
     <link href="{{ asset('admin-template/build/css/custom.min.css') }}" rel="stylesheet">
 
+    <!-- Datatables -->
+    <link href="{{  asset('admin-template/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css') }}" >
+    <link href="{{  asset('admin-template/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css') }}" >
+    <link href="{{  asset('admin-template/vendors/datatables.net-fixedheader-bs/css/fixedHeader.bootstrap.min.css') }}" >
+    <link href="{{  asset('admin-template/datatables.net-responsive-bs/css/responsive.bootstrap.min.css') }}" >
+    <link href="{{  asset('datatables.net-scroller-bs/css/scroller.bootstrap.min.css') }}" >
+
     @yield('stylesheets')
     <script>
     

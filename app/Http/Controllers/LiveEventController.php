@@ -38,6 +38,12 @@ class LiveEventController extends Controller
 
     }
 
+    public function AllLiveEvents()
+    {
+        $events = LiveEvent::all();
+        return view('admins.show_liveevents')->withLiveevents($events);
+    }
+
     public function live($event_id)
     {
         $event = LiveEvent::where('youtube_event_id',$event_id)->first();

@@ -29,8 +29,31 @@ class SongController extends Controller
      */
     public function index()
     {
-        //$this->songFeeds();
+        $songs = Song::all();
+        return view('admins.show_songs')->withSongs($songs);
     }
+
+    public function artistSongs()
+    {   
+        $artistIds = User::where('is_artist', 1)->pluck('id');
+        $songs = Song::whereIn('user_id',$artistIds)->get();
+        return view('admins.show_artistsongs')->withSongs($songs);
+    }
+
+    public function fanSongs()
+    {
+        $fanIds = User::where('is_artist', 0)->pluck('id');
+        $songs = Song::whereIn('user_id',$fanIds)->get();
+        return view('admins.show_fansongs')->withSongs($songs);
+    }
+
+    public function deletedSongs()
+    {
+
+        $songs = Song::where('status','deleted')->get();
+        return view('admins.show_deletedsongs')->withSongs($songs);
+    }
+
 
     /**
      * allow the user to have full song and access to download full song after payment process.
@@ -278,7 +301,7 @@ class SongController extends Controller
 
             $song = new Song;
             $song->title = $request->filename;
-            $song->user_id = Auth::guard('web')->id();
+            $song->user_id = Auth::guard('web')->id() || Auth::guard('admin')->id();
             $song->upload_type = $request->upload_type;
 
 

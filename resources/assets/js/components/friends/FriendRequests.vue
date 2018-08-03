@@ -2,7 +2,7 @@
         <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-users"></i></span><span class="badge" id="count">{{ users.length }}</span></a>
             <ul v-if="requests" class="dropdown-menu">
-                <li  v-for="user in users"><a href="" @click.prevent> {{ user.name }} {{ user.id }} sent  you friend request <button class="btn btn-sm btn-default" @click="confirmFriend(user)">confirm</button>  <button class="btn btn-sm btn-default" @click="removeRequest(user)">remove</button></a></li>
+                <li  v-for="user in users"><a href="" @click.prevent> {{ user.name }} sent  you friend request <button class="btn btn-sm btn-default" @click="confirmFriend(user)">confirm</button>  <button class="btn btn-sm btn-default" @click="removeRequest(user)">remove</button></a></li>
             </ul>
 
             <ul class="dropdown-menu" v-else="!requests">

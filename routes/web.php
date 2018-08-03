@@ -16,13 +16,30 @@
 Route::group(['middleware' => ['web']], function () {
 
 	Route::get('/', 'PageController@index')->name('landing')->middleware('guest:admin','guest');
-
 	Route::post('user/logout','Auth\LoginController@userLogout')->name('user.logout');
-
 
 	// handles all auth routes for normal users which are fans and artists
 	Auth::routes();
 	Route::get('user/verify/{token}','Auth\RegisterController@verify')->name('user.verify');
+
+	Route::get('/getprofile/{slug}', 'ProfileController@getProfile');//vuejs call
+	Route::post('/changeprofilepic', 'ProfileController@updateProfilePic');
+	Route::put('/profile/update', 'ProfileController@update')->name('profile.update');
+
+	Route::get('/topsongs','SongController@getMostPlayedSongs');	
+	Route::get('/recentsongs','SongController@getMostRecentSongs');
+
+
+	//userpublic song
+	/*
+		Route::get('getusersongs/{user_id}','SongController@getUserSongs');
+		Route::get('getmostplayedusersongs/{user_id}','SongController@getMostPlayedUserSongs');
+	*/
+	//demosong view
+	/*	Route::get('demos/{artist_id}','SongController@getPrivateSongDemo');
+		Route::get('getmostsoldusersongs/{user_id}','SongController@getMostSoldUserSongs');
+	*/
+
 
 	
 });
@@ -50,6 +67,33 @@ Route::group(['prefix' => 'admin'], function () {
 
 		Route::get('/','AdminController@index')->name('admin.dashboard');
 		Route::post('/logout','Auth\AdminLoginController@adminLogout')->name('admin.logout');
+
+		//admin navigation routes
+		Route::get('/users', 'UserController@index')->name('users.index');
+		Route::get('/deletedusers', 'UserController@deletedUsers')->name('users.deletedusers');
+		Route::get('/createuser', 'UserController@create')->name('users.create');
+		Route::post('/adduser', 'UserController@store')->name('users.store');
+		Route::get('/deleteuser/{slug}', 'UserController@destroy')->name('users.destroy');
+		Route::get('/userprofile/{slug}', 'UserController@profile')->name('users.profile');
+
+		//Route::get('/copyrights', 'SongController@copyrights')->name('songs.copyrights');
+
+
+		Route::get('/songs', 'SongController@index')->name('songs.all');
+		Route::get('/deletedsongs', 'SongController@deletedSongs')->name('songs.deleted');
+		Route::get('/artistsongs','SongController@artistSongs')->name('song.artists');
+		Route::get('/fansongs','SongController@fanSongs')->name('song.fans');
+
+		Route::get('/playlists', 'PlaylistController@index')->name('playlists.index');
+		Route::get('/deletedplaylists', 'PlaylistController@deletedPlaylists')->name('playlists.deleted');
+
+		Route::get('/liveevents', 'LiveEventController@allLiveEvents')->name('liveevents.allLiveEvents');
+		Route::get('/notes', 'NoteController@allNotes')->name('notes.allNotes');
+		Route::get('/reports', 'AdminController@report')->name('admin.reports');
+
+
+
+
 		Route::resource('tags', 'TagController', ['except' => ['create']]);
 
 		
@@ -61,7 +105,7 @@ Route::group(['prefix' => 'admin'], function () {
 /*`````````````		 Fan and Artists usable common routes 		``````````````````````	*/
 
 
-Route::group(['middleware' => ['auth:web']], function () {
+Route::group(['middleware' => ['auth:web' OR 'auth:admin']], function () {
 
 	//chat routes
 
@@ -74,17 +118,18 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::post('get-private-messages-sent','PrivateMessageController@getPrivateMessagesSent');
 	Route::post('/send-private-message','PrivateMessageController@sendPrivateMessage');
 	Route::get('users-list', function(){
-		return App\User::all()->except(Auth::id());
+		//return App\User::all()->except(Auth::id()); all users except autenticated
+		return Auth::user()->friends();
 	});
 
 
 	//profile routes
 	Route::get('/profile/{slug}', 'ProfileController@index')->name('profile.show');//laravel reurn view call
 	Route::get('/getprofile/{slug}', 'ProfileController@getProfile');//vuejs call
+	Route::post('/changeprofilepic', 'ProfileController@updateProfilePic');
 	Route::get('/profile/{slug}/edit', 'ProfileController@edit')->name('profile.edit');
 	Route::put('/profile/update', 'ProfileController@update')->name('profile.update');
 
-	Route::post('/changeprofilepic', 'ProfileController@updateProfilePic');
 
 	//friendship routes
 	Route::get('/check_relationship_status/{user_id}','FriendshipsController@checkStatus' );
@@ -156,6 +201,8 @@ Route::group(['middleware' => ['auth:web']], function () {
 		Route::post('songs/buy','SongController@addToOrderList');
 		Route::get('songs/{song_id}','SongController@getPrivateSong');
 		Route::get('demos/{artist_id}','SongController@getPrivateSongDemo');
+		Route::get('getmostsoldusersongs/{user_id}','SongController@getMostSoldUserSongs');
+
 		Route::get('songs/download/{payment_id}','SongController@viewDownSong')->name('songs.download');
 
 		Route::resource('songs','SongController');
@@ -167,8 +214,8 @@ Route::group(['middleware' => ['auth:web']], function () {
 
 	Route::get('getpublicsong/{song_id}','SongController@getPublicSong');
 	Route::get('songfeeds','SongController@songFeeds');	//songs for users from all his friends
-	Route::get('/topsongs','SongController@getMostPlayedSongs');	
-	Route::get('/recentsongs','SongController@getMostRecentSongs');
+	//Route::get('/topsongs','SongController@getMostPlayedSongs');	
+	//Route::get('/recentsongs','SongController@getMostRecentSongs');
 	Route::get('/get-purchased-songs','SongController@getPurchasedSongs');
 
 	
@@ -235,6 +282,10 @@ Route::group(['middleware' => ['auth:web']], function () {
 	Route::get('/get-all-favourite/', 'FavouriteController@getAllFavourite')->name('favourite.index');
 	Route::get('/add-favourite/{followed_id}', 'FavouriteController@addToFavourite')->name('favourite.store');
 	Route::get('/remove-favourite/{followed_id}', 'FavouriteController@removeFavourite')->name('favourite.destroy');
+
+	//account ettings routes
+	Route::get('change-password', 'UserController@changePass')->name('password.form');
+	Route::post('change-password', 'UserController@updatePass')->name('password.update');
 
 
 });

@@ -25,36 +25,25 @@
       <ol class="carousel-indicators">
         <li data-target="#myCarousel" data-slide-to="0" class="active"></li>
         <li data-target="#myCarousel" data-slide-to="1" class=""></li>
-        <li data-target="#myCarousel" data-slide-to="2" class=""></li>
       </ol>
       <div class="carousel-inner" role="listbox">
         <div class="item active">
-          <img class="first-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="First slide">
+          <img class="first-slide" src="{{ asset('3.jpg') }}" alt="First slide">
           <div class="container">
             <div class="carousel-caption">
-              <h1>Example headline.</h1>
-              <p>Note: If you're viewing this page via a <code>file://</code> URL, the "next" and "previous" Glyphicon buttons on the left and right might not load/display properly due to web browser security rules.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Sign up today</a></p>
+              <h1>Sign Up Now!</h1>
+              <p> Musicbook can be used by anyone from music following fans as well as music making artists. It's free to explore as well as to promote your songs.</p>
+              <p><a class="btn btn-lg btn-primary" href="{{ route('register') }}" role="button">Sign up now</a></p>
             </div>
           </div>
         </div>
         <div class="item">
-          <img class="second-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Second slide">
+          <img class="third-slide" src="{{ asset('2.png') }}" alt="Third slide">
           <div class="container">
             <div class="carousel-caption">
-              <h1>Another example headline.</h1>
-              <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Learn more</a></p>
-            </div>
-          </div>
-        </div>
-        <div class="item">
-          <img class="third-slide" src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" alt="Third slide">
-          <div class="container">
-            <div class="carousel-caption">
-              <h1>One more for good measure.</h1>
-              <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
-              <p><a class="btn btn-lg btn-primary" href="#" role="button">Browse gallery</a></p>
+              <h1>Start Browsing Songs</h1>
+              <p style="color:black;">You can listen to some trending songs wihtout creating accounts.However the number of songs you get to listen are limited until you get yourself a free account registration. </p>
+              <p><a class="btn btn-lg btn-primary" href="#browse" role="button">Browse gallery</a></p>
             </div>
           </div>
         </div>
@@ -70,71 +59,7 @@
     </div>
 
 <div class="row">
-    <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Top songs
-            </div>
-            <div class="panel-body">
-                <ul>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                </ul>
-            </div>   
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                Top albums
-            </div>
-            <div class="panel-body">
-                <ul>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                    <li>albums</li>
-                </ul>                        
-            </div>
-
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                recently added
-            </div>
-            <div class="panel-body">
-                <ul>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                    <li>songs</li>
-                </ul>
-            </div>
-        </div>
-    </div>        
-</div>
+    <song-home></song-home>
 </div>
 
 
