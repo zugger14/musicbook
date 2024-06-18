@@ -12,3 +12,5 @@ Features:
 - personal notes,playlists which can be shared with other users
 - admin module to manage songs uploads,reports,etc
 
+
+## Setup instructions
