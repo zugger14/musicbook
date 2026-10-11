@@ -1,5 +1,5 @@
 <!-- default navbar -->
-<nav :class="'navbar navbar-default navbar-fixed-' + nav" style="text-align: center;">
+<nav :class="'navbar navbar-default navbar-fixed-' + nav" class="modern-navbar">
     <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -9,7 +9,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/" style="opacity: 0.5">@yield('navbar_title')</a>
+            <a class="navbar-brand modern-brand" href="/">@yield('navbar_title')</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -51,7 +51,7 @@
                 <audio id='noty_audio' src="{{ asset('audio/notify.mp3') }}"></audio>
                 @if (Auth::guard('web')->check())
                     <li>
-                        <song-upload :isArtist="{{ Auth::user()->is_artist }}" :tags="{{ $tags }}" style="margin-top: -8px;"></song-upload>    
+                        <song-upload :isArtist="{{ Auth::user()->is_artist }}" :tags="{{ $tags }}"></song-upload>    
                     </li>
                 @endif
                     @if (Auth::guard('web')->check()  && Auth::user()->is_artist)
@@ -119,8 +119,8 @@
 
                 @else
                     <div class="signing">
-                        <a href=" {{ route('login') }}" class="btn btn-md btn-default" style="border-radius: 0px; margin-top: 7px; ">Sign in</a>
-                        <a href="{{ route('register') }}" class="btn btn-md btn-default" style="border-radius: 0px; margin-top: 7px;">Create account</a>
+                        <a href="{{ route('login') }}" class="btn btn-modern-login">Sign in</a>
+                        <a href="{{ route('register') }}" class="btn btn-modern-register">Create account</a>
                     </div>
                 @endif
 

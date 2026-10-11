@@ -1,0 +1,15 @@
+{
+    "name": "nikhil-pandey/esewa",
+    "description": "Local stub of the original nikhil-pandey/esewa package (upstream repo is gone).",
+    "version": "1.0.0",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.5",
+        "laravel/framework": "^5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "NikhilPandey\\Esewa\\": "src/"
+        }
+    }
+}

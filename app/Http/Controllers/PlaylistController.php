@@ -109,7 +109,7 @@ class PlaylistController extends Controller
         $input_data = $request->all();
         $validator = Validator::make(
             $input_data, [
-            'file.*' => 'required|mimes:mpga,wav|max:20000'
+            'file.*' => 'required|max:307200'
             ],[
                 'file.*.required' => 'Please upload an audio file',
                 'file.*.mimes' => 'Only mp3 and wav audio are allowed',
@@ -124,7 +124,7 @@ class PlaylistController extends Controller
         $validator = Validator::make($request->all(), [
             'file' => 'required',
             'name' => 'required|max:255',
-            'filesize' => 'required|numeric|max:200',
+            'filesize' => 'required|numeric|max:1000',
             //'description' => 'sometimes|max:255',
             'img' => 'nullable|mimes:jpeg,png,bmp',
             'private' =>'nullable',

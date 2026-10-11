@@ -1,0 +1,8 @@
+.git
+.idea
+node_modules
+scratch
+tests/screenshots
+test_sample.wav
+PayPal.log
+.DS_Store

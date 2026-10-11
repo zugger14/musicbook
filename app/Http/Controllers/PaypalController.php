@@ -18,10 +18,38 @@ class PaypalController extends Controller
         every payments that have been created aprroved or failed
         after collection all payment details make a call to this method to get all latest payment information ..change count to but same payment data appear maybe due to sandbox.
     */
-	public function index()
+	public function index(Request $request)
     {
-        $payments = Paypalpayment::getAll(['count' => 1, 'start_index' => 0], Paypalpayment::apiContext());   
-        return response()->json([$payments->toArray()], 200);
+        $clientId = config('paypal_payment.Account.client_id');
+        $clientSecret = config('paypal_payment.Account.client_secret');
+        $isConfigured = !empty($clientId) && !empty($clientSecret);
+
+        $orders = Order::where('user_id', Auth::id())->with('song')->orderBy('id', 'desc')->get();
+
+        if (!$request->ajax() && !$request->wantsJson()) {
+            return view('fans.payments', [
+                'orders' => $orders,
+                'is_configured' => $isConfigured
+            ]);
+        }
+
+        try {
+            if (!$isConfigured) {
+                return response()->json([
+                    'status' => 'sandbox_mode',
+                    'message' => 'PayPal credentials are not configured in .env',
+                    'orders' => $orders
+                ], 200);
+            }
+            $payments = Paypalpayment::getAll(['count' => 1, 'start_index' => 0], Paypalpayment::apiContext());   
+            return response()->json([$payments->toArray()], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'PayPal connection notice: ' . $e->getMessage(),
+                'orders' => $orders
+            ], 200);
+        }
     }
 
     /*
@@ -59,8 +87,12 @@ class PaypalController extends Controller
     */
     public function show($payment_id)
     { 
-        $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
-        return $payment->toArray();//if i dont toArray also blade template can parse it but cannot read when set as response()->json()
+        try {
+            $payment = Paypalpayment::getById($payment_id, Paypalpayment::apiContext());
+            return $payment->toArray();
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
     }
 
     /*
@@ -171,7 +203,7 @@ class PaypalController extends Controller
             // using a valid ApiContext
             // The return object contains the status;
             $payment->create(Paypalpayment::apiContext());
-        } catch (\PayPalConnectionException $ex) {
+        } catch (\Exception $ex) {
             return response()->json(["error" => $ex->getMessage()], 400);
         }
 
@@ -279,7 +311,7 @@ class PaypalController extends Controller
             // using a valid ApiContext
             // The return object contains the status;
             $payment->create(Paypalpayment::apiContext());
-        } catch (\PayPalConnectionException $ex) {
+        } catch (\Exception $ex) {
             return response()->json(["error" => $ex->getMessage()], 400);
         }
         

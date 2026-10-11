@@ -70,7 +70,7 @@ class SongController extends Controller
                 $songs = Song::whereId($song_id)->where('upload_type', 'private')->get(); // to get array collection because vueplayer wants array in song view component
                 foreach ($songs as $song) {
 
-                        $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                        $music_file = url('stream-song') . '/' .$song->song_filename;
                         $song->src = $music_file;   
                 }                       
                 return $songs;
@@ -83,7 +83,7 @@ class SongController extends Controller
     {
         $songs = Song::where('id', $song_id)->where('status', 'present')->get();
         foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $music_file = url('stream-song') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }     
         return $songs;
@@ -165,7 +165,7 @@ class SongController extends Controller
     {
         $songs = Song::where('user_id', $user_id)->where('status', 'present')->where('upload_type', 'public')->orderBy('id', 'desc')->get();//if used all() instead get canot read value in vuejs by aplayer 
         foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $music_file = url('stream-song') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
         return response()->json($songs, 200);//json response can be used sending to vuejs only doesnot work if sent to blade files(protected json response error) but can send jsonecode without response thats the difference of response..
@@ -180,7 +180,7 @@ class SongController extends Controller
         $songs = Song::whereIn('id', $songs_id)->get();
 
         foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $music_file = url('stream-song') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
         return $songs;
@@ -207,7 +207,7 @@ class SongController extends Controller
             if($song->upload_type == 'private' && $song->status == 'present') {
                 $song = $this->getPrivateSongDemoBySongId($song->id);
             } else {
-                $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                $music_file = url('stream-song') . '/' .$song->song_filename;
                 $song->src = $music_file;   
             }
         }
@@ -229,7 +229,7 @@ class SongController extends Controller
             if($song->upload_type == 'private' && $song->status == 'present') {
                 $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object pass referene in foreach
             } else {
-                $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                $music_file = url('stream-song') . '/' .$song->song_filename;
                 $song->src = $music_file;   
             }
         }
@@ -241,13 +241,19 @@ class SongController extends Controller
 
     public function songFeeds() //returns all song feeds of users and their friends(basically public songs uploaded ) for users from thier added friends
     {      
-        $friends = Auth::guard('web')->user()->friends();
+        $user = Auth::guard('web')->user();
+        $friends = $user->friends();
         $songfeeds = array();
         
+        foreach ($user->songs as $song) {
+            $song->src = url('stream-song') . '/' .$song->song_filename;
+            array_push($songfeeds, $song);
+        }
+
         foreach ($friends as $friend) {
             foreach ($friend->songs as $song) {
                 if($song->upload_type == 'public') {
-                    $song->src = asset('storage/songs') . '/' .$song->song_filename;// or change in frontend more easy i think so
+                    $song->src = url('stream-song') . '/' .$song->song_filename;// or change in frontend more easy i think so
                     array_push($songfeeds, $song);
                 }
             }
@@ -284,9 +290,9 @@ class SongController extends Controller
     public function store(Request $request)
     {//max amount for pricing song would be 10000
         $validator = Validator::make($request->all(), [
-            'file' => 'required|mimes:mpga,wav|max:20000',
+            'file' => 'required|max:307200',
             'filename' => 'required|max:255',
-            'filesize' => 'required|numeric|max:20',
+            'filesize' => 'required|numeric|max:300',
             'description' => 'sometimes|max:255',
             'img' => 'nullable',
             'upload_type' =>'required',
@@ -301,7 +307,7 @@ class SongController extends Controller
 
             $song = new Song;
             $song->title = $request->filename;
-            $song->user_id = Auth::guard('web')->id() || Auth::guard('admin')->id();
+            $song->user_id = Auth::guard('web')->id() ?: Auth::guard('admin')->id();
             $song->upload_type = $request->upload_type;
 
 
@@ -469,7 +475,7 @@ class SongController extends Controller
     {
         $songs = Song::orderBy('played_time', 'desc')->where('upload_type', 'public')->where('status', 'present')->limit(20)->get();
         foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $music_file = url('stream-song') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
         return $songs;
@@ -479,7 +485,7 @@ class SongController extends Controller
     {
         $songs = Song::orderBy('played_time', 'desc')->where('upload_type', 'public')->where('status', 'present')->where('user_id', $user_id)->limit(20)->get();
         foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $music_file = url('stream-song') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
         return $songs;
@@ -497,7 +503,7 @@ class SongController extends Controller
         $songs = Song::whereIn('id', $songsByCount->pluck('song_id'))->get();
                 
         foreach ($songs as $song) {
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $music_file = url('stream-song') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
         return $songs;    
@@ -520,7 +526,7 @@ class SongController extends Controller
                 $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object returning from called method.
                 return $song;
             } else {
-                $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                $music_file = url('stream-song') . '/' .$song->song_filename;
                 $song->src = $music_file;
                 return $song;   
             }
@@ -534,7 +540,7 @@ class SongController extends Controller
                     $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object pass referene in foreach
                     return $song;
                 } else {
-                    $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                    $music_file = url('stream-song') . '/' .$song->song_filename;
                     $song->src = $music_file;
                     return $song;   
                 }
@@ -547,7 +553,7 @@ class SongController extends Controller
                 if($song->upload_type == 'private' && $song->status == 'present') {
                     $song = $this->getPrivateSongDemoBySongId($song->id);//to replace $song object wihtn new object pass referene in foreach
                 } else {
-                    $music_file = asset('storage/songs') . '/' .$song->song_filename;
+                    $music_file = url('stream-song') . '/' .$song->song_filename;
                     $song->src = $music_file;   
                 }
             }
@@ -562,7 +568,7 @@ class SongController extends Controller
     {
         $songs = Song::orderBy('created_at', 'desc')->where('upload_type', 'public')->limit(20)->get();
         foreach ($songs as $song) {//make dry
-            $music_file = asset('storage/songs') . '/' .$song->song_filename;
+            $music_file = url('stream-song') . '/' .$song->song_filename;
             $song->src = $music_file;   
         }
         return $songs;
@@ -588,11 +594,65 @@ class SongController extends Controller
         return response()->json($order , 200);
         
         //return redirect()->route('payment.creditcard');
-
-
     }
 
+    public function streamSong($filename)
+    {
+        $path = storage_path('app/public/songs/' . $filename);
+        if(!file_exists($path)) {
+            abort(404);
+        }
 
+        $size = filesize($path);
+        $mime = mime_content_type($path) ?: 'application/octet-stream';
+        $start = 0;
+        $end = $size - 1;
+        $statusCode = 200;
 
+        $headers = [
+            'Content-Type'   => $mime,
+            'Accept-Ranges'  => 'bytes',
+            'Cache-Control'  => 'public, max-age=86400',
+            'Content-Length' => $size,
+        ];
 
+        // Handle Range request for instant seeking/playback
+        if (request()->header('Range')) {
+            $statusCode = 206;
+            $range = request()->header('Range');
+            // Parse "bytes=start-end"
+            list(, $range) = explode('=', $range, 2);
+            if (strpos($range, ',') !== false) {
+                return response('', 416, ['Content-Range' => "bytes */$size"]);
+            }
+            if ($range == '-') {
+                $start = $size - 1;
+            } else {
+                $range = explode('-', $range);
+                $start = intval($range[0]);
+                $end = (isset($range[1]) && is_numeric($range[1])) ? intval($range[1]) : $size - 1;
+            }
+            if ($start > $end || $start > $size - 1 || $end >= $size) {
+                return response('', 416, ['Content-Range' => "bytes */$size"]);
+            }
+            $length = $end - $start + 1;
+            $headers['Content-Length'] = $length;
+            $headers['Content-Range'] = "bytes $start-$end/$size";
+        }
+
+        return response()->stream(function () use ($path, $start, $end) {
+            $fp = fopen($path, 'rb');
+            fseek($fp, $start);
+            $remaining = $end - $start + 1;
+            $bufferSize = 8192; // 8KB chunks for fast start
+            while ($remaining > 0 && !feof($fp)) {
+                $read = min($bufferSize, $remaining);
+                echo fread($fp, $read);
+                $remaining -= $read;
+                flush();
+            }
+            fclose($fp);
+        }, $statusCode, $headers);
+    }
 }
+

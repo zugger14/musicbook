@@ -1,20 +1,8 @@
 @extends('main')
 
 @section('title', '| Home')
-<style type="text/css">
-  
-  .carousel-inner > .item >img {
-  min-height : 300px;
-  max-height : 300px;
-  width : 100%;
-}
-/*.container{
-  height:300px;
-}*/
-</style>
-
 @section('navbar_title')
-    <div class="logo"><b><span>Mu</span>si<span>c</span> Bo<span>ok</span></b></div>
+    <span style="font-size: 20px;">🎵</span> <span style="font-weight: 800; font-family: 'Space Grotesk', sans-serif;">Music<span style="color: #a78bfa;">Book</span></span>
 @endsection
 
 @section('content')
@@ -31,9 +19,9 @@
           <img class="first-slide" src="{{ asset('3.jpg') }}" alt="First slide">
           <div class="container">
             <div class="carousel-caption">
-              <h1>Sign Up Now!</h1>
-              <p> Musicbook can be used by anyone from music following fans as well as music making artists. It's free to explore as well as to promote your songs.</p>
-              <p><a class="btn btn-lg btn-primary" href="{{ route('register') }}" role="button">Sign up now</a></p>
+              <h1>The Sound of Tomorrow, Today</h1>
+              <p>Connect with emerging artists, discover exclusive unreleased tracks, and share your sonic journey with music fans worldwide.</p>
+              <p><a class="btn btn-lg btn-primary" href="{{ route('register') }}" role="button">Start Listening Free</a></p>
             </div>
           </div>
         </div>
@@ -41,9 +29,9 @@
           <img class="third-slide" src="{{ asset('2.png') }}" alt="Third slide">
           <div class="container">
             <div class="carousel-caption">
-              <h1>Start Browsing Songs</h1>
-              <p style="color:black;">You can listen to some trending songs wihtout creating accounts.However the number of songs you get to listen are limited until you get yourself a free account registration. </p>
-              <p><a class="btn btn-lg btn-primary" href="#browse" role="button">Browse gallery</a></p>
+              <h1>Explore Trending Releases</h1>
+              <p>Stream high fidelity music from independent creators or upload your own masterpieces directly to the global community.</p>
+              <p><a class="btn btn-lg btn-primary" href="#browse" role="button">Browse Collection</a></p>
             </div>
           </div>
         </div>

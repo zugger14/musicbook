@@ -1,0 +1,59 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: musicbook-app:latest
+    container_name: musicbook-app
+    restart: always
+    ports:
+      - "127.0.0.1:8001:8000"
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  db:
+    image: mariadb:10.6
+    container_name: musicbook-db
+    restart: always
+    command: --innodb-buffer-pool-size=64M --performance-schema=OFF --key-buffer-size=16M --max-connections=30
+    ports:
+      - "127.0.0.1:3306:3306"
+    environment:
+      MYSQL_DATABASE: musicbook
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: musicbook
+      MYSQL_PASSWORD: secret
+    volumes:
+      - musicbook-db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  redis:
+    image: redis:alpine
+    container_name: musicbook-redis
+    restart: always
+
+  socket:
+    image: node:14-alpine
+    container_name: musicbook-socket
+    restart: always
+    working_dir: /var/www/node_server
+    volumes:
+      - .:/var/www
+    ports:
+      - "127.0.0.1:8890:8890"
+    command: sh -c "npm install && node server.js"
+    depends_on:
+      - redis
+
+volumes:
+  musicbook-db-data:

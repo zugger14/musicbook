@@ -44,7 +44,7 @@
 
                     </p>
                     <p>
-                        Address:   {{  $user->profile->location }}
+                        Address:   {{  optional($user->profile)->location ?: 'Not specified' }}
 
                     </p>
                 </div>
@@ -59,7 +59,7 @@
 
                 <div class="panel-body">
                     <p class="">
-                        {{  $user->profile->about }}
+                        {{  optional($user->profile)->about ?: 'No bio added yet.' }}
                     </p>
                 </div> 
             </div>

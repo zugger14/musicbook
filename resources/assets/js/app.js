@@ -73,7 +73,7 @@ Vue.component('InfiniteLoading', require('vue-infinite-loading'));
 import VueSocketio from 'vue-socket.io'
 import store from './store'
        
-Vue.use(VueSocketio, 'http://localhost:8890');
+Vue.use(VueSocketio, window.location.protocol + '//' + window.location.hostname + ':8890');
 
 const app = new Vue({
     el: '#app',

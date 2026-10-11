@@ -63,7 +63,7 @@
                                             <div class="form-group">
                                                 <p v-if="singleup" :class="[uploadLimit ? 'text-danger': 'text-success','small']" for="size">Size (in MB): {{ song.filesize }}</p><!-- change text color for upload max limit -->
                                                 <div v-if="uploadLimit && !errors.filesize">
-                                                    <span class="help text-danger">The filesize may not be greater than 20.(in MB)</span>
+                                                    <span class="help text-danger">The filesize may not be greater than 100.(in MB)</span>
                                                 </div>
                                                 <div v-if="singleup && errors.file">
                                                     <span class="help text-danger" v-text="errors.file[0]"></span>
@@ -169,7 +169,7 @@ export default {
             this.song.file = event.target.files[0];
             this.song.filename = this.song.file.name;
             this.song.filesize = this.song.file.size/1000000;
-            if(this.song.filesize > 20) {
+            if(this.song.filesize > 100) {
                 this.uploadLimit = true;
             }
             //$("#exampleModal").modal('show');         

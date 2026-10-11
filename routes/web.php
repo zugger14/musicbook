@@ -28,7 +28,7 @@ Route::group(['middleware' => ['web']], function () {
 
 	Route::get('/topsongs','SongController@getMostPlayedSongs');	
 	Route::get('/recentsongs','SongController@getMostRecentSongs');
-
+	Route::get('/stream-song/{filename}','SongController@streamSong');
 
 	//userpublic song
 	/*

@@ -8,7 +8,7 @@ server.listen(8890);
 io.on('connection',function(socket){
 
 	console.log('client connected');
-	var redisClient = redis.createClient();
+	var redisClient = redis.createClient({host: 'redis', port: 6379});
 	redisClient.subscribe('message', 'addfriend', 'acceptfriend');
 	
 	redisClient.on('message', function(channel, message){
